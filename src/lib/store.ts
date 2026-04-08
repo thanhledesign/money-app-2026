@@ -64,7 +64,22 @@ export function loadDashboardIndex(): DashboardIndex {
   const key = getUserKey('dashboards')
   try {
     const raw = localStorage.getItem(key)
-    if (raw) return JSON.parse(raw) as DashboardIndex
+    if (raw) {
+      const idx = JSON.parse(raw) as DashboardIndex
+      // Backfill: add sample dashboard if missing (for users created before this feature)
+      if (!idx.dashboards.some(d => d.id === 'sample')) {
+        idx.dashboards.push({
+          id: 'sample',
+          name: 'Sample Dashboard',
+          emoji: '🎯',
+          mode: 'scenario',
+          createdAt: new Date().toISOString(),
+        })
+        saveDashboardIndex(idx)
+      }
+      initSampleDashboard()
+      return idx
+    }
 
     // Migration: check if old data exists under the legacy key
     const legacyKey = `${_userPrefix}data`
