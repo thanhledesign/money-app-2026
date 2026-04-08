@@ -25,6 +25,7 @@ import {
   getAccountsByCategory,
   getMonthlySnapshots,
   getMonthKey,
+  getCurrentMonthKey,
   getLatestSnapshot,
   formatCurrency,
   formatPercent,
@@ -175,6 +176,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
   }
 
   const latestMonthKey = getMonthKey(latest.timestamp)
+  const currentMonthKey = getCurrentMonthKey()
 
   return (
     <PageTheme page="debt">
@@ -182,6 +184,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
       <PageHeader
         icon="👿"
         title="Debt"
+        titleKey="debt"
         subtitle="Credit cards, loans, and debt status"
         rightContent={
           <div className="text-right">
@@ -218,7 +221,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                   <th
                     key={monthKeys[i]}
                     className={`py-2.5 px-3 text-right font-medium text-xs uppercase tracking-wider whitespace-nowrap ${
-                      monthKeys[i] === latestMonthKey ? 'text-accent' : 'text-text-muted'
+                      monthKeys[i] === currentMonthKey ? 'text-text-primary' : 'text-text-muted opacity-60'
                     }`}
                   >
                     {label}
@@ -248,10 +251,13 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                     {monthKeys.map(mk => {
                       const snap = monthlyMap.get(mk)
                       const val = snap ? (snap.balances[acc.id] ?? null) : null
+                      const isPast = mk < currentMonthKey
                       return (
                         <td
                           key={mk}
                           className={`py-2.5 px-3 text-right tabular-nums ${
+                            isPast ? 'opacity-60' : ''
+                          } ${
                             val === null
                               ? 'text-text-muted'
                               : val < 0
@@ -281,22 +287,27 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                 <td className="py-2.5 px-3 text-text-primary text-xs uppercase tracking-wider">
                   Total
                 </td>
-                {monthTotals.map((total, i) => (
-                  <td
-                    key={monthKeys[i]}
-                    className={`py-2.5 px-3 text-right tabular-nums ${
-                      total === null
-                        ? 'text-text-muted'
-                        : total < 0
-                        ? 'text-red'
-                        : total > 0
-                        ? 'text-green'
-                        : 'text-text-secondary'
-                    }`}
-                  >
-                    {total !== null ? formatCurrency(total) : '—'}
-                  </td>
-                ))}
+                {monthTotals.map((total, i) => {
+                  const isPast = monthKeys[i] < currentMonthKey
+                  return (
+                    <td
+                      key={monthKeys[i]}
+                      className={`py-2.5 px-3 text-right tabular-nums ${
+                        isPast ? 'opacity-60' : ''
+                      } ${
+                        total === null
+                          ? 'text-text-muted'
+                          : total < 0
+                          ? 'text-red'
+                          : total > 0
+                          ? 'text-green'
+                          : 'text-text-secondary'
+                      }`}
+                    >
+                      {total !== null ? formatCurrency(total) : '—'}
+                    </td>
+                  )
+                })}
                 {(() => {
                   const lastTotal = monthTotals[monthTotals.length - 1] ?? null
                   const prevTotal = prevMonthKey ? monthTotals[monthKeys.indexOf(prevMonthKey)] ?? null : null

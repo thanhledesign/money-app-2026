@@ -15,6 +15,7 @@ import {
   getLatestSnapshot,
   getTotalCash,
   getMonthKey,
+  getCurrentMonthKey,
   getMonthlySnapshots,
   formatCurrency,
   formatDateShort,
@@ -80,6 +81,8 @@ export default function AccountsPage({ data, prefs, addAccount, updateAccounts }
   const currentIsNewColumn =
     latestMonthKey !== null && !monthKeys.includes(latestMonthKey)
 
+  const currentMonthKey = getCurrentMonthKey()
+
   // ── Snapshot pie data (current balances per account) ──
   const pieData = useMemo(() => {
     if (!latest) return []
@@ -127,6 +130,7 @@ export default function AccountsPage({ data, prefs, addAccount, updateAccounts }
       <PageHeader
         icon="🏦"
         title="Cash Accounts"
+        titleKey="accounts"
         subtitle="Checking, savings, high-yield savings balances"
         rightContent={latest && <div className="text-right"><p className="text-xs text-text-muted">Total Cash</p><p className="text-lg font-semibold text-green tabular-nums">{formatCurrency(getTotalCash(latest, data))}</p></div>}
       />
@@ -158,7 +162,9 @@ export default function AccountsPage({ data, prefs, addAccount, updateAccounts }
                     {monthKeys.map(mk => (
                       <th
                         key={mk}
-                        className="text-right py-2 px-3 font-medium text-text-muted whitespace-nowrap tabular-nums"
+                        className={`text-right py-2 px-3 font-medium whitespace-nowrap tabular-nums ${
+                          mk === currentMonthKey ? 'text-text-primary' : 'text-text-muted opacity-60'
+                        }`}
                       >
                         {labelMonth(mk)}
                       </th>
@@ -191,12 +197,13 @@ export default function AccountsPage({ data, prefs, addAccount, updateAccounts }
                         </td>
                         {monthKeys.map(mk => {
                           const bal = balanceFor(acc.id, mk)
+                          const isPast = mk < currentMonthKey
                           return (
                             <td
                               key={mk}
                               className={`text-right py-2 px-3 tabular-nums whitespace-nowrap ${
-                                bal >= 0 ? 'text-text-primary' : 'text-red'
-                              }`}
+                                isPast ? 'opacity-60' : ''
+                              } ${bal >= 0 ? 'text-text-primary' : 'text-red'}`}
                             >
                               {formatCurrency(bal)}
                             </td>
@@ -229,12 +236,13 @@ export default function AccountsPage({ data, prefs, addAccount, updateAccounts }
                     <td className="py-2 pr-4 font-semibold text-text-primary">Total</td>
                     {monthKeys.map(mk => {
                       const total = monthTotal(mk)
+                      const isPast = mk < currentMonthKey
                       return (
                         <td
                           key={mk}
                           className={`text-right py-2 px-3 tabular-nums font-semibold whitespace-nowrap ${
-                            total >= 0 ? 'text-text-primary' : 'text-red'
-                          }`}
+                            isPast ? 'opacity-60' : ''
+                          } ${total >= 0 ? 'text-text-primary' : 'text-red'}`}
                         >
                           {formatCurrency(total)}
                         </td>

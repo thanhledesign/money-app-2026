@@ -15,6 +15,7 @@ import {
   getLatestSnapshot,
   getTotalInvestments,
   getMonthKey,
+  getCurrentMonthKey,
   getMonthlySnapshots,
   getDisneyConcentration,
   formatCurrency,
@@ -86,6 +87,8 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
   const currentIsNewColumn =
     latestMonthKey !== null && !monthKeys.includes(latestMonthKey)
 
+  const currentMonthKey = getCurrentMonthKey()
+
   // ── Snapshot pie data (current balances per account) ──
   const pieData = useMemo(() => {
     if (!latest) return []
@@ -133,6 +136,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
       <PageHeader
         icon="📈"
         title="Investments"
+        titleKey="investments"
         subtitle="401K, brokerages, IRAs and investment balances"
         rightContent={latest && <div className="text-right"><p className="text-xs text-text-muted">Total Investments</p><p className="text-lg font-semibold text-cyan tabular-nums">{formatCurrency(getTotalInvestments(latest, data))}</p></div>}
       />
@@ -196,7 +200,9 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                     {monthKeys.map(mk => (
                       <th
                         key={mk}
-                        className="text-right py-2 px-3 font-medium text-text-muted whitespace-nowrap tabular-nums"
+                        className={`text-right py-2 px-3 font-medium whitespace-nowrap tabular-nums ${
+                          mk === currentMonthKey ? 'text-text-primary' : 'text-text-muted opacity-60'
+                        }`}
                       >
                         {labelMonth(mk)}
                       </th>
@@ -229,12 +235,13 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                         </td>
                         {monthKeys.map(mk => {
                           const bal = balanceFor(acc.id, mk)
+                          const isPast = mk < currentMonthKey
                           return (
                             <td
                               key={mk}
                               className={`text-right py-2 px-3 tabular-nums whitespace-nowrap ${
-                                bal >= 0 ? 'text-text-primary' : 'text-red'
-                              }`}
+                                isPast ? 'opacity-60' : ''
+                              } ${bal >= 0 ? 'text-text-primary' : 'text-red'}`}
                             >
                               {formatCurrency(bal)}
                             </td>
@@ -267,12 +274,13 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                     <td className="py-2 pr-4 font-semibold text-text-primary">Total</td>
                     {monthKeys.map(mk => {
                       const total = monthTotal(mk)
+                      const isPast = mk < currentMonthKey
                       return (
                         <td
                           key={mk}
                           className={`text-right py-2 px-3 tabular-nums font-semibold whitespace-nowrap ${
-                            total >= 0 ? 'text-text-primary' : 'text-red'
-                          }`}
+                            isPast ? 'opacity-60' : ''
+                          } ${total >= 0 ? 'text-text-primary' : 'text-red'}`}
                         >
                           {formatCurrency(total)}
                         </td>

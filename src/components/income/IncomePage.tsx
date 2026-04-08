@@ -951,6 +951,7 @@ export function IncomePage({ data, updateComp, updateDeductions, updateAllocatio
       <PageHeader
         icon="💰"
         title="Income"
+        titleKey="income"
         subtitle="How much you get paid, where the money goes"
         rightContent={<div className="text-right"><p className="text-xs text-text-muted">Total Comp Package</p><p className="text-lg font-semibold text-green tabular-nums">{formatCurrency(data.comp.annualSalary + data.comp.bonus + data.comp.ltiPreTax)}</p></div>}
       />

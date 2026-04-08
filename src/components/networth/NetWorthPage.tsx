@@ -25,6 +25,7 @@ import {
   getLatestSnapshot,
   getMonthlySnapshots,
   getMonthKey,
+  getCurrentMonthKey,
   getNetWorth,
   getTotalCash,
   getTotalInvestments,
@@ -68,6 +69,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
   }, [data])
 
   const latestMonthKey = latest ? getMonthKey(latest.timestamp) : ''
+  const currentMonthKey = getCurrentMonthKey()
 
   // Per-month total net worth
   const monthNetWorthTotals = useMemo(
@@ -179,6 +181,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
       <PageHeader
         icon="💎"
         title="Net Worth"
+        titleKey="net-worth"
         subtitle="Complete financial status"
         rightContent={
           <div className="text-right">
@@ -216,7 +219,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                   <th
                     key={monthKeys[i]}
                     className={`py-2.5 px-3 text-right font-medium text-xs uppercase tracking-wider whitespace-nowrap ${
-                      monthKeys[i] === latestMonthKey ? 'text-accent' : 'text-text-muted'
+                      monthKeys[i] === currentMonthKey ? 'text-text-primary' : 'text-text-muted opacity-60'
                     }`}
                   >
                     {label}
@@ -263,10 +266,13 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                         {monthKeys.map(mk => {
                           const snap = monthlyMap.get(mk)
                           const val = snap ? (snap.balances[acc.id] ?? null) : null
+                          const isPast = mk < currentMonthKey
                           return (
                             <td
                               key={mk}
                               className={`py-2.5 px-3 text-right tabular-nums ${
+                                isPast ? 'opacity-60' : ''
+                              } ${
                                 val === null
                                   ? 'text-text-muted'
                                   : val < 0
@@ -301,20 +307,25 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                 >
                   Net Worth
                 </td>
-                {monthNetWorthTotals.map((total, i) => (
-                  <td
-                    key={monthKeys[i]}
-                    className={`py-2.5 px-3 text-right tabular-nums ${
-                      total === null
-                        ? 'text-text-muted'
-                        : total >= 0
-                        ? 'text-purple'
-                        : 'text-red'
-                    }`}
-                  >
-                    {total !== null ? formatCurrency(total) : '—'}
-                  </td>
-                ))}
+                {monthNetWorthTotals.map((total, i) => {
+                  const isPast = monthKeys[i] < currentMonthKey
+                  return (
+                    <td
+                      key={monthKeys[i]}
+                      className={`py-2.5 px-3 text-right tabular-nums ${
+                        isPast ? 'opacity-60' : ''
+                      } ${
+                        total === null
+                          ? 'text-text-muted'
+                          : total >= 0
+                          ? 'text-purple'
+                          : 'text-red'
+                      }`}
+                    >
+                      {total !== null ? formatCurrency(total) : '—'}
+                    </td>
+                  )
+                })}
                 {(() => {
                   const lastNW = monthNetWorthTotals[monthNetWorthTotals.length - 1] ?? null
                   const prevNW = prevMonthKey ? monthNetWorthTotals[monthKeys.indexOf(prevMonthKey)] ?? null : null

@@ -411,6 +411,7 @@ export default function ToolsPage() {
       <PageHeader
         icon="🔧"
         title="Tools"
+        titleKey="tools"
         subtitle="Financial calculators and planners"
       />
       <DebtPayoffTool />

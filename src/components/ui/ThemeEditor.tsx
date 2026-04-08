@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Save, Trash2, RotateCcw, Download, Upload, Copy } from 'lucide-react'
+import { Save, Trash2, RotateCcw, Download, Upload, Copy, Type } from 'lucide-react'
 import { Card, CardTitle } from '@/components/ui/Card'
+import { usePageTitles, DEFAULT_PAGE_TITLES } from '@/hooks/usePageTitles'
 import {
   type ThemeVars, type SavedTheme, DEFAULT_VARS, PRESET_THEMES,
   loadSavedThemes, saveSavedThemes, loadActiveThemeName, saveActiveThemeName,
@@ -207,6 +208,8 @@ export function ThemeEditor() {
     }
   }, [])
 
+  const { titles: pageTitles, setTitle: setPageTitle, getTitle: getPageTitleValue } = usePageTitles()
+
   const varGroups = [
     { label: 'Background', keys: ['background', 'surface', 'surface-hover'] },
     { label: 'Borders', keys: ['border', 'border-light'] },
@@ -315,6 +318,26 @@ export function ThemeEditor() {
           >
             <Copy size={14} /> Copy CSS
           </button>
+        </div>
+      </Card>
+
+      {/* Page Titles */}
+      <Card>
+        <CardTitle>Page Titles</CardTitle>
+        <p className="text-xs text-text-muted mt-1 mb-4">Customize the title shown on each page. Changes apply live.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {Object.entries(DEFAULT_PAGE_TITLES).map(([key, defaultTitle]) => (
+            <div key={key} className="flex items-center gap-2">
+              <label className="text-xs text-text-muted w-24 flex-shrink-0 capitalize">{key.replace('-', ' ')}</label>
+              <input
+                type="text"
+                value={getPageTitleValue(key)}
+                onChange={e => setPageTitle(key, e.target.value)}
+                placeholder={defaultTitle}
+                className="flex-1 px-2 py-1.5 bg-background border border-border rounded-lg text-sm text-text-primary"
+              />
+            </div>
+          ))}
         </div>
       </Card>
 

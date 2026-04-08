@@ -283,6 +283,7 @@ export function BudgetPage({ data, updateBudgetItems }: BudgetPageProps) {
       <PageHeader
         icon="⚖️"
         title="Budget"
+        titleKey="budget"
         subtitle="Track spending, savings, and investment allocation"
         rightContent={<div className="text-right"><p className="text-xs text-text-muted">Monthly Cost of Living</p><p className="text-lg font-semibold text-amber tabular-nums">{formatCurrency(burnRate)}</p></div>}
       />

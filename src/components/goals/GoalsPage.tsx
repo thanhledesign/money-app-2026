@@ -301,6 +301,7 @@ export function GoalsPage({ data, addGoal }: GoalsPageProps) {
       <PageHeader
         icon="🏆"
         title="Goals & Achievements"
+        titleKey="goals"
         subtitle="Victories, milestones, large and small wins"
       />
 

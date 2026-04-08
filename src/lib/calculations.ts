@@ -150,6 +150,11 @@ export function getMonthKey(timestamp: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
+export function getCurrentMonthKey(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+}
+
 export function getMonthlySnapshots(data: AppData): Map<string, Snapshot> {
   const monthly = new Map<string, Snapshot>()
   for (const s of data.snapshots) {

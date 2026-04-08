@@ -23,11 +23,20 @@ const TOOLTIP_STYLE = {
   labelStyle: { color: '#8888a0' },
 }
 
+const KPI_KEYS = [
+  'kpi-net-worth', 'kpi-cash', 'kpi-investments', 'kpi-debt',
+  'kpi-credit-score', 'kpi-savings-rate', 'kpi-runway', 'kpi-paycheck',
+]
+
+const CHART_KEYS = [
+  'warnings', 'net-worth-chart', 'cash-vs-investments',
+  'comp-pie', 'annual-bar', 'debt-trend', 'latest-changes',
+]
+
 export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
   const [editMode, setEditMode] = useState(false)
   const [dragIdx, setDragIdx] = useState<number | null>(null)
   const [dashTitle, setDashTitle] = useState(() => localStorage.getItem('money-app-dash-title') || 'Dashboard')
-  const [editingTitle, setEditingTitle] = useState(false)
   const latest = calc.getLatestSnapshot(data)
   const prev = calc.getPreviousSnapshot(data)
 
@@ -117,28 +126,36 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
     weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 
-  // Dashboard sections as orderable blocks
+  // Individual KPI sections
   const sectionMap: Record<string, React.ReactNode> = {
-    'kpi-row-1': (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6" key="kpi-row-1">
-        <KPICard label="Net Worth" value={calc.formatCurrency(metrics.netWorth, true)}
-          trend={metrics.nwDelta >= 0 ? 'up' : 'down'} trendValue={calc.formatCurrency(metrics.nwDelta, true)} emoji="💎" />
-        <KPICard label="Cash" value={calc.formatCurrency(metrics.cash, true)}
-          subValue={`${data.accounts.filter(a => a.category === 'cash' && a.isActive).length} accounts`} emoji="💵" />
-        <KPICard label="Investments" value={calc.formatCurrency(metrics.investments, true)}
-          subValue={`Disney: ${calc.formatPercent(metrics.disneyConc)}`} emoji="📈" />
-        <KPICard label="Debt" value={calc.formatCurrency(metrics.debt)}
-          subValue={`${calc.formatPercent(metrics.utilization)} utilization`} emoji="💀" />
-      </div>
+    'kpi-net-worth': (
+      <KPICard key="kpi-net-worth" label="Net Worth" value={calc.formatCurrency(metrics.netWorth, true)}
+        trend={metrics.nwDelta >= 0 ? 'up' : 'down'} trendValue={calc.formatCurrency(metrics.nwDelta, true)} emoji="💎" />
     ),
-    'kpi-row-2': (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6" key="kpi-row-2">
-        <KPICard label="Credit Score" value={String(latest.creditScore || '—')} emoji="🏆" />
-        <KPICard label="Savings Rate" value={calc.formatPercent(metrics.savingsRate)} emoji="📊" />
-        <KPICard label="Runway" value={`${metrics.runway.toFixed(1)} mo`}
-          subValue="months of expenses" emoji="⏳" />
-        <KPICard label="Latest Paycheck" value={latest.paycheckAmount ? calc.formatCurrency(latest.paycheckAmount) : '—'} emoji="💰" />
-      </div>
+    'kpi-cash': (
+      <KPICard key="kpi-cash" label="Cash" value={calc.formatCurrency(metrics.cash, true)}
+        subValue={`${data.accounts.filter(a => a.category === 'cash' && a.isActive).length} accounts`} emoji="💵" />
+    ),
+    'kpi-investments': (
+      <KPICard key="kpi-investments" label="Investments" value={calc.formatCurrency(metrics.investments, true)}
+        subValue={`Disney: ${calc.formatPercent(metrics.disneyConc)}`} emoji="📈" />
+    ),
+    'kpi-debt': (
+      <KPICard key="kpi-debt" label="Debt" value={calc.formatCurrency(metrics.debt)}
+        subValue={`${calc.formatPercent(metrics.utilization)} utilization`} emoji="💀" />
+    ),
+    'kpi-credit-score': (
+      <KPICard key="kpi-credit-score" label="Credit Score" value={String(latest.creditScore || '—')} emoji="🏆" />
+    ),
+    'kpi-savings-rate': (
+      <KPICard key="kpi-savings-rate" label="Savings Rate" value={calc.formatPercent(metrics.savingsRate)} emoji="📊" />
+    ),
+    'kpi-runway': (
+      <KPICard key="kpi-runway" label="Runway" value={`${metrics.runway.toFixed(1)} mo`}
+        subValue="months of expenses" emoji="⏳" />
+    ),
+    'kpi-paycheck': (
+      <KPICard key="kpi-paycheck" label="Latest Paycheck" value={latest.paycheckAmount ? calc.formatCurrency(latest.paycheckAmount) : '—'} emoji="💰" />
     ),
     'warnings': (
       <div key="warnings">
@@ -323,15 +340,39 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
     ) : null,
   }
 
-  const order = prefs.dashboardOrder.length > 0 ? prefs.dashboardOrder : Object.keys(sectionMap)
-  // Add any sections not in saved order
+  // Migrate old kpi-row-1/kpi-row-2 in saved order to individual keys
+  const migrateOrder = (order: string[]) => {
+    const result: string[] = []
+    for (const k of order) {
+      if (k === 'kpi-row-1') {
+        result.push('kpi-net-worth', 'kpi-cash', 'kpi-investments', 'kpi-debt')
+      } else if (k === 'kpi-row-2') {
+        result.push('kpi-credit-score', 'kpi-savings-rate', 'kpi-runway', 'kpi-paycheck')
+      } else {
+        result.push(k)
+      }
+    }
+    return result
+  }
+
+  const rawOrder = prefs.dashboardOrder.length > 0 ? migrateOrder(prefs.dashboardOrder) : Object.keys(sectionMap)
   const allKeys = Object.keys(sectionMap)
-  const finalOrder = [...order.filter(k => allKeys.includes(k)), ...allKeys.filter(k => !order.includes(k))]
-  const visibleOrder = finalOrder.filter(k => !prefs.hiddenSections?.includes(k))
+  const finalOrder = [...rawOrder.filter(k => allKeys.includes(k)), ...allKeys.filter(k => !rawOrder.includes(k))]
+  const hiddenSections = prefs.hiddenSections ?? []
+  const visibleOrder = finalOrder.filter(k => !hiddenSections.includes(k))
+
+  // Group visible KPIs into a grid row
+  const visibleKPIs = KPI_KEYS.filter(k => !hiddenSections.includes(k))
 
   const SECTION_LABELS: Record<string, string> = {
-    'kpi-row-1': 'KPI Row 1 (Net Worth, Cash, Investments, Debt)',
-    'kpi-row-2': 'KPI Row 2 (Credit Score, Savings Rate, Runway, Paycheck)',
+    'kpi-net-worth': 'Net Worth',
+    'kpi-cash': 'Cash',
+    'kpi-investments': 'Investments',
+    'kpi-debt': 'Debt',
+    'kpi-credit-score': 'Credit Score',
+    'kpi-savings-rate': 'Savings Rate',
+    'kpi-runway': 'Runway',
+    'kpi-paycheck': 'Latest Paycheck',
     'warnings': 'Warnings',
     'net-worth-chart': 'Net Worth Chart',
     'cash-vs-investments': 'Cash vs Investments',
@@ -380,11 +421,25 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
   }
   const handleDragEnd = () => setDragIdx(null)
 
+  // Render KPI grid from visible KPIs (non-edit mode)
+  const renderKPIGrid = () => {
+    if (visibleKPIs.length === 0) return null
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        {visibleKPIs.map(key => sectionMap[key])}
+      </div>
+    )
+  }
+
+  // Non-KPI sections in order
+  const nonKPIOrder = visibleOrder.filter(k => !KPI_KEYS.includes(k))
+
   return (
     <div>
       <PageHeader
         icon="📊"
         title={dashTitle}
+        titleKey="dashboard"
         subtitle={`Last updated: ${lastUpdated}`}
         rightContent={
           <div className="flex items-center gap-4">
@@ -409,18 +464,36 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
       </div>
 
       {editMode && (
-        <div className="mb-6 p-4 rounded-xl border border-accent/30 bg-accent/5 space-y-4">
+        <div className="sticky top-0 z-40 mb-6 p-4 rounded-xl border border-accent/30 bg-surface shadow-lg space-y-4">
           <p className="text-xs font-semibold text-accent uppercase tracking-wide">Layout Editor</p>
 
-          {/* Section visibility checkboxes */}
+          {/* KPI Card toggles */}
           <div>
-            <p className="text-xs text-text-muted mb-2">Show / Hide Sections</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              {allKeys.map(key => (
+            <p className="text-xs text-text-muted mb-2">KPI Cards</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              {KPI_KEYS.map(key => (
                 <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-text-secondary">
                   <input
                     type="checkbox"
-                    checked={!(prefs.hiddenSections ?? []).includes(key)}
+                    checked={!hiddenSections.includes(key)}
+                    onChange={() => handleToggleSection(key)}
+                    className="accent-accent"
+                  />
+                  {SECTION_LABELS[key] ?? key}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Chart section toggles */}
+          <div>
+            <p className="text-xs text-text-muted mb-2">Chart Sections</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              {CHART_KEYS.map(key => (
+                <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-text-secondary">
+                  <input
+                    type="checkbox"
+                    checked={!hiddenSections.includes(key)}
                     onChange={() => handleToggleSection(key)}
                     className="accent-accent"
                   />
@@ -462,10 +535,15 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
         </div>
       )}
 
-      {(editMode ? finalOrder : visibleOrder).map((key, idx) => {
-        const section = sectionMap[key]
-        if (!section) return null
-        if (editMode) {
+      {/* KPI Grid */}
+      {!editMode && renderKPIGrid()}
+
+      {/* Edit mode: show all sections individually for drag reorder */}
+      {editMode ? (
+        finalOrder.map((key, idx) => {
+          const section = sectionMap[key]
+          if (!section) return null
+          const isKPI = KPI_KEYS.includes(key)
           return (
             <div
               key={key}
@@ -473,21 +551,30 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
               onDragStart={() => handleDragStart(idx)}
               onDragOver={(e) => handleDragOver(e, idx)}
               onDragEnd={handleDragEnd}
-              className={`relative group cursor-grab active:cursor-grabbing ${
+              className={`relative group cursor-grab active:cursor-grabbing mb-3 ${
                 dragIdx === idx ? 'opacity-50' : ''
-              }`}
+              } ${hiddenSections.includes(key) ? 'opacity-30' : ''}`}
             >
               <div className="absolute -left-8 top-4 opacity-0 group-hover:opacity-100 transition-opacity text-text-muted">
                 <GripVertical size={16} />
               </div>
-              <div className="ring-1 ring-accent/20 ring-dashed rounded-xl">
-                {section}
+              <div className={`ring-1 ring-accent/20 ring-dashed rounded-xl ${isKPI ? 'inline-block' : ''}`}>
+                {isKPI ? (
+                  <div className="p-1">
+                    {section}
+                  </div>
+                ) : section}
               </div>
             </div>
           )
-        }
-        return <div key={key}>{section}</div>
-      })}
+        })
+      ) : (
+        nonKPIOrder.map(key => {
+          const section = sectionMap[key]
+          if (!section) return null
+          return <div key={key}>{section}</div>
+        })
+      )}
     </div>
   )
 }

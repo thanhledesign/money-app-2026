@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Camera, Landmark, TrendingUp,
@@ -31,25 +31,62 @@ interface Props {
   userName?: string
   onSignOut: () => void
   isLocal: boolean
+  width: number
+  onWidthChange: (w: number) => void
 }
 
-export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, isLocal }: Props) {
+export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, isLocal, width, onWidthChange }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isResizing, setIsResizing] = useState(false)
+  const startXRef = useRef(0)
+  const startWidthRef = useRef(0)
   const location = useLocation()
 
   const closeMobile = () => setMobileOpen(false)
 
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizing(true)
+    startXRef.current = e.clientX
+    startWidthRef.current = width
+  }, [width])
+
+  useEffect(() => {
+    if (!isResizing) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const delta = e.clientX - startXRef.current
+      onWidthChange(startWidthRef.current + delta)
+    }
+
+    const handleMouseUp = () => {
+      setIsResizing(false)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+  }, [isResizing, onWidthChange])
+
   const sidebarContent = (
     <>
       <div className="p-4 border-b border-border flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-text-primary tracking-tight">Money 2026</h1>
-          <p className="text-xs text-text-muted mt-0.5">Financial Dashboard</p>
+        <div className="min-w-0">
+          <h1 className="text-lg font-semibold text-text-primary tracking-tight truncate">Money 2026</h1>
+          <p className="text-xs text-text-muted mt-0.5 truncate">Financial Dashboard</p>
         </div>
         <button
           type="button"
           onClick={closeMobile}
-          className="md:hidden p-1 text-text-muted hover:text-text-primary"
+          className="md:hidden p-1 text-text-muted hover:text-text-primary flex-shrink-0"
         >
           <X size={20} />
         </button>
@@ -70,8 +107,8 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, is
               }`
             }
           >
-            <Icon size={18} />
-            {label}
+            <Icon size={18} className="flex-shrink-0" />
+            <span className="truncate">{label}</span>
           </NavLink>
         ))}
 
@@ -94,8 +131,8 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, is
               }`
             }
           >
-            <Icon size={18} />
-            {label}
+            <Icon size={18} className="flex-shrink-0" />
+            <span className="truncate">{label}</span>
           </NavLink>
         ))}
       </nav>
@@ -110,8 +147,8 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, is
             }`
           }
         >
-          <Settings size={16} />
-          Settings
+          <Settings size={16} className="flex-shrink-0" />
+          <span className="truncate">Settings</span>
         </NavLink>
         <UserMenu
           email={userEmail}
@@ -145,8 +182,18 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, is
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-56 bg-surface border-r border-border flex-col z-50">
+      <aside
+        className="hidden md:flex fixed left-0 top-0 h-screen bg-surface border-r border-border flex-col z-50"
+        style={{ width }}
+      >
         {sidebarContent}
+        {/* Resize handle */}
+        <div
+          onMouseDown={handleMouseDown}
+          className={`absolute right-0 top-0 h-full w-1 cursor-col-resize transition-colors hover:bg-accent/40 ${
+            isResizing ? 'bg-accent/60' : 'bg-transparent'
+          }`}
+        />
       </aside>
     </>
   )
