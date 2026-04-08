@@ -19,12 +19,11 @@ export function useAuth() {
   })
 
   useEffect(() => {
-    if (!configured) {
+    if (!configured || !supabase) {
       setState(s => ({ ...s, loading: false }))
       return
     }
 
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setState({
         user: session?.user ?? null,
@@ -34,7 +33,6 @@ export function useAuth() {
       })
     })
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setState({
         user: session?.user ?? null,
@@ -48,7 +46,7 @@ export function useAuth() {
   }, [configured])
 
   const signInWithGoogle = useCallback(async () => {
-    if (!configured) return
+    if (!configured || !supabase) return
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -58,7 +56,7 @@ export function useAuth() {
   }, [configured])
 
   const signOut = useCallback(async () => {
-    if (!configured) return
+    if (!configured || !supabase) return
     await supabase.auth.signOut()
   }, [configured])
 
