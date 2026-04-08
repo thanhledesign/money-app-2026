@@ -1,9 +1,26 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { AppData, Snapshot, Account, BudgetItem, Goal } from '@/data/types'
 import * as store from '@/lib/store'
 
-export function useAppData() {
+export function useAppData(userId?: string) {
+  const prevUserIdRef = useRef(userId)
+
+  // Set prefix on initial call (before first render's useState)
+  if (prevUserIdRef.current !== userId) {
+    store.setStoragePrefix(userId)
+    prevUserIdRef.current = userId
+  }
+
+  // Ensure prefix is set for initial load
+  store.setStoragePrefix(userId)
+
   const [data, setData] = useState<AppData>(() => store.loadData())
+
+  // When userId changes, switch storage scope and reload
+  useEffect(() => {
+    store.setStoragePrefix(userId)
+    setData(store.loadData())
+  }, [userId])
 
   const refresh = useCallback(() => setData(store.loadData()), [])
 

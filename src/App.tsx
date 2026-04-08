@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Routes, Route, useSearchParams } from 'react-router-dom'
 import { useAppData } from '@/hooks/useAppData'
 import { useChartPrefs } from '@/hooks/useChartPrefs'
@@ -21,6 +21,7 @@ import BusinessPage from '@/components/pro/BusinessPage'
 import PropertiesPage from '@/components/pro/PropertiesPage'
 import { AdminDesigner } from '@/components/ui/AdminDesigner'
 import ToolsPage from '@/components/tools/ToolsPage'
+import { getStorageKey } from '@/lib/store'
 
 export default function App() {
   const [searchParams] = useSearchParams()
@@ -32,25 +33,37 @@ export default function App() {
     return localStorage.getItem('money-app-skipped-login') === 'true'
   })
 
+  // Pass userId to scope localStorage per authenticated user
+  const userId = auth.user?.id
   const {
     data, addSnapshot, deleteSnapshot, addGoal,
     addAccount, updateAccounts,
     updateComp, updateDeductions, updateAllocations, updateBudgetItems,
     resetData,
-  } = useAppData()
+  } = useAppData(userId)
 
   const { prefs, update: updatePrefs, setAccountColor, setLabelColor, reset: resetPrefs } = useChartPrefs()
 
+  // Wizard completion is scoped per user via the storage prefix
+  const wizardDoneKey = useMemo(() => getStorageKey('wizard-done'), [userId])
+
   const [wizardComplete, setWizardComplete] = useState(() => {
     if (freshMode) return false
-    return localStorage.getItem('money-app-wizard-done') === 'true' || data.snapshots.length > 0
+    return localStorage.getItem(wizardDoneKey) === 'true' || data.snapshots.length > 0
   })
+
+  // Re-check wizard state when userId changes (new user signs in)
+  useEffect(() => {
+    if (auth.loading) return
+    const done = localStorage.getItem(wizardDoneKey) === 'true' || data.snapshots.length > 0
+    setWizardComplete(done)
+  }, [userId, wizardDoneKey, data.snapshots.length, auth.loading])
 
   // Fresh mode: reset data on mount
   useEffect(() => {
     if (freshMode) {
       resetData()
-      localStorage.removeItem('money-app-wizard-done')
+      localStorage.removeItem(wizardDoneKey)
       localStorage.removeItem('money-app-skipped-login')
     }
   }, [freshMode])
@@ -88,7 +101,7 @@ export default function App() {
     return (
       <WizardPage
         onComplete={() => {
-          localStorage.setItem('money-app-wizard-done', 'true')
+          localStorage.setItem(wizardDoneKey, 'true')
           setWizardComplete(true)
         }}
         addAccount={addAccount}

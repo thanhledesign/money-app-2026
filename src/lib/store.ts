@@ -4,9 +4,33 @@ import {
   defaultAllocations, defaultBudgetItems, defaultGoals,
 } from '@/data/seed'
 
-const STORAGE_KEY = 'money-app-data'
+// User-scoped storage prefix
+let _prefix = 'money-app-'
 
-function getDefaultData(): AppData {
+export function setStoragePrefix(userId?: string) {
+  _prefix = userId ? `money-app-u-${userId}-` : 'money-app-'
+}
+
+export function getStorageKey(base: string): string {
+  return `${_prefix}${base}`
+}
+
+function getEmptyData(): AppData {
+  return {
+    accounts: [],
+    snapshots: [],
+    comp: { annualSalary: 0, bonus: 0, ltiPreTax: 0, taxRate: 0 },
+    deductions: [],
+    allocations: [],
+    budgetItems: [],
+    goals: [],
+    budgetActuals: [],
+    payFrequency: 'semimonthly',
+    paychecksPerMonth: [5, 4, 4, 5, 4, 4, 5, 4, 4, 5, 4, 5],
+  }
+}
+
+function getSeededData(): AppData {
   return {
     accounts: defaultAccounts,
     snapshots: seedSnapshots,
@@ -21,9 +45,16 @@ function getDefaultData(): AppData {
   }
 }
 
+// Local (anonymous) users get seed data; authenticated users start empty
+function getDefaultData(): AppData {
+  const isUserScoped = _prefix !== 'money-app-'
+  return isUserScoped ? getEmptyData() : getSeededData()
+}
+
 export function loadData(): AppData {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const key = getStorageKey('data')
+    const raw = localStorage.getItem(key)
     if (!raw) {
       const data = getDefaultData()
       saveData(data)
@@ -38,7 +69,7 @@ export function loadData(): AppData {
 }
 
 export function saveData(data: AppData): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  localStorage.setItem(getStorageKey('data'), JSON.stringify(data))
 }
 
 export function addSnapshot(snapshot: Snapshot): AppData {
@@ -121,7 +152,7 @@ export function resetData(): AppData {
 }
 
 export function exportData(): string {
-  return localStorage.getItem(STORAGE_KEY) || '{}'
+  return localStorage.getItem(getStorageKey('data')) || '{}'
 }
 
 export function importData(json: string): AppData {
