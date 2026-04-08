@@ -2,25 +2,25 @@ import type { Account, Snapshot, CompBreakdown, PaycheckDeduction, PaycheckAlloc
 
 export const defaultAccounts: Account[] = [
   // Cash accounts
-  { id: 'hysa-1', name: 'High-Yield Savings', institution: 'Online Bank', type: 'savings', category: 'cash', isActive: true },
-  { id: 'checking-1', name: 'Primary Checking', institution: 'National Bank', type: 'checking', category: 'cash', isActive: true },
-  { id: 'savings-1', name: 'Savings', institution: 'National Bank', type: 'savings', category: 'cash', isActive: true },
-  { id: 'checking-2', name: 'Business Checking', institution: 'National Bank', type: 'checking', category: 'cash', isActive: true },
-  { id: 'cu-checking', name: 'Credit Union Checking', institution: 'Local Credit Union', type: 'checking', category: 'cash', isActive: true },
-  { id: 'cu-savings', name: 'Credit Union Savings', institution: 'Local Credit Union', type: 'savings', category: 'cash', isActive: true },
+  { id: 'hysa-1', name: 'Maple HYSA', institution: 'Maple Savings Bank', type: 'savings', category: 'cash', isActive: true },
+  { id: 'checking-1', name: 'Cornerstone Checking', institution: 'Cornerstone Bank', type: 'checking', category: 'cash', isActive: true },
+  { id: 'savings-1', name: 'Cornerstone Savings', institution: 'Cornerstone Bank', type: 'savings', category: 'cash', isActive: true },
+  { id: 'checking-2', name: 'Cornerstone Biz Checking', institution: 'Cornerstone Bank', type: 'checking', category: 'cash', isActive: true },
+  { id: 'cu-checking', name: 'Horizon CU Checking', institution: 'Horizon Credit Union', type: 'checking', category: 'cash', isActive: true },
+  { id: 'cu-savings', name: 'Horizon CU Savings', institution: 'Horizon Credit Union', type: 'savings', category: 'cash', isActive: true },
 
   // Investment accounts
-  { id: 'bond-fund', name: 'Bond Fund', institution: 'Online Bank', type: 'investment', category: 'investment', isActive: true },
-  { id: 'brokerage-1', name: 'Individual Brokerage', institution: 'Investment Firm', type: 'brokerage', category: 'investment', isActive: true },
-  { id: 'roth-ira', name: 'Roth IRA', institution: 'Investment Firm', type: 'retirement', category: 'investment', isActive: true },
-  { id: 'employer-401k', name: 'Employer 401K', institution: 'Employer Plan', type: 'retirement', category: 'investment', isActive: true },
-  { id: 'employer-match', name: 'Employer 401K Match', institution: 'Employer Plan', type: 'retirement', category: 'investment', isActive: true },
-  { id: 'employer-lti', name: 'Employer Stock (LTI)', institution: 'Employer Plan', type: 'other', category: 'investment', isActive: true },
+  { id: 'bond-fund', name: 'Maple Bond Portfolio', institution: 'Maple Savings Bank', type: 'investment', category: 'investment', isActive: true },
+  { id: 'brokerage-1', name: 'Summit Brokerage', institution: 'Summit Investments', type: 'brokerage', category: 'investment', isActive: true },
+  { id: 'roth-ira', name: 'Summit Roth IRA', institution: 'Summit Investments', type: 'retirement', category: 'investment', isActive: true },
+  { id: 'employer-401k', name: 'Employer 401K (Employee)', institution: 'Acme Corp Benefits', type: 'retirement', category: 'investment', isActive: true },
+  { id: 'employer-match', name: 'Employer 401K (Match)', institution: 'Acme Corp Benefits', type: 'retirement', category: 'investment', isActive: true },
+  { id: 'employer-lti', name: 'Acme Stock Awards (LTI)', institution: 'Acme Corp Benefits', type: 'other', category: 'investment', isActive: true },
 
   // Debt accounts
-  { id: 'cc-rewards', name: 'Rewards Credit Card', institution: 'Card Issuer A', type: 'credit', category: 'debt', creditLimit: 8000, isActive: true },
-  { id: 'cc-travel', name: 'Travel Credit Card', institution: 'Card Issuer B', type: 'credit', category: 'debt', creditLimit: 12000, isActive: true },
-  { id: 'cc-cashback', name: 'Cashback Credit Card', institution: 'Card Issuer C', type: 'credit', category: 'debt', creditLimit: 10000, isActive: true },
+  { id: 'cc-rewards', name: 'Pinnacle Rewards Visa', institution: 'Pinnacle Financial', type: 'credit', category: 'debt', creditLimit: 8000, isActive: true },
+  { id: 'cc-travel', name: 'Voyager Travel Mastercard', institution: 'Voyager Bank', type: 'credit', category: 'debt', creditLimit: 12000, isActive: true },
+  { id: 'cc-cashback', name: 'Thrive Cashback Card', institution: 'Thrive Financial', type: 'credit', category: 'debt', creditLimit: 10000, isActive: true },
 ]
 
 // $100K salary → ~$4,166.67 gross/semi-monthly → ~$2,850 net after taxes & deductions
@@ -165,7 +165,7 @@ export const defaultBudgetItems: BudgetItem[] = [
 ]
 
 export const defaultGoals: Goal[] = [
-  { id: 'g1', ranking: '3', completedDate: '2025-06-15', milestone: 'Paid off rewards credit card' },
+  { id: 'g1', ranking: '3', completedDate: '2025-06-15', milestone: 'Paid off Pinnacle Rewards Visa' },
   { id: 'g2', ranking: '2', completedDate: '2025-09-01', milestone: 'Built $5K emergency fund' },
   { id: 'g3', ranking: '1', completedDate: '2025-11-30', milestone: 'Credit score above 720' },
   { id: 'g4', ranking: '2', completedDate: '2026-01-15', milestone: 'Maxed out 401K match (6%)' },

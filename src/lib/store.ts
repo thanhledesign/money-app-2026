@@ -30,15 +30,34 @@ export function getUserKey(base: string): string {
 
 function getDefaultDashboardIndex(): DashboardIndex {
   return {
-    dashboards: [{
-      id: 'default',
-      name: 'My Finances',
-      emoji: '📊',
-      mode: 'scenario',
-      createdAt: new Date().toISOString(),
-    }],
+    dashboards: [
+      {
+        id: 'default',
+        name: 'My Finances',
+        emoji: '📊',
+        mode: 'scenario',
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 'sample',
+        name: 'Sample Dashboard',
+        emoji: '🎯',
+        mode: 'scenario',
+        createdAt: new Date().toISOString(),
+      },
+    ],
     activeId: 'default',
   }
+}
+
+// Initialize the sample dashboard with seed data
+function initSampleDashboard(): void {
+  const key = `${_userPrefix}d-sample-data`
+  if (localStorage.getItem(key)) return // already exists
+  const data = getSeededData()
+  localStorage.setItem(key, JSON.stringify(data))
+  // Mark wizard done for sample
+  localStorage.setItem(`${_userPrefix}d-sample-wizard-done`, 'true')
 }
 
 export function loadDashboardIndex(): DashboardIndex {
@@ -67,10 +86,12 @@ export function loadDashboardIndex(): DashboardIndex {
     }
 
     saveDashboardIndex(idx)
+    initSampleDashboard()
     return idx
   } catch {
     const idx = getDefaultDashboardIndex()
     saveDashboardIndex(idx)
+    initSampleDashboard()
     return idx
   }
 }

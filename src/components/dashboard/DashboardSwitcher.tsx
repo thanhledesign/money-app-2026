@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronDown, Plus, Trash2, Pencil } from 'lucide-react'
+import { ChevronDown, Plus, Trash2, Pencil, Download, Upload } from 'lucide-react'
 import type { Dashboard } from '@/data/types'
 import { MAX_FREE_DASHBOARDS } from '@/data/types'
+import { setDashboardId, exportData, importData } from '@/lib/store'
 
 interface Props {
   dashboards: Dashboard[]
@@ -24,6 +25,7 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editEmoji, setEditEmoji] = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const ref = useRef<HTMLDivElement>(null)
 
   const active = dashboards.find(d => d.id === activeId) ?? dashboards[0]
@@ -34,6 +36,7 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false)
         setEditingId(null)
+        setConfirmDeleteId(null)
       }
     }
     document.addEventListener('mousedown', handle)
@@ -53,6 +56,41 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
     }
   }
 
+  const handleExportDashboard = (d: Dashboard) => {
+    setDashboardId(d.mode === 'view' ? (d.sourceId ?? 'default') : d.id)
+    const json = exportData()
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${d.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    // Restore active dashboard prefix
+    setDashboardId(activeId)
+  }
+
+  const handleImportToDashboard = (d: Dashboard) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = () => {
+        try {
+          setDashboardId(d.id)
+          importData(reader.result as string)
+          setDashboardId(activeId)
+          window.location.reload()
+        } catch { /* ignore */ }
+      }
+      reader.readAsText(file)
+    }
+    input.click()
+  }
+
   return (
     <div ref={ref} className="relative px-3 py-2 border-b border-border">
       <button
@@ -65,7 +103,7 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
       </button>
 
       {open && (
-        <div className="absolute left-2 right-2 top-full mt-1 bg-surface border border-border rounded-lg shadow-2xl z-50 py-1 max-h-80 overflow-y-auto">
+        <div className="absolute left-2 right-2 top-full mt-1 bg-surface border border-border rounded-lg shadow-2xl z-50 py-1 max-h-96 overflow-y-auto">
           {dashboards.map(d => (
             <div key={d.id}>
               {editingId === d.id ? (
@@ -92,6 +130,20 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
                     <button onClick={() => setEditingId(null)} className="px-2 py-1 text-text-muted rounded text-xs">Cancel</button>
                   </div>
                 </div>
+              ) : confirmDeleteId === d.id ? (
+                <div className="px-3 py-2 bg-red/5 border-y border-red/20">
+                  <p className="text-xs text-red mb-2">Delete "{d.name}"? This cannot be undone.</p>
+                  <div className="flex gap-1">
+                    <button onClick={() => { onDelete(d.id); setConfirmDeleteId(null) }}
+                      className="px-2 py-1 bg-red/10 text-red border border-red/30 rounded text-xs">
+                      Yes, Delete
+                    </button>
+                    <button onClick={() => setConfirmDeleteId(null)}
+                      className="px-2 py-1 text-text-muted rounded text-xs">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <div
                   className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors group ${
@@ -112,12 +164,22 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
                       {MODE_BADGE[d.mode]?.label ?? d.mode}
                     </span>
                   </button>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                    <button onClick={() => startEdit(d)} className="p-1 text-text-muted hover:text-text-primary">
+                  <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                    {d.mode === 'scenario' && (
+                      <>
+                        <button onClick={() => handleExportDashboard(d)} className="p-1 text-text-muted hover:text-green" title="Export">
+                          <Download size={12} />
+                        </button>
+                        <button onClick={() => handleImportToDashboard(d)} className="p-1 text-text-muted hover:text-blue" title="Import">
+                          <Upload size={12} />
+                        </button>
+                      </>
+                    )}
+                    <button onClick={() => startEdit(d)} className="p-1 text-text-muted hover:text-text-primary" title="Rename">
                       <Pencil size={12} />
                     </button>
                     {d.id !== 'default' && (
-                      <button onClick={() => { onDelete(d.id); }} className="p-1 text-text-muted hover:text-red">
+                      <button onClick={() => setConfirmDeleteId(d.id)} className="p-1 text-text-muted hover:text-red" title="Delete">
                         <Trash2 size={12} />
                       </button>
                     )}
