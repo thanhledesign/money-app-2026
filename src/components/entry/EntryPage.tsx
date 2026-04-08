@@ -130,15 +130,8 @@ export default function EntryPage({ data, addSnapshot, addAccount, updateAccount
           return (
             <Card key={key}>
               <CardTitle className="mb-4">{emoji} {label}</CardTitle>
-              <AccountManager
-                accounts={data.accounts}
-                category={key}
-                onAdd={addAccount}
-                onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
-                onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
-              />
               {accounts.length > 0 && (
-                <div className="space-y-3">
+                <div className="space-y-3 mb-4">
                   {accounts.map(acc => (
                     <FieldRow
                       key={acc.id}
@@ -152,6 +145,13 @@ export default function EntryPage({ data, addSnapshot, addAccount, updateAccount
                   ))}
                 </div>
               )}
+              <AccountManager
+                accounts={data.accounts}
+                category={key}
+                onAdd={addAccount}
+                onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
+                onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
+              />
             </Card>
           )
         })}

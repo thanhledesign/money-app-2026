@@ -60,7 +60,7 @@ const DEFAULT_DASHBOARD_ORDER = [
 function getDefaults(): ChartPrefs {
   return {
     curveType: 'smooth',
-    showDots: true,
+    showDots: false,
     accountColors: { ...DEFAULT_ACCOUNT_COLORS },
     labelColors: { ...DEFAULT_LABEL_COLORS },
     dashboardOrder: [...DEFAULT_DASHBOARD_ORDER],

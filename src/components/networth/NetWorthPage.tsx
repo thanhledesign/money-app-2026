@@ -190,36 +190,14 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
         }
       />
 
-      {/* ── Account Managers ── */}
-      <div className="flex flex-wrap gap-4 mb-2">
-        <div className="flex-1 min-w-[200px]">
-          <AccountManager
-            accounts={data.accounts}
-            category="cash"
-            onAdd={addAccount}
-            onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
-            onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
-          />
-        </div>
-        <div className="flex-1 min-w-[200px]">
-          <AccountManager
-            accounts={data.accounts}
-            category="investment"
-            onAdd={addAccount}
-            onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
-            onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
-          />
-        </div>
-        <div className="flex-1 min-w-[200px]">
-          <AccountManager
-            accounts={data.accounts}
-            category="debt"
-            onAdd={addAccount}
-            onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
-            onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
-          />
-        </div>
-      </div>
+      {/* ── Account Manager (single) ── */}
+      <AccountManager
+        accounts={data.accounts}
+        category="cash"
+        onAdd={addAccount}
+        onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
+        onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
+      />
 
       {/* ── Section 1: All-accounts monthly table ── */}
       <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #a855f7)' }}>

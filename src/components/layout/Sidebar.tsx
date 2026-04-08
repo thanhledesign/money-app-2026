@@ -1,7 +1,9 @@
-import { NavLink } from 'react-router-dom'
+import { useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, PlusCircle, Landmark, TrendingUp,
   Skull, Diamond, Scale, Trophy, DollarSign, Settings,
+  Menu, X, Building2, Home as HomeIcon,
 } from 'lucide-react'
 import { UserMenu } from '@/components/auth/UserMenu'
 
@@ -17,6 +19,11 @@ const navItems = [
   { to: '/goals', icon: Trophy, label: 'Goals' },
 ]
 
+const proItems = [
+  { to: '/business', icon: Building2, label: 'Business', pro: true },
+  { to: '/properties', icon: HomeIcon, label: 'Properties', pro: true },
+]
+
 interface Props {
   userEmail?: string
   userAvatar?: string
@@ -26,11 +33,25 @@ interface Props {
 }
 
 export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, isLocal }: Props) {
-  return (
-    <aside className="fixed left-0 top-0 h-screen w-56 bg-surface border-r border-border flex flex-col z-50">
-      <div className="p-4 border-b border-border">
-        <h1 className="text-lg font-semibold text-text-primary tracking-tight">Money 2026</h1>
-        <p className="text-xs text-text-muted mt-0.5">Financial Dashboard</p>
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const location = useLocation()
+
+  const closeMobile = () => setMobileOpen(false)
+
+  const sidebarContent = (
+    <>
+      <div className="p-4 border-b border-border flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-text-primary tracking-tight">Money 2026</h1>
+          <p className="text-xs text-text-muted mt-0.5">Financial Dashboard</p>
+        </div>
+        <button
+          type="button"
+          onClick={closeMobile}
+          className="md:hidden p-1 text-text-muted hover:text-text-primary"
+        >
+          <X size={20} />
+        </button>
       </div>
 
       <nav className="flex-1 py-2 overflow-y-auto">
@@ -39,6 +60,7 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, is
             key={to}
             to={to}
             end={to === '/'}
+            onClick={closeMobile}
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
                 isActive
@@ -51,11 +73,36 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, is
             {label}
           </NavLink>
         ))}
+
+        <div className="px-4 pt-4 pb-1">
+          <p className="text-[10px] text-text-muted uppercase tracking-wider flex items-center gap-1">
+            Pro Features
+            <span className="px-1.5 py-0.5 text-[8px] bg-amber/10 text-amber rounded-full border border-amber/20">Free Preview</span>
+          </p>
+        </div>
+        {proItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            onClick={closeMobile}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                isActive
+                  ? 'text-amber bg-amber/10 border-r-2 border-amber'
+                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+              }`
+            }
+          >
+            <Icon size={18} />
+            {label}
+          </NavLink>
+        ))}
       </nav>
 
       <div className="p-3 border-t border-border space-y-2">
         <NavLink
           to="/settings"
+          onClick={closeMobile}
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
               isActive ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-text-secondary'
@@ -73,6 +120,33 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, is
           isLocal={isLocal}
         />
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Mobile header bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-surface border-b border-border flex items-center px-4 z-50">
+        <button type="button" onClick={() => setMobileOpen(true)} className="p-1 text-text-secondary">
+          <Menu size={24} />
+        </button>
+        <h1 className="ml-3 text-sm font-semibold text-text-primary">Money 2026</h1>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/60" onClick={closeMobile} />
+          <aside className="relative w-64 h-full bg-surface border-r border-border flex flex-col">
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex fixed left-0 top-0 h-screen w-56 bg-surface border-r border-border flex-col z-50">
+        {sidebarContent}
+      </aside>
+    </>
   )
 }

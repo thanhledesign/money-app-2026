@@ -29,23 +29,17 @@ interface KPICardProps {
   trend?: 'up' | 'down' | 'neutral'
   trendValue?: string
   accent?: 'green' | 'red' | 'amber' | 'blue' | 'purple' | 'cyan' | 'default'
+  emoji?: string
 }
 
-const accentColors = {
-  green: 'text-green',
-  red: 'text-red',
-  amber: 'text-amber',
-  blue: 'text-blue',
-  purple: 'text-purple',
-  cyan: 'text-cyan',
-  default: 'text-text-primary',
-}
-
-export function KPICard({ label, value, subValue, trend, trendValue, accent = 'default' }: KPICardProps) {
+export function KPICard({ label, value, subValue, trend, trendValue, emoji }: KPICardProps) {
   return (
     <Card>
-      <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">{label}</p>
-      <p className={`text-2xl font-semibold tabular-nums ${accentColors[accent]}`}>{value}</p>
+      <div className="flex items-start justify-between">
+        <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">{label}</p>
+        {emoji && <span className="text-2xl leading-none">{emoji}</span>}
+      </div>
+      <p className="text-2xl font-semibold tabular-nums text-text-primary">{value}</p>
       <div className="flex items-center gap-2 mt-1">
         {trend && trendValue && (
           <span className={`text-xs font-medium ${trend === 'up' ? 'text-green' : trend === 'down' ? 'text-red' : 'text-text-muted'}`}>

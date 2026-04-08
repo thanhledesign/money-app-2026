@@ -26,6 +26,8 @@ const TOOLTIP_STYLE = {
 export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
   const [editMode, setEditMode] = useState(false)
   const [dragIdx, setDragIdx] = useState<number | null>(null)
+  const [dashTitle, setDashTitle] = useState(() => localStorage.getItem('money-app-dash-title') || 'Dashboard')
+  const [editingTitle, setEditingTitle] = useState(false)
   const latest = calc.getLatestSnapshot(data)
   const prev = calc.getPreviousSnapshot(data)
 
@@ -120,26 +122,22 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
     'kpi-row-1': (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6" key="kpi-row-1">
         <KPICard label="Net Worth" value={calc.formatCurrency(metrics.netWorth, true)}
-          trend={metrics.nwDelta >= 0 ? 'up' : 'down'} trendValue={calc.formatCurrency(metrics.nwDelta, true)} accent="purple" />
+          trend={metrics.nwDelta >= 0 ? 'up' : 'down'} trendValue={calc.formatCurrency(metrics.nwDelta, true)} emoji="💎" />
         <KPICard label="Cash" value={calc.formatCurrency(metrics.cash, true)}
-          subValue={`${data.accounts.filter(a => a.category === 'cash' && a.isActive).length} accounts`} accent="green" />
+          subValue={`${data.accounts.filter(a => a.category === 'cash' && a.isActive).length} accounts`} emoji="💵" />
         <KPICard label="Investments" value={calc.formatCurrency(metrics.investments, true)}
-          subValue={`Disney: ${calc.formatPercent(metrics.disneyConc)}`}
-          accent={metrics.disneyConc > 0.70 ? 'amber' : 'blue'} />
+          subValue={`Disney: ${calc.formatPercent(metrics.disneyConc)}`} emoji="📈" />
         <KPICard label="Debt" value={calc.formatCurrency(metrics.debt)}
-          subValue={`${calc.formatPercent(metrics.utilization)} utilization`}
-          accent={metrics.debt < 0 ? 'red' : 'green'} />
+          subValue={`${calc.formatPercent(metrics.utilization)} utilization`} emoji="💀" />
       </div>
     ),
     'kpi-row-2': (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6" key="kpi-row-2">
-        <KPICard label="Credit Score" value={String(latest.creditScore || '—')}
-          accent={latest.creditScore && latest.creditScore >= 750 ? 'green' : latest.creditScore && latest.creditScore >= 700 ? 'amber' : 'red'} />
-        <KPICard label="Savings Rate" value={calc.formatPercent(metrics.savingsRate)}
-          accent={metrics.savingsRate > 0.30 ? 'green' : 'amber'} />
+        <KPICard label="Credit Score" value={String(latest.creditScore || '—')} emoji="🏆" />
+        <KPICard label="Savings Rate" value={calc.formatPercent(metrics.savingsRate)} emoji="📊" />
         <KPICard label="Runway" value={`${metrics.runway.toFixed(1)} mo`}
-          subValue="months of expenses" accent={metrics.runway > 6 ? 'green' : metrics.runway > 3 ? 'amber' : 'red'} />
-        <KPICard label="Latest Paycheck" value={latest.paycheckAmount ? calc.formatCurrency(latest.paycheckAmount) : '—'} accent="cyan" />
+          subValue="months of expenses" emoji="⏳" />
+        <KPICard label="Latest Paycheck" value={latest.paycheckAmount ? calc.formatCurrency(latest.paycheckAmount) : '—'} emoji="💰" />
       </div>
     ),
     'warnings': (
@@ -384,8 +382,8 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
   return (
     <div>
       <PageHeader
-        icon="$"
-        title="2026 Money"
+        icon="📊"
+        title={dashTitle}
         subtitle={`Last updated: ${lastUpdated}`}
         rightContent={
           <div className="flex items-center gap-4">

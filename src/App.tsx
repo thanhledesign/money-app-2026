@@ -15,6 +15,8 @@ import { IncomePage } from '@/components/income/IncomePage'
 import { BudgetPage } from '@/components/budget/BudgetPage'
 import { GoalsPage } from '@/components/goals/GoalsPage'
 import SettingsPage from '@/components/settings/SettingsPage'
+import BusinessPage from '@/components/pro/BusinessPage'
+import PropertiesPage from '@/components/pro/PropertiesPage'
 import { AdminDesigner } from '@/components/ui/AdminDesigner'
 
 export default function App() {
@@ -80,6 +82,8 @@ export default function App() {
         } />
         <Route path="budget" element={<BudgetPage data={data} updateBudgetItems={updateBudgetItems} />} />
         <Route path="goals" element={<GoalsPage data={data} addGoal={addGoal} />} />
+        <Route path="business" element={<BusinessPage />} />
+        <Route path="properties" element={<PropertiesPage />} />
         <Route path="settings" element={
           <SettingsPage data={data} prefs={prefs}
             setAccountColor={setAccountColor} setLabelColor={setLabelColor}

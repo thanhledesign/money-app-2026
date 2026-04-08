@@ -19,7 +19,7 @@ export default function Layout({ userEmail, userAvatar, userName, onSignOut, isL
         onSignOut={onSignOut}
         isLocal={isLocal}
       />
-      <main className="flex-1 ml-56 p-6 max-w-[1200px]">
+      <main className="flex-1 md:ml-56 pt-16 md:pt-0 p-4 md:p-6 max-w-[1200px] w-full">
         <Outlet />
       </main>
     </div>
