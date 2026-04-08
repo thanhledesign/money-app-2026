@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { Outlet } from 'react-router-dom'
+import type { Dashboard } from '@/data/types'
 import Sidebar from './Sidebar'
 
 const SIDEBAR_KEY = 'money-app-sidebar-width'
-const DEFAULT_WIDTH = 224 // w-56
+const DEFAULT_WIDTH = 224
 const MIN_WIDTH = 180
 const MAX_WIDTH = 360
 
@@ -23,9 +24,21 @@ interface Props {
   onSignOut: () => void
   onSignIn?: () => void
   isLocal: boolean
+  dashboards: Dashboard[]
+  activeId: string
+  activeDashboard?: Dashboard
+  canCreateDashboard: boolean
+  onSwitchDashboard: (id: string) => void
+  onCreateDashboard: (d: Dashboard) => void
+  onDeleteDashboard: (id: string) => void
+  onRenameDashboard: (id: string, name: string, emoji: string) => void
 }
 
-export default function Layout({ userEmail, userAvatar, userName, onSignOut, onSignIn, isLocal }: Props) {
+export default function Layout({
+  userEmail, userAvatar, userName, onSignOut, onSignIn, isLocal,
+  dashboards, activeId, activeDashboard, canCreateDashboard,
+  onSwitchDashboard, onCreateDashboard, onDeleteDashboard, onRenameDashboard,
+}: Props) {
   const [sidebarWidth, setSidebarWidth] = useState(loadWidth)
 
   const handleWidthChange = useCallback((w: number) => {
@@ -45,15 +58,28 @@ export default function Layout({ userEmail, userAvatar, userName, onSignOut, onS
         isLocal={isLocal}
         width={sidebarWidth}
         onWidthChange={handleWidthChange}
+        dashboards={dashboards}
+        activeId={activeId}
+        activeDashboard={activeDashboard}
+        canCreateDashboard={canCreateDashboard}
+        onSwitchDashboard={onSwitchDashboard}
+        onCreateDashboard={onCreateDashboard}
+        onDeleteDashboard={onDeleteDashboard}
+        onRenameDashboard={onRenameDashboard}
       />
       <main
         className="flex-1 pt-16 md:pt-0 p-4 md:p-6 max-w-[1200px] w-full"
         style={{ marginLeft: undefined }}
       >
         <div className="hidden md:block" style={{ marginLeft: sidebarWidth }} />
+        {/* Combined dashboard read-only banner */}
+        {activeDashboard?.mode === 'combined' && (
+          <div className="mb-4 px-4 py-2 bg-purple/10 border border-purple/30 rounded-lg text-xs text-purple">
+            Combined view — showing merged data from {activeDashboard.mergeIds?.length ?? 0} dashboards (read-only)
+          </div>
+        )}
         <Outlet />
       </main>
-      {/* Spacer for desktop sidebar */}
       <style>{`@media (min-width: 768px) { main { margin-left: ${sidebarWidth}px !important; } }`}</style>
     </div>
   )

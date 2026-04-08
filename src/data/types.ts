@@ -61,6 +61,23 @@ export interface MonthlyBudgetActual {
   actual: number
 }
 
+export interface Dashboard {
+  id: string
+  name: string
+  emoji: string
+  mode: 'scenario' | 'view' | 'combined'
+  createdAt: string
+  sourceId?: string    // For 'view' mode: which dashboard's data to use
+  mergeIds?: string[]  // For 'combined' mode: which dashboards to merge
+}
+
+export interface DashboardIndex {
+  dashboards: Dashboard[]
+  activeId: string
+}
+
+export const MAX_FREE_DASHBOARDS = 3
+
 export interface AppData {
   accounts: Account[]
   snapshots: Snapshot[]

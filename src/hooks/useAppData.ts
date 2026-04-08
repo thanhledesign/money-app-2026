@@ -1,75 +1,105 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import type { AppData, Snapshot, Account, BudgetItem, Goal } from '@/data/types'
+import type { AppData, Snapshot, Account, BudgetItem, Goal, Dashboard } from '@/data/types'
 import * as store from '@/lib/store'
 
-export function useAppData(userId?: string) {
-  const prevUserIdRef = useRef(userId)
+export function useAppData(userId?: string, dashboard?: Dashboard) {
+  const dashboardId = dashboard?.id ?? 'default'
+  const isReadOnly = dashboard?.mode === 'combined'
 
-  // Set prefix on initial call (before first render's useState)
-  if (prevUserIdRef.current !== userId) {
-    store.setStoragePrefix(userId)
-    prevUserIdRef.current = userId
-  }
-
-  // Ensure prefix is set for initial load
+  // Set prefixes before first load
   store.setStoragePrefix(userId)
+  store.setDashboardId(
+    dashboard?.mode === 'view' ? (dashboard.sourceId ?? 'default') : dashboardId
+  )
 
-  const [data, setData] = useState<AppData>(() => store.loadData())
+  const [data, setData] = useState<AppData>(() => {
+    if (dashboard?.mode === 'combined' && dashboard.mergeIds?.length) {
+      return store.getMergedData(dashboard.mergeIds)
+    }
+    return store.loadData()
+  })
 
-  // When userId changes, switch storage scope and reload
+  // When userId or dashboard changes, reload
   useEffect(() => {
     store.setStoragePrefix(userId)
-    setData(store.loadData())
-  }, [userId])
+    if (dashboard?.mode === 'combined' && dashboard.mergeIds?.length) {
+      setData(store.getMergedData(dashboard.mergeIds))
+    } else {
+      store.setDashboardId(
+        dashboard?.mode === 'view' ? (dashboard.sourceId ?? 'default') : dashboardId
+      )
+      setData(store.loadData())
+    }
+  }, [userId, dashboardId, dashboard?.mode, dashboard?.sourceId])
 
-  const refresh = useCallback(() => setData(store.loadData()), [])
+  const refresh = useCallback(() => {
+    if (dashboard?.mode === 'combined' && dashboard.mergeIds?.length) {
+      setData(store.getMergedData(dashboard.mergeIds))
+    } else {
+      setData(store.loadData())
+    }
+  }, [dashboard])
+
+  // Mutation functions — no-op for combined (read-only) dashboards
+  const noop = (() => data) as any
 
   const addSnapshot = useCallback((snapshot: Snapshot) => {
+    if (isReadOnly) return
     setData(store.addSnapshot(snapshot))
-  }, [])
+  }, [isReadOnly])
 
   const updateSnapshot = useCallback((id: string, updates: Partial<Snapshot>) => {
+    if (isReadOnly) return
     setData(store.updateSnapshot(id, updates))
-  }, [])
+  }, [isReadOnly])
 
   const deleteSnapshot = useCallback((id: string) => {
+    if (isReadOnly) return
     setData(store.deleteSnapshot(id))
-  }, [])
+  }, [isReadOnly])
 
   const addAccount = useCallback((account: Account) => {
+    if (isReadOnly) return
     setData(store.addAccount(account))
-  }, [])
+  }, [isReadOnly])
 
   const updateAccounts = useCallback((accounts: Account[]) => {
+    if (isReadOnly) return
     setData(store.updateAccounts(accounts))
-  }, [])
+  }, [isReadOnly])
 
   const updateBudgetItems = useCallback((items: BudgetItem[]) => {
+    if (isReadOnly) return
     setData(store.updateBudgetItems(items))
-  }, [])
+  }, [isReadOnly])
 
   const addGoal = useCallback((goal: Goal) => {
+    if (isReadOnly) return
     setData(store.addGoal(goal))
-  }, [])
+  }, [isReadOnly])
 
   const updateComp = useCallback((comp: AppData['comp']) => {
+    if (isReadOnly) return
     setData(store.updateComp(comp))
-  }, [])
+  }, [isReadOnly])
 
   const updateDeductions = useCallback((deductions: AppData['deductions']) => {
+    if (isReadOnly) return
     setData(store.updateDeductions(deductions))
-  }, [])
+  }, [isReadOnly])
 
   const updateAllocations = useCallback((allocations: AppData['allocations']) => {
+    if (isReadOnly) return
     setData(store.updateAllocations(allocations))
-  }, [])
+  }, [isReadOnly])
 
   const resetData = useCallback(() => {
+    if (isReadOnly) return
     setData(store.resetData())
-  }, [])
+  }, [isReadOnly])
 
   return {
-    data, refresh, addSnapshot, updateSnapshot, deleteSnapshot,
+    data, isReadOnly, refresh, addSnapshot, updateSnapshot, deleteSnapshot,
     addAccount, updateAccounts, updateBudgetItems, addGoal,
     updateComp, updateDeductions, updateAllocations, resetData,
   }

@@ -5,7 +5,10 @@ import {
   Skull, Diamond, Scale, Trophy, DollarSign, Settings,
   Menu, X, Building2, Home as HomeIcon, Wrench,
 } from 'lucide-react'
+import type { Dashboard } from '@/data/types'
 import { UserMenu } from '@/components/auth/UserMenu'
+import { DashboardSwitcher } from '@/components/dashboard/DashboardSwitcher'
+import { CreateDashboardModal } from '@/components/dashboard/CreateDashboardModal'
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -34,11 +37,25 @@ interface Props {
   isLocal: boolean
   width: number
   onWidthChange: (w: number) => void
+  dashboards: Dashboard[]
+  activeId: string
+  activeDashboard?: Dashboard
+  canCreateDashboard: boolean
+  onSwitchDashboard: (id: string) => void
+  onCreateDashboard: (d: Dashboard) => void
+  onDeleteDashboard: (id: string) => void
+  onRenameDashboard: (id: string, name: string, emoji: string) => void
 }
 
-export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, onSignIn, isLocal, width, onWidthChange }: Props) {
+export default function Sidebar({
+  userEmail, userAvatar, userName, onSignOut, onSignIn, isLocal,
+  width, onWidthChange,
+  dashboards, activeId, canCreateDashboard,
+  onSwitchDashboard, onCreateDashboard, onDeleteDashboard, onRenameDashboard,
+}: Props) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const startXRef = useRef(0)
   const startWidthRef = useRef(0)
   const location = useLocation()
@@ -54,21 +71,15 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, on
 
   useEffect(() => {
     if (!isResizing) return
-
     const handleMouseMove = (e: MouseEvent) => {
       const delta = e.clientX - startXRef.current
       onWidthChange(startWidthRef.current + delta)
     }
-
-    const handleMouseUp = () => {
-      setIsResizing(false)
-    }
-
+    const handleMouseUp = () => setIsResizing(false)
     document.addEventListener('mousemove', handleMouseMove)
     document.addEventListener('mouseup', handleMouseUp)
     document.body.style.cursor = 'col-resize'
     document.body.style.userSelect = 'none'
-
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
@@ -92,6 +103,17 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, on
           <X size={20} />
         </button>
       </div>
+
+      {/* Dashboard Switcher */}
+      <DashboardSwitcher
+        dashboards={dashboards}
+        activeId={activeId}
+        canCreate={canCreateDashboard}
+        onSwitch={(id) => { onSwitchDashboard(id); closeMobile() }}
+        onCreateClick={() => setShowCreateModal(true)}
+        onDelete={onDeleteDashboard}
+        onRename={onRenameDashboard}
+      />
 
       <nav className="flex-1 py-2 overflow-y-auto">
         {navItems.map(({ to, icon: Icon, label }) => (
@@ -189,7 +211,6 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, on
         style={{ width }}
       >
         {sidebarContent}
-        {/* Resize handle */}
         <div
           onMouseDown={handleMouseDown}
           className={`absolute right-0 top-0 h-full w-1 cursor-col-resize transition-colors hover:bg-accent/40 ${
@@ -197,6 +218,15 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, on
           }`}
         />
       </aside>
+
+      {/* Create Dashboard Modal */}
+      {showCreateModal && (
+        <CreateDashboardModal
+          dashboards={dashboards}
+          onClose={() => setShowCreateModal(false)}
+          onCreate={onCreateDashboard}
+        />
+      )}
     </>
   )
 }

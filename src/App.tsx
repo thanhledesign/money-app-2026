@@ -3,6 +3,7 @@ import { Routes, Route, useSearchParams } from 'react-router-dom'
 import { useAppData } from '@/hooks/useAppData'
 import { useChartPrefs } from '@/hooks/useChartPrefs'
 import { useAuth } from '@/hooks/useAuth'
+import { useDashboards } from '@/hooks/useDashboards'
 import { PasswordGate, isPasswordRequired, isPasswordValid } from '@/components/auth/PasswordGate'
 import Layout from '@/components/layout/Layout'
 import { LoginPage } from '@/components/auth/LoginPage'
@@ -31,28 +32,37 @@ function AppInner({ userId, isLocal, auth }: {
   const [searchParams] = useSearchParams()
   const freshMode = searchParams.get('fresh') === 'true'
 
+  const db = useDashboards(userId)
+  const { activeDashboard } = db
+
   const {
-    data, addSnapshot, deleteSnapshot, addGoal,
+    data, isReadOnly, addSnapshot, deleteSnapshot, addGoal,
     addAccount, updateAccounts,
     updateComp, updateDeductions, updateAllocations, updateBudgetItems,
     resetData,
-  } = useAppData(userId)
+  } = useAppData(userId, activeDashboard)
 
   const { prefs, update: updatePrefs, setAccountColor, setLabelColor, reset: resetPrefs } = useChartPrefs()
 
-  // Wizard completion is scoped per user via the storage prefix
-  const wizardDoneKey = useMemo(() => getStorageKey('wizard-done'), [userId])
+  // Wizard completion is scoped per dashboard
+  const wizardDoneKey = useMemo(() => getStorageKey('wizard-done'), [userId, db.activeId])
 
   const [wizardComplete, setWizardComplete] = useState(() => {
     if (freshMode) return false
+    // Combined and view dashboards skip the wizard
+    if (activeDashboard?.mode === 'combined' || activeDashboard?.mode === 'view') return true
     return localStorage.getItem(wizardDoneKey) === 'true' || data.snapshots.length > 0
   })
 
-  // Re-check wizard state when userId changes (new user signs in)
+  // Re-check wizard state when dashboard changes
   useEffect(() => {
+    if (activeDashboard?.mode === 'combined' || activeDashboard?.mode === 'view') {
+      setWizardComplete(true)
+      return
+    }
     const done = localStorage.getItem(wizardDoneKey) === 'true' || data.snapshots.length > 0
     setWizardComplete(done)
-  }, [userId, wizardDoneKey, data.snapshots.length])
+  }, [userId, db.activeId, wizardDoneKey, data.snapshots.length, activeDashboard?.mode])
 
   // Fresh mode: reset data on mount
   useEffect(() => {
@@ -90,6 +100,14 @@ function AppInner({ userId, isLocal, auth }: {
           onSignOut={auth.signOut}
           onSignIn={auth.configured ? auth.signInWithGoogle : undefined}
           isLocal={isLocal}
+          dashboards={db.dashboards}
+          activeId={db.activeId}
+          activeDashboard={activeDashboard}
+          canCreateDashboard={db.canCreate}
+          onSwitchDashboard={db.switchDashboard}
+          onCreateDashboard={db.createDashboard}
+          onDeleteDashboard={db.deleteDashboard}
+          onRenameDashboard={db.renameDashboard}
         />
       }>
         <Route index element={<DashboardPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} />} />
@@ -155,6 +173,5 @@ export default function App() {
   const isLocal = !auth.isAuthenticated
   const userId = auth.user?.id
 
-  // Data loading happens in AppInner, AFTER we know the userId
   return <AppInner userId={userId} isLocal={isLocal} auth={auth} />
 }

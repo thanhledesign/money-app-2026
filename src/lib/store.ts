@@ -1,19 +1,169 @@
-import type { AppData, Snapshot, Account, BudgetItem, Goal } from '@/data/types'
+import type { AppData, Snapshot, Account, BudgetItem, Goal, Dashboard, DashboardIndex } from '@/data/types'
 import {
   defaultAccounts, seedSnapshots, defaultComp, defaultDeductions,
   defaultAllocations, defaultBudgetItems, defaultGoals,
 } from '@/data/seed'
 
-// User-scoped storage prefix
-let _prefix = 'money-app-'
+// ── Prefix system ──
+// Format: money-app-[u-{userId}-]d-{dashboardId}-
+let _userPrefix = 'money-app-'
+let _dashboardId = 'default'
 
 export function setStoragePrefix(userId?: string) {
-  _prefix = userId ? `money-app-u-${userId}-` : 'money-app-'
+  _userPrefix = userId ? `money-app-u-${userId}-` : 'money-app-'
+}
+
+export function setDashboardId(dashboardId: string) {
+  _dashboardId = dashboardId
 }
 
 export function getStorageKey(base: string): string {
-  return `${_prefix}${base}`
+  return `${_userPrefix}d-${_dashboardId}-${base}`
 }
+
+// Key that's NOT dashboard-scoped (for dashboard index, wizard, etc.)
+export function getUserKey(base: string): string {
+  return `${_userPrefix}${base}`
+}
+
+// ── Dashboard Index ──
+
+function getDefaultDashboardIndex(): DashboardIndex {
+  return {
+    dashboards: [{
+      id: 'default',
+      name: 'My Finances',
+      emoji: '📊',
+      mode: 'scenario',
+      createdAt: new Date().toISOString(),
+    }],
+    activeId: 'default',
+  }
+}
+
+export function loadDashboardIndex(): DashboardIndex {
+  const key = getUserKey('dashboards')
+  try {
+    const raw = localStorage.getItem(key)
+    if (raw) return JSON.parse(raw) as DashboardIndex
+
+    // Migration: check if old data exists under the legacy key
+    const legacyKey = `${_userPrefix}data`
+    const legacyData = localStorage.getItem(legacyKey)
+    const idx = getDefaultDashboardIndex()
+
+    if (legacyData) {
+      // Migrate: copy old data to new dashboard-scoped key
+      const newKey = `${_userPrefix}d-default-data`
+      localStorage.setItem(newKey, legacyData)
+      // Also migrate wizard-done flag
+      const legacyWizard = localStorage.getItem(`${_userPrefix}wizard-done`)
+      if (legacyWizard) {
+        localStorage.setItem(`${_userPrefix}d-default-wizard-done`, legacyWizard)
+      }
+      // Remove legacy keys
+      localStorage.removeItem(legacyKey)
+      localStorage.removeItem(`${_userPrefix}wizard-done`)
+    }
+
+    saveDashboardIndex(idx)
+    return idx
+  } catch {
+    const idx = getDefaultDashboardIndex()
+    saveDashboardIndex(idx)
+    return idx
+  }
+}
+
+export function saveDashboardIndex(index: DashboardIndex): void {
+  localStorage.setItem(getUserKey('dashboards'), JSON.stringify(index))
+}
+
+export function createDashboardEntry(dashboard: Dashboard): DashboardIndex {
+  const idx = loadDashboardIndex()
+  idx.dashboards.push(dashboard)
+  idx.activeId = dashboard.id
+  saveDashboardIndex(idx)
+
+  // Initialize empty data for scenario dashboards
+  if (dashboard.mode === 'scenario') {
+    setDashboardId(dashboard.id)
+    saveData(getEmptyData())
+  }
+
+  return idx
+}
+
+export function deleteDashboardEntry(id: string): DashboardIndex {
+  if (id === 'default') return loadDashboardIndex() // Can't delete default
+  const idx = loadDashboardIndex()
+  idx.dashboards = idx.dashboards.filter(d => d.id !== id)
+  if (idx.activeId === id) idx.activeId = 'default'
+  saveDashboardIndex(idx)
+
+  // Remove stored data
+  const dataKey = `${_userPrefix}d-${id}-data`
+  localStorage.removeItem(dataKey)
+  localStorage.removeItem(`${_userPrefix}d-${id}-wizard-done`)
+
+  return idx
+}
+
+export function renameDashboardEntry(id: string, name: string, emoji: string): DashboardIndex {
+  const idx = loadDashboardIndex()
+  const dash = idx.dashboards.find(d => d.id === id)
+  if (dash) {
+    dash.name = name
+    dash.emoji = emoji
+  }
+  saveDashboardIndex(idx)
+  return idx
+}
+
+// ── Merged data for combined dashboards ──
+
+export function getMergedData(mergeIds: string[]): AppData {
+  const merged = getEmptyData()
+  const seenAccountIds = new Set<string>()
+
+  for (const did of mergeIds) {
+    setDashboardId(did)
+    const data = loadData()
+
+    // Merge accounts (deduplicate by id)
+    for (const acc of data.accounts) {
+      if (!seenAccountIds.has(acc.id)) {
+        seenAccountIds.add(acc.id)
+        merged.accounts.push(acc)
+      }
+    }
+
+    // Merge snapshots (keep all, tag with dashboard source)
+    merged.snapshots.push(...data.snapshots)
+
+    // Merge budget items (keep all — may have duplicates, user can review)
+    merged.budgetItems.push(...data.budgetItems)
+
+    // Merge goals
+    merged.goals.push(...data.goals)
+
+    // Use the first non-zero comp found
+    if (merged.comp.annualSalary === 0 && data.comp.annualSalary > 0) {
+      merged.comp = { ...data.comp }
+      merged.deductions = [...data.deductions]
+      merged.allocations = [...data.allocations]
+      merged.payFrequency = data.payFrequency
+      merged.paychecksPerMonth = [...data.paychecksPerMonth]
+    }
+  }
+
+  // Sort snapshots by date
+  merged.snapshots.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+
+  return merged
+}
+
+// ── AppData CRUD ──
 
 function getEmptyData(): AppData {
   return {
@@ -45,10 +195,11 @@ function getSeededData(): AppData {
   }
 }
 
-// Local (anonymous) users get seed data; authenticated users start empty
 function getDefaultData(): AppData {
-  const isUserScoped = _prefix !== 'money-app-'
-  return isUserScoped ? getEmptyData() : getSeededData()
+  // Only the default dashboard of a local user gets seed data
+  const isUserScoped = _userPrefix !== 'money-app-'
+  if (isUserScoped) return getEmptyData()
+  return _dashboardId === 'default' ? getSeededData() : getEmptyData()
 }
 
 export function loadData(): AppData {
