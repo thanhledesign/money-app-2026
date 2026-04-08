@@ -93,7 +93,7 @@ export default function EntryPage({ data, addSnapshot, deleteSnapshot, addAccoun
     <PageTheme page="enter">
     <div>
       <PageHeader
-        icon="💵📸"
+        icon="📸"
         title="Add Snapshot"
         subtitle="Record a new financial snapshot"
       />

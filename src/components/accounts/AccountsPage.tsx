@@ -13,6 +13,7 @@ import { PageTheme } from '@/components/ui/PageTheme'
 import { AccountManager } from '@/components/ui/AccountManager'
 import {
   getLatestSnapshot,
+  getTotalCash,
   getMonthKey,
   getMonthlySnapshots,
   formatCurrency,
@@ -127,6 +128,7 @@ export default function AccountsPage({ data, prefs, addAccount, updateAccounts }
         icon="🏦"
         title="Cash Accounts"
         subtitle="Checking, savings, high-yield savings balances"
+        rightContent={latest && <div className="text-right"><p className="text-xs text-text-muted">Total Cash</p><p className="text-lg font-semibold text-green tabular-nums">{formatCurrency(getTotalCash(latest, data))}</p></div>}
       />
 
       <AccountManager

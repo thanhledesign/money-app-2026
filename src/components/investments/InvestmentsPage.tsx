@@ -13,6 +13,7 @@ import { PageTheme } from '@/components/ui/PageTheme'
 import { AccountManager } from '@/components/ui/AccountManager'
 import {
   getLatestSnapshot,
+  getTotalInvestments,
   getMonthKey,
   getMonthlySnapshots,
   getDisneyConcentration,
@@ -133,6 +134,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
         icon="📈"
         title="Investments"
         subtitle="401K, brokerages, IRAs and investment balances"
+        rightContent={latest && <div className="text-right"><p className="text-xs text-text-muted">Total Investments</p><p className="text-lg font-semibold text-cyan tabular-nums">{formatCurrency(getTotalInvestments(latest, data))}</p></div>}
       />
 
       <AccountManager

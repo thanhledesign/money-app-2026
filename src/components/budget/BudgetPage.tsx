@@ -26,10 +26,10 @@ interface BudgetPageProps {
 type Tier = BudgetItem['tier']
 
 const TIER_CONFIG: Record<Tier, { label: string; desc: string; accent: string; bg: string; badge: string }> = {
-  fixed:    { label: 'Fixed — Survival',      desc: 'Non-negotiable monthly obligations',   accent: 'text-red',    bg: 'bg-red/5',    badge: 'bg-red/10 text-red' },
-  variable: { label: 'Variable — Lifestyle',  desc: 'Recurring expenses that flex a bit',    accent: 'text-amber',  bg: 'bg-amber/5',  badge: 'bg-amber/10 text-amber' },
-  wealth:   { label: 'Wealth Building',       desc: 'Savings and investment contributions',  accent: 'text-green',  bg: 'bg-green/5',  badge: 'bg-green/10 text-green' },
-  optional: { label: 'Optional — Luxury',     desc: 'Nice-to-haves and one-time expenses',  accent: 'text-purple', bg: 'bg-purple/5', badge: 'bg-purple/10 text-purple' },
+  fixed:    { label: '🏠 Fixed — Survival',      desc: 'Non-negotiable monthly obligations',   accent: 'text-red',    bg: 'bg-red/5',    badge: 'bg-red/10 text-red' },
+  variable: { label: '🛒 Variable — Lifestyle',  desc: 'Recurring expenses that flex a bit',    accent: 'text-amber',  bg: 'bg-amber/5',  badge: 'bg-amber/10 text-amber' },
+  wealth:   { label: '💎 Wealth Building',       desc: 'Savings and investment contributions',  accent: 'text-green',  bg: 'bg-green/5',  badge: 'bg-green/10 text-green' },
+  optional: { label: '✨ Optional — Luxury',     desc: 'Nice-to-haves and one-time expenses',  accent: 'text-purple', bg: 'bg-purple/5', badge: 'bg-purple/10 text-purple' },
 }
 
 const TIER_ORDER: Tier[] = ['fixed', 'variable', 'wealth', 'optional']
@@ -284,33 +284,18 @@ export function BudgetPage({ data, updateBudgetItems }: BudgetPageProps) {
         icon="⚖️"
         title="Budget"
         subtitle="Track spending, savings, and investment allocation"
+        rightContent={<div className="text-right"><p className="text-xs text-text-muted">Monthly Cost of Living</p><p className="text-lg font-semibold text-amber tabular-nums">{formatCurrency(burnRate)}</p></div>}
       />
 
       {/* ── Actionable Insights ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KPICard
-          label="Total Monthly Expenses"
-          value={formatCurrency(burnRate)}
-          accent="default"
-        />
-        <KPICard
-          label="Savings Rate"
-          value={`${savingsRate.toFixed(1)}%`}
-          accent={savingsRateLow ? 'amber' : 'green'}
-          subValue={savingsRateLow ? 'Below 30% target' : 'On track'}
-        />
-        <KPICard
-          label="Runway"
-          value={`${runwayMonths.toFixed(1)} mo`}
-          accent={runwayMonths < 6 ? 'red' : runwayMonths < 12 ? 'amber' : 'green'}
-          subValue="at current burn rate"
-        />
-        <KPICard
-          label="Emergency Fund"
-          value={formatCurrency(cashBalance)}
-          subValue={`${emergencyPct.toFixed(0)}% of $50K target`}
-          accent={emergencyPct >= 100 ? 'green' : emergencyPct >= 60 ? 'amber' : 'red'}
-        />
+        <KPICard label="Total Monthly" value={formatCurrency(burnRate)} emoji="💸" />
+        <KPICard label="Savings Rate" value={`${savingsRate.toFixed(1)}%`} emoji="📊"
+          subValue={savingsRateLow ? 'Below 30% target' : 'On track'} />
+        <KPICard label="Runway" value={`${runwayMonths.toFixed(1)} mo`} emoji="⏳"
+          subValue="at current burn rate" />
+        <KPICard label="Emergency Fund" value={formatCurrency(cashBalance)} emoji="🛡️"
+          subValue={`${emergencyPct.toFixed(0)}% of $50K target`} />
       </div>
 
       {/* Emergency fund progress bar */}

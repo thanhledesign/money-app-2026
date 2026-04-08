@@ -5,6 +5,7 @@ import { useChartPrefs } from '@/hooks/useChartPrefs'
 import { useAuth } from '@/hooks/useAuth'
 import Layout from '@/components/layout/Layout'
 import { LoginPage } from '@/components/auth/LoginPage'
+import WizardPage from '@/components/wizard/WizardPage'
 import DashboardPage from '@/components/dashboard/DashboardPage'
 import EntryPage from '@/components/entry/EntryPage'
 import AccountsPage from '@/components/accounts/AccountsPage'
@@ -34,6 +35,10 @@ export default function App() {
 
   const { prefs, update: updatePrefs, setAccountColor, setLabelColor, reset: resetPrefs } = useChartPrefs()
 
+  const [wizardComplete, setWizardComplete] = useState(() =>
+    localStorage.getItem('money-app-wizard-done') === 'true' || data.snapshots.length > 0
+  )
+
   // Show login if not authenticated and hasn't skipped
   if (auth.loading) {
     return (
@@ -57,6 +62,21 @@ export default function App() {
   }
 
   const isLocal = !auth.isAuthenticated
+
+  if (!wizardComplete) {
+    return (
+      <WizardPage
+        onComplete={() => {
+          localStorage.setItem('money-app-wizard-done', 'true')
+          setWizardComplete(true)
+        }}
+        addAccount={addAccount}
+        updateComp={updateComp}
+        updateBudgetItems={updateBudgetItems}
+        addGoal={addGoal}
+      />
+    )
+  }
 
   return (
     <>

@@ -64,7 +64,7 @@ function DebtPayoffTool() {
 
   return (
     <Card className="mb-6">
-      <CardTitle>Debt Payoff Calculator</CardTitle>
+      <CardTitle>🥊 Debt Fighter</CardTitle>
       <p className="text-xs text-text-muted mt-1 mb-4">Enter balance, APR, and monthly payment to see your payoff timeline.</p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <div>
@@ -147,7 +147,7 @@ function EmergencyFundTool() {
 
   return (
     <Card className="mb-6">
-      <CardTitle>Emergency Fund Calculator</CardTitle>
+      <CardTitle>🛡️ Safety Net Builder</CardTitle>
       <p className="text-xs text-text-muted mt-1 mb-4">Calculate your target emergency fund and how close you are.</p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <div>
@@ -239,7 +239,7 @@ function PaycheckEstimatorTool() {
 
   return (
     <Card className="mb-6">
-      <CardTitle>Paycheck Estimator</CardTitle>
+      <CardTitle>💰 Paycheck X-Ray</CardTitle>
       <p className="text-xs text-text-muted mt-1 mb-4">Estimate take-home pay by period based on gross salary and effective tax rate.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
@@ -339,7 +339,7 @@ function BudgetPlannerTool() {
 
   return (
     <Card className="mb-6">
-      <CardTitle>Budget Planner</CardTitle>
+      <CardTitle>📋 Budget Architect</CardTitle>
       <p className="text-xs text-text-muted mt-1 mb-4">Enter monthly income and expenses to calculate your savings rate.</p>
       <div className="mb-4">
         <label className="block text-xs text-text-muted mb-1">Monthly Income</label>
