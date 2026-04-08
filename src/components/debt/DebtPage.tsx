@@ -31,6 +31,7 @@ import {
   formatCurrency,
   formatPercent,
 } from '@/lib/calculations'
+import { ScrollableTable } from '@/components/ui/ScrollableTable'
 
 interface Props {
   data: AppData
@@ -207,7 +208,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
       {/* ── Section 1: Monthly Balance Table ── */}
       <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #f59e0b)' }}>
         <CardTitle style={{ color: 'var(--page-accent, #f59e0b)' }}>Monthly Balance History</CardTitle>
-        <div className="overflow-x-auto mt-4">
+        <ScrollableTable className="mt-4">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
@@ -330,7 +331,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
               </tr>
             </tbody>
           </table>
-        </div>
+        </ScrollableTable>
       </Card>
 
       {/* ── Section 2: Credit Card Status ── */}

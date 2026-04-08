@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { Pencil } from 'lucide-react'
 import { getPageTitle, DEFAULT_PAGE_TITLES } from '@/hooks/usePageTitles'
 
 const STORAGE_KEY = 'money-app-page-titles'
@@ -79,10 +80,11 @@ export function PageHeader({ icon, title, subtitle, rightContent, titleKey }: Pa
           ) : (
             <span
               onClick={startEdit}
-              className={titleKey ? 'cursor-pointer hover:text-accent transition-colors' : ''}
+              className={titleKey ? 'cursor-pointer hover:text-accent transition-colors group/title inline-flex items-center gap-1.5' : ''}
               title={titleKey ? 'Click to rename' : undefined}
             >
               {currentTitle}
+              {titleKey && <Pencil size={14} className="opacity-0 group-hover/title:opacity-40 transition-opacity" />}
             </span>
           )}
         </h2>

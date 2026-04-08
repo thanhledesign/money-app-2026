@@ -160,14 +160,23 @@ function AddGoalForm({ onAdd }: { onAdd: (g: Goal) => void }) {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs text-text-muted uppercase tracking-wider">Color</label>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#a855f7', '#ec4899', '#f97316'].map(c => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  className={`w-7 h-7 rounded-full border-2 transition-transform ${color === c ? 'border-white scale-110' : 'border-transparent'}`}
+                  style={{ background: c }}
+                />
+              ))}
               <input
                 type="color"
                 value={color}
                 onChange={e => setColor(e.target.value)}
-                className="w-10 h-10 rounded-lg cursor-pointer border border-border"
+                className="w-7 h-7 rounded-lg cursor-pointer border border-border"
+                title="Custom color"
               />
-              <span className="text-xs text-text-muted font-mono">{color}</span>
             </div>
           </div>
         </div>
@@ -273,21 +282,21 @@ function GoalStats({ goals }: { goals: Goal[] }) {
   const small = goals.filter(g => g.ranking === '1').length
 
   return (
-    <div className="grid grid-cols-3 gap-4">
-      <Card className="text-center">
-        <p className="text-2xl mb-1">🏆🏆🏆</p>
-        <p className="text-xl font-semibold text-amber tabular-nums">{major}</p>
-        <p className="text-xs text-text-muted mt-0.5">Major Milestones</p>
+    <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <Card className="text-center min-h-[100px] flex flex-col items-center justify-center">
+        <p className="text-xl sm:text-2xl mb-1">🏆🏆🏆</p>
+        <p className="text-lg sm:text-xl font-semibold text-amber tabular-nums">{major}</p>
+        <p className="text-[10px] sm:text-xs text-text-muted mt-0.5">Milestones</p>
       </Card>
-      <Card className="text-center">
-        <p className="text-2xl mb-1">🏆🏆</p>
-        <p className="text-xl font-semibold text-accent tabular-nums">{big}</p>
-        <p className="text-xs text-text-muted mt-0.5">Big Wins</p>
+      <Card className="text-center min-h-[100px] flex flex-col items-center justify-center">
+        <p className="text-xl sm:text-2xl mb-1">🏆🏆</p>
+        <p className="text-lg sm:text-xl font-semibold text-accent tabular-nums">{big}</p>
+        <p className="text-[10px] sm:text-xs text-text-muted mt-0.5">Big Wins</p>
       </Card>
-      <Card className="text-center">
-        <p className="text-2xl mb-1">🏆</p>
-        <p className="text-xl font-semibold text-green tabular-nums">{small}</p>
-        <p className="text-xs text-text-muted mt-0.5">Wins</p>
+      <Card className="text-center min-h-[100px] flex flex-col items-center justify-center">
+        <p className="text-xl sm:text-2xl mb-1">🏆</p>
+        <p className="text-lg sm:text-xl font-semibold text-green tabular-nums">{small}</p>
+        <p className="text-[10px] sm:text-xs text-text-muted mt-0.5">Wins</p>
       </Card>
     </div>
   )

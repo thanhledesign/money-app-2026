@@ -70,10 +70,10 @@ export default function Layout({
         onDuplicateDashboard={onDuplicateDashboard}
       />
       <main
-        className="flex-1 pt-16 md:pt-0 p-4 md:p-6 max-w-[1200px] w-full"
+        className="flex-1 pt-16 lg:pt-0 p-4 lg:p-6 max-w-[1200px] w-full"
         style={{ marginLeft: undefined }}
       >
-        <div className="hidden md:block" style={{ marginLeft: sidebarWidth }} />
+        <div className="hidden lg:block" style={{ marginLeft: sidebarWidth }} />
         {/* Sample dashboard banner */}
         {activeId === 'sample' && (
           <div className="mb-4 px-4 py-2 bg-amber/10 border border-amber/30 rounded-lg text-xs text-amber">
@@ -88,7 +88,7 @@ export default function Layout({
         )}
         <Outlet />
       </main>
-      <style>{`@media (min-width: 768px) { main { margin-left: ${sidebarWidth}px !important; } }`}</style>
+      <style>{`@media (min-width: 1024px) { main { margin-left: ${sidebarWidth}px !important; } }`}</style>
     </div>
   )
 }

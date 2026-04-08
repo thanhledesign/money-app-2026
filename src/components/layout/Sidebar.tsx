@@ -99,7 +99,7 @@ export default function Sidebar({
         <button
           type="button"
           onClick={closeMobile}
-          className="md:hidden p-1 text-text-muted hover:text-text-primary flex-shrink-0"
+          className="lg:hidden p-1 text-text-muted hover:text-text-primary flex-shrink-0"
         >
           <X size={20} />
         </button>
@@ -190,7 +190,7 @@ export default function Sidebar({
   return (
     <>
       {/* Mobile header bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-surface border-b border-border flex items-center px-4 z-50">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-surface border-b border-border flex items-center px-4 z-50">
         <button type="button" onClick={() => setMobileOpen(true)} className="p-1 text-text-secondary">
           <Menu size={24} />
         </button>
@@ -199,7 +199,7 @@ export default function Sidebar({
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-50">
+        <div className="lg:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/60" onClick={closeMobile} />
           <aside className="relative w-64 h-full bg-surface border-r border-border flex flex-col">
             {sidebarContent}
@@ -209,7 +209,7 @@ export default function Sidebar({
 
       {/* Desktop sidebar */}
       <aside
-        className="hidden md:flex fixed left-0 top-0 h-screen bg-surface border-r border-border flex-col z-50"
+        className="hidden lg:flex fixed left-0 top-0 h-screen bg-surface border-r border-border flex-col z-50"
         style={{ width }}
       >
         {sidebarContent}

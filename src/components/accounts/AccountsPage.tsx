@@ -21,6 +21,7 @@ import {
   formatCurrency,
   formatDateShort,
 } from '@/lib/calculations'
+import { ScrollableTable } from '@/components/ui/ScrollableTable'
 
 interface Props {
   data: AppData
@@ -154,9 +155,9 @@ export default function AccountsPage({ data, prefs, addAccount, updateAccounts }
       {accounts.length > 0 && (
         <>
           {/* ── Section 1: Monthly Balance Table ── */}
-          <Card className="mb-6 overflow-x-auto" style={{ borderColor: 'var(--page-accent, #22c55e)' }}>
+          <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #22c55e)' }}>
             <CardTitle style={{ color: 'var(--page-accent, #22c55e)' }}>Monthly Balances</CardTitle>
-            <div className="mt-4 overflow-x-auto">
+            <ScrollableTable className="mt-4">
               <table className="w-full text-sm border-collapse">
                 <thead>
                   <tr className="border-b border-border">
@@ -281,13 +282,13 @@ export default function AccountsPage({ data, prefs, addAccount, updateAccounts }
                   </tr>
                 </tfoot>
               </table>
-            </div>
+            </ScrollableTable>
           </Card>
 
           {/* ── Section 2: Two-column grid — Snapshot + Individual ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Left: Snapshot donut pie */}
-            <Card>
+            <Card className="pb-14 sm:pb-5">
               <CardTitle>Cash Accounts — Snapshot</CardTitle>
               <div className="h-72 mt-4">
                 <ResponsiveContainer width="100%" height="100%">

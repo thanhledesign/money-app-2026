@@ -6,11 +6,12 @@ import {
 } from 'recharts'
 import type { AppData, CompBreakdown, PaycheckDeduction, PaycheckAllocation } from '@/data/types'
 import { formatCurrency, formatPercent } from '@/lib/calculations'
+import { ScrollableTable } from '@/components/ui/ScrollableTable'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { UVPBadge } from '@/components/ui/UVPBadge'
 import { NumberInput } from '@/components/ui/NumberInput'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, ChevronDown } from 'lucide-react'
 
 interface IncomePageProps {
   data: AppData
@@ -469,7 +470,7 @@ function CompSection({
       </div>
 
       {/* Pay period table */}
-      <div className="overflow-x-auto">
+      <ScrollableTable>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
@@ -501,7 +502,7 @@ function CompSection({
             })}
           </tbody>
         </table>
-      </div>
+      </ScrollableTable>
     </Card>
   )
 }
@@ -659,13 +660,28 @@ function DeductionsSection({
     )
   }
 
+  const [collapsed, setCollapsed] = useState(false)
+  const totalDeductions = taxTotal + pretaxTotal
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Taxes &amp; Deductions</CardTitle>
-        <p className="text-xs text-text-muted mt-1">Per paycheck (semi-monthly). Gross: {formatCurrency(grossSemiMonthly)}</p>
+        <button
+          type="button"
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex items-center justify-between w-full text-left sm:pointer-events-none"
+        >
+          <div>
+            <CardTitle>Taxes &amp; Deductions</CardTitle>
+            <p className="text-xs text-text-muted mt-1">Per paycheck (semi-monthly). Gross: {formatCurrency(grossSemiMonthly)}</p>
+          </div>
+          <div className="flex items-center gap-2 sm:hidden">
+            <span className="text-sm font-semibold text-text-primary tabular-nums">{formatCurrency(totalDeductions)}</span>
+            <ChevronDown size={16} className={`text-text-muted transition-transform ${collapsed ? '' : 'rotate-180'}`} />
+          </div>
+        </button>
       </CardHeader>
-      <div className="flex gap-6 flex-wrap">
+      <div className={`${collapsed ? 'hidden sm:flex' : 'flex'} flex-col sm:flex-row gap-6`}>
         <DeductionGroup items={taxes} title="Taxes" total={taxTotal} groupType="tax" />
         <div className="w-px bg-border hidden sm:block" />
         <DeductionGroup items={pretax} title="Pre-Tax Deductions" total={pretaxTotal} groupType="pretax" />
@@ -721,20 +737,32 @@ function AllocationSection({
     onChange(updated)
   }
 
+  const [collapsed, setCollapsed] = useState(false)
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2 flex-wrap">
-          <CardTitle>Paycheck Breakdown</CardTitle>
-          <UVPBadge label="Exclusive" description="Paycheck allocation tool — split your net pay across accounts before it arrives. No other finance app does this." />
-        </div>
-        <p className="text-xs text-text-muted mt-1">
-          Net paycheck: <span className="text-green font-medium">{formatCurrency(netPaycheck)}</span>
-          &nbsp;—&nbsp;How it splits across accounts
-        </p>
+        <button
+          type="button"
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex items-center justify-between w-full text-left sm:pointer-events-none"
+        >
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <CardTitle>Paycheck Breakdown</CardTitle>
+              <UVPBadge label="Exclusive" description="Paycheck allocation tool — split your net pay across accounts before it arrives. No other finance app does this." />
+            </div>
+            <p className="text-xs text-text-muted mt-1">
+              Net paycheck: <span className="text-green font-medium">{formatCurrency(netPaycheck)}</span>
+              &nbsp;—&nbsp;How it splits across accounts
+            </p>
+          </div>
+          <ChevronDown size={16} className={`text-text-muted transition-transform sm:hidden shrink-0 ${collapsed ? '' : 'rotate-180'}`} />
+        </button>
       </CardHeader>
 
-      <div className="overflow-x-auto">
+      <div className={collapsed ? 'hidden sm:block' : ''}>
+      <ScrollableTable>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
@@ -779,13 +807,14 @@ function AllocationSection({
             </tr>
           </tfoot>
         </table>
-      </div>
+      </ScrollableTable>
 
       {Math.abs(balance) >= 0.001 && variableId === null && (
         <p className="text-xs text-amber mt-3">
           Allocations {balance > 0 ? 'under' : 'over'} by {formatPercent(Math.abs(balance))} ({formatCurrency(Math.abs(netPaycheck * balance))}). Adjust percentages or mark one account as variable to auto-fill the remainder.
         </p>
       )}
+      </div>
     </Card>
   )
 }

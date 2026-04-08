@@ -343,14 +343,18 @@ export function ThemeEditor() {
 
       {/* Custom CSS Editor */}
       <Card>
-        <CardTitle>Custom CSS</CardTitle>
-        <p className="text-xs text-text-muted mt-1 mb-3">
-          Write any CSS to override styles. Injected as a &lt;style&gt; tag. Use browser DevTools to find class names.
-        </p>
-        <div
-          ref={editorRef}
-          className="border border-border rounded-lg overflow-hidden"
-        />
+        <details className="sm:open" open={undefined}>
+          <summary className="sm:list-none sm:pointer-events-none cursor-pointer">
+            <CardTitle className="inline">Custom CSS</CardTitle>
+            <span className="text-xs text-text-muted ml-2 sm:hidden">tap to expand</span>
+          </summary>
+          <p className="text-xs text-text-muted mt-1 mb-3">
+            Write any CSS to override styles. Injected as a &lt;style&gt; tag. Use browser DevTools to find class names.
+          </p>
+          <div
+            ref={editorRef}
+            className="border border-border rounded-lg overflow-hidden"
+          />
         <div className="mt-2 flex gap-2">
           <button
             onClick={handleApplyCSS}
@@ -375,6 +379,7 @@ export function ThemeEditor() {
             Clear
           </button>
         </div>
+        </details>
       </Card>
     </div>
   )

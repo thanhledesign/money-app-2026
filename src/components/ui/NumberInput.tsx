@@ -98,7 +98,7 @@ export function NumberInput({
   }, [commitAndClose, handleKey])
 
   const displayValue = isPercent
-    ? `${(value * 100).toFixed(1)}%`
+    ? `${value.toFixed(1)}%`
     : isCurrency
     ? formatCurrency(value)
     : String(value)
@@ -115,11 +115,36 @@ export function NumberInput({
     if (open && padRef.current) padRef.current.focus()
   }, [open])
 
+  const inputRef2 = useRef<HTMLInputElement>(null)
+
   const padContent = (
     <div ref={padRef} className="bg-surface border border-border rounded-xl shadow-2xl overflow-hidden" onKeyDown={handleKeyboard} tabIndex={0}>
       <div className="px-4 py-3 border-b border-border bg-background">
         {label && <p className="text-[10px] text-text-muted uppercase tracking-wider mb-0.5">{label}</p>}
-        <p className="text-2xl font-semibold text-text-primary tabular-nums text-right">{bufferDisplay}</p>
+        {isMobile ? (
+          <p className="text-2xl font-semibold text-text-primary tabular-nums text-right">{bufferDisplay}</p>
+        ) : (
+          <div className="flex items-center gap-1">
+            {isPercent ? null : isCurrency ? <span className="text-lg text-text-muted">{prefix}</span> : null}
+            <input
+              ref={inputRef2}
+              type="text"
+              inputMode="decimal"
+              value={buffer}
+              onChange={e => {
+                const v = e.target.value.replace(/[^0-9.\-]/g, '')
+                setBuffer(v)
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') { e.preventDefault(); commitAndClose() }
+                if (e.key === 'Escape') { e.preventDefault(); commitAndClose() }
+              }}
+              className="flex-1 text-right text-2xl font-semibold text-text-primary tabular-nums bg-transparent outline-none w-full"
+              autoFocus
+            />
+            {isPercent && <span className="text-lg text-text-muted">%</span>}
+          </div>
+        )}
       </div>
       <div className="grid grid-cols-3 gap-px bg-border">
         {KEYS.slice(0, 4).flat().map(key => (
@@ -129,7 +154,7 @@ export function NumberInput({
             onClick={() => handleKey(key)}
             className={`py-3.5 text-lg font-medium transition-colors ${
               key === '±'
-                ? 'bg-surface text-text-muted hover:bg-surface-hover'
+                ? 'bg-surface-hover text-blue font-semibold hover:bg-blue/10'
                 : 'bg-surface text-text-primary hover:bg-surface-hover active:bg-accent/10'
             }`}
           >
@@ -178,7 +203,7 @@ export function NumberInput({
       )}
 
       {open && isMobile && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+        <div className="fixed inset-0 z-[10000] flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/50" onClick={commitAndClose} />
           <div className="relative w-full max-w-md mx-auto">
             {padContent}

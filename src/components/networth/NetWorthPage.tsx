@@ -33,6 +33,7 @@ import {
   getTotalDebt,
   formatCurrency,
 } from '@/lib/calculations'
+import { ScrollableTable } from '@/components/ui/ScrollableTable'
 
 interface Props {
   data: AppData
@@ -202,7 +203,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
       {/* ── Section 1: All-accounts monthly table ── */}
       <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #a855f7)' }}>
         <CardTitle style={{ color: 'var(--page-accent, #a855f7)' }}>All Accounts — Monthly Balances</CardTitle>
-        <div className="overflow-x-auto mt-4">
+        <ScrollableTable className="mt-4">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
@@ -346,7 +347,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
               </tr>
             </tbody>
           </table>
-        </div>
+        </ScrollableTable>
       </Card>
 
       {/* ── Section 2: Two-column chart grid ── */}

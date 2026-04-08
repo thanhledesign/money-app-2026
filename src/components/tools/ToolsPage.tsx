@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardTitle } from '@/components/ui/Card'
 import { NumberInput } from '@/components/ui/NumberInput'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -37,6 +37,7 @@ function DebtPayoffTool() {
     loadDraft('debt-payoff', { balance: 5000, apr: 0.20, payment: 200 })
   )
   const [result, setResult] = useState<DebtResult | null>(null)
+  const resultRef = useRef<HTMLDivElement>(null)
 
   const set = (k: keyof DebtInputs) => (v: number) =>
     setInputs(prev => ({ ...prev, [k]: v }))
@@ -46,6 +47,7 @@ function DebtPayoffTool() {
     const monthlyRate = apr / 12
     if (payment <= balance * monthlyRate) {
       setResult({ months: Infinity, totalInterest: Infinity, payoffDate: 'Never — increase payment' })
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
       return
     }
     const months = Math.ceil(
@@ -60,6 +62,7 @@ function DebtPayoffTool() {
       totalInterest,
       payoffDate: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
     })
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
   }
 
   return (
@@ -101,7 +104,7 @@ function DebtPayoffTool() {
         )}
       </div>
       {result && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-background rounded-xl border border-border">
+        <div ref={resultRef} className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-background rounded-xl border border-border">
           <div>
             <p className="text-xs text-text-muted">Payoff Date</p>
             <p className="text-sm font-semibold text-text-primary mt-0.5">{result.payoffDate}</p>
@@ -134,6 +137,7 @@ function EmergencyFundTool() {
     loadDraft('emergency-fund', { monthlyExpenses: 3000, targetMonths: 6, currentSaved: 0 })
   )
   const [result, setResult] = useState<EmergencyResult | null>(null)
+  const resultRef = useRef<HTMLDivElement>(null)
 
   const set = (k: keyof EmergencyInputs) => (v: number) =>
     setInputs(prev => ({ ...prev, [k]: v }))
@@ -143,6 +147,7 @@ function EmergencyFundTool() {
     const shortfall = Math.max(0, targetAmount - inputs.currentSaved)
     const progressPct = Math.min(100, (inputs.currentSaved / targetAmount) * 100)
     setResult({ targetAmount, shortfall, progressPct })
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
   }
 
   return (
@@ -184,7 +189,7 @@ function EmergencyFundTool() {
         )}
       </div>
       {result && (
-        <div className="space-y-3 p-4 bg-background rounded-xl border border-border">
+        <div ref={resultRef} className="space-y-3 p-4 bg-background rounded-xl border border-border">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <p className="text-xs text-text-muted">Target Amount</p>
@@ -221,6 +226,7 @@ function PaycheckEstimatorTool() {
     loadDraft('paycheck-estimator', { grossSalary: 100000, taxRate: 0.28 })
   )
   const [result, setResult] = useState<PaycheckResult | null>(null)
+  const resultRef = useRef<HTMLDivElement>(null)
 
   const set = (k: keyof PaycheckInputs) => (v: number) =>
     setInputs(prev => ({ ...prev, [k]: v }))
@@ -233,6 +239,7 @@ function PaycheckEstimatorTool() {
       netSemiMonthly: netAnnual / 24,
       netBiweekly: netAnnual / 26,
     })
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
   }
 
   const fmt = (v: number) => `$${v.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
@@ -273,7 +280,7 @@ function PaycheckEstimatorTool() {
         )}
       </div>
       {result && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-background rounded-xl border border-border">
+        <div ref={resultRef} className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-background rounded-xl border border-border">
           <div>
             <p className="text-xs text-text-muted">Annual</p>
             <p className="text-sm font-semibold text-green mt-0.5">{fmt(result.netAnnual)}</p>
@@ -315,6 +322,7 @@ function BudgetPlannerTool() {
     loadDraft('budget-planner', { income: 5000, categories: DEFAULT_CATEGORIES })
   )
   const [result, setResult] = useState<BudgetResult | null>(null)
+  const resultRef = useRef<HTMLDivElement>(null)
 
   function setIncome(v: number) {
     setInputs(prev => ({ ...prev, income: v }))
@@ -333,6 +341,7 @@ function BudgetPlannerTool() {
     const savings = inputs.income - totalExpenses
     const savingsRate = inputs.income > 0 ? savings / inputs.income : 0
     setResult({ totalExpenses, savings, savingsRate })
+    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
   }
 
   const fmt = (v: number) => `$${v.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
@@ -380,7 +389,7 @@ function BudgetPlannerTool() {
         )}
       </div>
       {result && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-background rounded-xl border border-border">
+        <div ref={resultRef} className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-background rounded-xl border border-border">
           <div>
             <p className="text-xs text-text-muted">Total Expenses</p>
             <p className="text-sm font-semibold text-red mt-0.5">{fmt(result.totalExpenses)}</p>

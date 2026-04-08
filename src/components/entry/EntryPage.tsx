@@ -157,9 +157,16 @@ export default function EntryPage({ data, addSnapshot, deleteSnapshot, addAccoun
           )
         })}
 
+        <div className="h-16 sm:hidden" />
         <button
           type="submit"
-          className="w-full py-3 rounded-xl bg-accent text-white font-semibold text-sm hover:bg-accent-hover transition-colors"
+          className="w-full py-3 rounded-xl bg-accent text-white font-semibold text-sm hover:bg-accent-hover transition-colors hidden sm:block"
+        >
+          Submit Snapshot
+        </button>
+        <button
+          type="submit"
+          className="sm:hidden fixed bottom-0 left-0 right-0 py-4 bg-accent text-white font-semibold text-sm hover:bg-accent-hover transition-colors z-40"
         >
           Submit Snapshot
         </button>
@@ -285,7 +292,7 @@ function FieldRow({ label, sublabel, value, onChange, prevValue, isCurrency, pla
   })()
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 max-w-lg">
       {/* Label row */}
       <div className="flex items-baseline justify-between gap-2">
         <div className="min-w-0">

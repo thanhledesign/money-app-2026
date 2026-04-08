@@ -114,12 +114,96 @@ function BudgetGroup({ tier, items, allItems, monthlyNetPay, onUpdate }: BudgetG
         </div>
       </CardHeader>
 
-      <div className="overflow-x-auto">
+      {/* Mobile card layout */}
+      <div className="sm:hidden space-y-2 px-1">
+        {items.map(item => {
+          const mode = getMode(item.id)
+          const pctValue = monthlyNetPay > 0 ? (item.amount / monthlyNetPay) * 100 : 0
+          const computedDollar = (pctValue / 100) * monthlyNetPay
+          return (
+            <div key={item.id} className="rounded-lg border border-border-light bg-surface/50 p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={item.name}
+                  onChange={e => handleNameChange(item.id, e.target.value)}
+                  placeholder="Item name"
+                  className="flex-1 min-w-0 bg-background border border-border rounded px-2 py-1 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                />
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="p-1.5 rounded text-text-muted hover:text-red hover:bg-red/10 transition-colors shrink-0"
+                  title="Delete item"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={item.category}
+                  onChange={e => handleCategoryChange(item.id, e.target.value)}
+                  placeholder="Category"
+                  className="flex-1 min-w-0 bg-background border border-border rounded px-2 py-1 text-xs text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                />
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {mode === '$' ? (
+                    <NumberInput
+                      value={item.amount}
+                      onChange={(v) => handleAmountChange(item.id, v)}
+                      isCurrency={true}
+                      label={item.name}
+                      className="w-24"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-end gap-0.5">
+                      <NumberInput
+                        value={pctValue}
+                        onChange={(v) => handlePercentageAmountChange(item.id, v)}
+                        isPercent={true}
+                        min={0}
+                        max={100}
+                        label={item.name}
+                        className="w-24"
+                      />
+                      <span className="text-xs text-text-muted tabular-nums">
+                        {formatCurrency(computedDollar)}
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => toggleMode(item.id)}
+                    title={mode === '$' ? 'Switch to % of net pay' : 'Switch to dollar amount'}
+                    className="px-1.5 py-0.5 rounded text-xs font-medium border border-border text-text-muted hover:text-text-secondary hover:border-accent transition-colors"
+                  >
+                    {mode === '$' ? '%' : '$'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+        <div className="flex items-center justify-between pt-2 border-t border-border">
+          <button
+            onClick={handleAdd}
+            className={`flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded hover:bg-surface-hover transition-colors ${cfg.accent}`}
+          >
+            <Plus size={13} />
+            Add Item
+          </button>
+          <span className={`text-sm font-semibold tabular-nums ${cfg.accent}`}>
+            {formatCurrency(subtotal)}
+          </span>
+        </div>
+      </div>
+
+      {/* Desktop/tablet table layout */}
+      <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              <th className="py-2.5 px-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Name</th>
-              <th className="py-2.5 px-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Category</th>
+              <th className="py-2.5 px-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider w-[40%]">Name</th>
+              <th className="py-2.5 px-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider w-[28%]">Category</th>
               <th className="py-2.5 px-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Monthly</th>
               <th className="py-2.5 px-3 w-8" />
             </tr>
@@ -289,7 +373,7 @@ export function BudgetPage({ data, updateBudgetItems }: BudgetPageProps) {
       />
 
       {/* ── Actionable Insights ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <KPICard label="Total Monthly" value={formatCurrency(burnRate)} emoji="💸" />
         <KPICard label="Savings Rate" value={`${savingsRate.toFixed(1)}%`} emoji="📊"
           subValue={savingsRateLow ? 'Below 30% target' : 'On track'} />
