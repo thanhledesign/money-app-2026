@@ -26,7 +26,7 @@ export default function App() {
   })
 
   const {
-    data, addSnapshot, addGoal,
+    data, addSnapshot, deleteSnapshot, addGoal,
     addAccount, updateAccounts,
     updateComp, updateDeductions, updateAllocations, updateBudgetItems,
   } = useAppData()
@@ -71,7 +71,7 @@ export default function App() {
         />
       }>
         <Route index element={<DashboardPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} />} />
-        <Route path="enter" element={<EntryPage data={data} addSnapshot={addSnapshot} addAccount={addAccount} updateAccounts={updateAccounts} />} />
+        <Route path="enter" element={<EntryPage data={data} addSnapshot={addSnapshot} deleteSnapshot={deleteSnapshot} addAccount={addAccount} updateAccounts={updateAccounts} />} />
         <Route path="accounts" element={<AccountsPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} addAccount={addAccount} updateAccounts={updateAccounts} />} />
         <Route path="investments" element={<InvestmentsPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} addAccount={addAccount} updateAccounts={updateAccounts} />} />
         <Route path="debt" element={<DebtPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} addAccount={addAccount} updateAccounts={updateAccounts} />} />

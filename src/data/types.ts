@@ -50,6 +50,9 @@ export interface Goal {
   ranking: string
   completedDate: string
   milestone: string
+  emoji?: string
+  category?: string
+  color?: string
 }
 
 export interface MonthlyBudgetActual {

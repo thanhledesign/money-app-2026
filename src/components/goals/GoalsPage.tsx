@@ -46,6 +46,9 @@ function AddGoalForm({ onAdd }: { onAdd: (g: Goal) => void }) {
   const [date, setDate] = useState(today)
   const [milestone, setMilestone] = useState('')
   const [ranking, setRanking] = useState<'1' | '2' | '3'>('1')
+  const [emoji, setEmoji] = useState('🏆')
+  const [category, setCategory] = useState('')
+  const [color, setColor] = useState('#6366f1')
   const [error, setError] = useState('')
 
   function handleSubmit(e: React.FormEvent) {
@@ -64,6 +67,9 @@ function AddGoalForm({ onAdd }: { onAdd: (g: Goal) => void }) {
       ranking,
       completedDate: date,
       milestone: milestone.trim(),
+      emoji: emoji || undefined,
+      category: category.trim() || undefined,
+      color: color || undefined,
     }
     onAdd(goal)
     setMilestone('')
@@ -130,6 +136,42 @@ function AddGoalForm({ onAdd }: { onAdd: (g: Goal) => void }) {
           />
         </div>
 
+        {/* Emoji, Category, Color */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-text-muted uppercase tracking-wider">Emoji</label>
+            <input
+              type="text"
+              value={emoji}
+              onChange={e => setEmoji(e.target.value)}
+              maxLength={4}
+              className="bg-surface border border-border rounded-lg px-3 py-2 text-xl text-center focus:outline-none focus:border-accent transition-colors w-full"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-text-muted uppercase tracking-wider">Category</label>
+            <input
+              type="text"
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+              placeholder="e.g. Debt, Investing..."
+              className="bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-text-muted uppercase tracking-wider">Color</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={color}
+                onChange={e => setColor(e.target.value)}
+                className="w-10 h-10 rounded-lg cursor-pointer border border-border"
+              />
+              <span className="text-xs text-text-muted font-mono">{color}</span>
+            </div>
+          </div>
+        </div>
+
         {error && <p className="text-xs text-red">{error}</p>}
 
         <button
@@ -146,26 +188,40 @@ function AddGoalForm({ onAdd }: { onAdd: (g: Goal) => void }) {
 // ── Timeline Goal Card ────────────────────────────────────────────────────────
 
 function GoalCard({ goal, isLast }: { goal: Goal; isLast: boolean }) {
-  const accent = rankingAccent(goal.ranking)
+  const accent = goal.color ? '' : rankingAccent(goal.ranking)
   const dot = rankingDot(goal.ranking)
+  const customStyle = goal.color ? {
+    borderColor: goal.color + '50',
+    backgroundColor: goal.color + '08',
+    color: goal.color,
+  } : undefined
 
   return (
     <div className="flex gap-4">
-      {/* Timeline spine */}
       <div className="flex flex-col items-center">
-        <div className={`w-3.5 h-3.5 rounded-full mt-4 flex-shrink-0 ${dot} ring-2 ring-background`} />
+        <div
+          className={`w-3.5 h-3.5 rounded-full mt-4 flex-shrink-0 ring-2 ring-background ${goal.color ? '' : dot}`}
+          style={goal.color ? { backgroundColor: goal.color } : undefined}
+        />
         {!isLast && <div className="w-px flex-1 bg-border mt-1" />}
       </div>
 
-      {/* Card */}
-      <div className={`flex-1 mb-5 border rounded-xl p-4 ${accent}`}>
+      <div className={`flex-1 mb-5 border rounded-xl p-4 ${accent}`} style={customStyle}>
         <div className="flex items-start justify-between gap-2 flex-wrap">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-text-primary leading-snug">{goal.milestone}</p>
-            <p className="text-xs text-text-muted mt-1">{formatDate(goal.completedDate)}</p>
+            <p className="text-sm font-medium text-text-primary leading-snug">
+              {goal.emoji && <span className="mr-1.5">{goal.emoji}</span>}
+              {goal.milestone}
+            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-xs text-text-muted">{formatDate(goal.completedDate)}</p>
+              {goal.category && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-surface-hover text-text-muted">{goal.category}</span>
+              )}
+            </div>
           </div>
           <div className="flex-shrink-0 text-right">
-            <span className="text-lg leading-none">{rankingTrophies(goal.ranking)}</span>
+            <span className="text-lg leading-none">{goal.emoji || rankingTrophies(goal.ranking)}</span>
             <p className="text-xs mt-0.5 font-medium opacity-80">{rankingLabel(goal.ranking)}</p>
           </div>
         </div>

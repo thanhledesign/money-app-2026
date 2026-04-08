@@ -117,10 +117,12 @@ function EditableInput({ label, value, onChange, format = 'currency' }: Editable
 // ── Chart 1: Total Compensation Package Donut ─────────────────────────────────
 
 function CompPackagePieChart({ comp }: { comp: CompBreakdown }) {
+  const [mode, setMode] = useState<'gross' | 'net'>('gross')
+  const mult = mode === 'net' ? (1 - comp.taxRate) : 1
   const slices = [
-    { name: 'Annual Pay', value: comp.annualSalary, color: '#22c55e' },
-    { name: 'Bonus',      value: comp.bonus,        color: '#f59e0b' },
-    { name: 'LTI',        value: comp.ltiPreTax,    color: '#a855f7' },
+    { name: 'Annual Pay', value: comp.annualSalary * mult, color: '#22c55e' },
+    { name: 'Bonus',      value: comp.bonus * mult,        color: '#f59e0b' },
+    { name: 'LTI',        value: comp.ltiPreTax * mult,    color: '#a855f7' },
   ].filter(s => s.value > 0)
 
   const total = slices.reduce((s, d) => s + d.value, 0)
@@ -128,7 +130,18 @@ function CompPackagePieChart({ comp }: { comp: CompBreakdown }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Total Compensation Package</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Total Compensation Package</CardTitle>
+          <div className="flex gap-1">
+            {(['gross', 'net'] as const).map(m => (
+              <button key={m} type="button" onClick={() => setMode(m)}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  mode === m ? 'bg-green/20 text-green' : 'text-text-muted hover:text-text-secondary'
+                }`}
+              >{m === 'gross' ? 'Gross' : 'Net'}</button>
+            ))}
+          </div>
+        </div>
       </CardHeader>
       <ResponsiveContainer width="100%" height={260}>
         <PieChart>

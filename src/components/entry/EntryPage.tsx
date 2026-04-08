@@ -18,6 +18,7 @@ import { NumberInput } from '@/components/ui/NumberInput'
 interface Props {
   data: AppData
   addSnapshot: (s: Snapshot) => void
+  deleteSnapshot: (id: string) => void
   addAccount: (a: Account) => void
   updateAccounts: (a: Account[]) => void
 }
@@ -51,7 +52,7 @@ const CATEGORY_CONFIG: { key: 'cash' | 'investment' | 'debt'; label: string; emo
   { key: 'debt', label: 'Debt', emoji: '💀' },
 ]
 
-export default function EntryPage({ data, addSnapshot, addAccount, updateAccounts }: Props) {
+export default function EntryPage({ data, addSnapshot, deleteSnapshot, addAccount, updateAccounts }: Props) {
   const latest = getLatestSnapshot(data)
   const activeAccounts = getActiveAccounts(data)
   const activeAccountIds = activeAccounts.map(a => a.id)
@@ -205,6 +206,40 @@ export default function EntryPage({ data, addSnapshot, addAccount, updateAccount
                 {latest ? 'No changes detected from previous snapshot.' : 'This is your first snapshot.'}
               </p>
             )}
+          </Card>
+        </div>
+      )}
+      {/* Snapshot History */}
+      {data.snapshots.length > 0 && (
+        <div className="mt-6">
+          <Card>
+            <CardTitle className="mb-3">Snapshot History</CardTitle>
+            <p className="text-xs text-text-muted mb-3">{data.snapshots.length} snapshots recorded</p>
+            <div className="space-y-1.5 max-h-64 overflow-y-auto">
+              {[...data.snapshots].reverse().map(s => (
+                <div key={s.id} className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-surface-hover group">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-text-primary">{formatDate(s.timestamp)}</p>
+                    <p className="text-[10px] text-text-muted">
+                      {s.paycheckAmount ? `Paycheck: ${formatCurrency(s.paycheckAmount)}` : 'No paycheck'}
+                      {s.creditScore ? ` | Score: ${s.creditScore}` : ''}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`Delete snapshot from ${formatDate(s.timestamp)}?`)) {
+                        deleteSnapshot(s.id)
+                      }
+                    }}
+                    className="text-text-muted hover:text-red opacity-0 group-hover:opacity-100 transition-all p-1"
+                    title="Delete snapshot"
+                  >
+                    <span className="text-xs">✕</span>
+                  </button>
+                </div>
+              ))}
+            </div>
           </Card>
         </div>
       )}
