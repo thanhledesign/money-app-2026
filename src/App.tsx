@@ -23,18 +23,14 @@ import { AdminDesigner } from '@/components/ui/AdminDesigner'
 import ToolsPage from '@/components/tools/ToolsPage'
 import { getStorageKey } from '@/lib/store'
 
-export default function App() {
+function AppInner({ userId, isLocal, auth }: {
+  userId: string | undefined
+  isLocal: boolean
+  auth: ReturnType<typeof useAuth>
+}) {
   const [searchParams] = useSearchParams()
   const freshMode = searchParams.get('fresh') === 'true'
-  const auth = useAuth()
-  const [passwordOk, setPasswordOk] = useState(() => isPasswordValid())
-  const [skippedLogin, setSkippedLogin] = useState(() => {
-    if (freshMode) return true
-    return localStorage.getItem('money-app-skipped-login') === 'true'
-  })
 
-  // Pass userId to scope localStorage per authenticated user
-  const userId = auth.user?.id
   const {
     data, addSnapshot, deleteSnapshot, addGoal,
     addAccount, updateAccounts,
@@ -54,10 +50,9 @@ export default function App() {
 
   // Re-check wizard state when userId changes (new user signs in)
   useEffect(() => {
-    if (auth.loading) return
     const done = localStorage.getItem(wizardDoneKey) === 'true' || data.snapshots.length > 0
     setWizardComplete(done)
-  }, [userId, wizardDoneKey, data.snapshots.length, auth.loading])
+  }, [userId, wizardDoneKey, data.snapshots.length])
 
   // Fresh mode: reset data on mount
   useEffect(() => {
@@ -67,35 +62,6 @@ export default function App() {
       localStorage.removeItem('money-app-skipped-login')
     }
   }, [freshMode])
-
-  // Password gate
-  if (isPasswordRequired() && !passwordOk) {
-    return <PasswordGate onSuccess={() => setPasswordOk(true)} />
-  }
-
-  // Loading
-  if (auth.loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-text-muted text-sm">Loading...</div>
-      </div>
-    )
-  }
-
-  if (!auth.isAuthenticated && !skippedLogin) {
-    return (
-      <LoginPage
-        onSignInWithGoogle={auth.signInWithGoogle}
-        configured={auth.configured}
-        onSkip={() => {
-          localStorage.setItem('money-app-skipped-login', 'true')
-          setSkippedLogin(true)
-        }}
-      />
-    )
-  }
-
-  const isLocal = !auth.isAuthenticated
 
   if (!wizardComplete) {
     return (
@@ -150,4 +116,45 @@ export default function App() {
     </Routes>
     </>
   )
+}
+
+export default function App() {
+  const auth = useAuth()
+  const [passwordOk, setPasswordOk] = useState(() => isPasswordValid())
+  const [skippedLogin, setSkippedLogin] = useState(() => {
+    return localStorage.getItem('money-app-skipped-login') === 'true'
+  })
+
+  // Password gate
+  if (isPasswordRequired() && !passwordOk) {
+    return <PasswordGate onSuccess={() => setPasswordOk(true)} />
+  }
+
+  // Wait for auth to resolve before loading any data
+  if (auth.loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-text-muted text-sm">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!auth.isAuthenticated && !skippedLogin) {
+    return (
+      <LoginPage
+        onSignInWithGoogle={auth.signInWithGoogle}
+        configured={auth.configured}
+        onSkip={() => {
+          localStorage.setItem('money-app-skipped-login', 'true')
+          setSkippedLogin(true)
+        }}
+      />
+    )
+  }
+
+  const isLocal = !auth.isAuthenticated
+  const userId = auth.user?.id
+
+  // Data loading happens in AppInner, AFTER we know the userId
+  return <AppInner userId={userId} isLocal={isLocal} auth={auth} />
 }
