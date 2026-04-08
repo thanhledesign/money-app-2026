@@ -17,13 +17,12 @@ const TYPE_OPTIONS: Record<Account['category'], Account['type'][]> = {
 }
 
 export function AccountManager({ accounts, category, onAdd, onRemove, onToggleActive }: Props) {
-  const [showForm, setShowForm] = useState(false)
+  const filtered = accounts.filter(a => a.category === category)
+  const [showForm, setShowForm] = useState(filtered.length === 0)
   const [name, setName] = useState('')
   const [institution, setInstitution] = useState('')
   const [type, setType] = useState<Account['type']>(TYPE_OPTIONS[category][0])
   const [creditLimit, setCreditLimit] = useState('')
-
-  const filtered = accounts.filter(a => a.category === category)
 
   const handleAdd = () => {
     if (!name.trim()) return

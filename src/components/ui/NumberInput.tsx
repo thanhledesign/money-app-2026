@@ -17,7 +17,8 @@ const KEYS = [
   ['7', '8', '9'],
   ['4', '5', '6'],
   ['1', '2', '3'],
-  ['.', '0', '⌫'],
+  ['±', '0', '.'],
+  ['⌫'],
 ]
 
 function useIsMobile() {
@@ -67,14 +68,17 @@ export function NumberInput({
   const handleKey = useCallback((key: string) => {
     if (key === '⌫') {
       setBuffer(prev => prev.slice(0, -1))
+    } else if (key === '±') {
+      setBuffer(prev => prev.startsWith('-') ? prev.slice(1) : '-' + prev)
     } else if (key === '.') {
       setBuffer(prev => prev.includes('.') ? prev : prev + '.')
     } else {
       setBuffer(prev => {
-        const next = prev + key
+        const raw = prev.startsWith('-') ? prev.slice(1) : prev
+        const next = raw + key
         const parts = next.split('.')
         if (parts[1] && parts[1].length > (isPercent ? 4 : 2)) return prev
-        return next
+        return (prev.startsWith('-') ? '-' : '') + next
       })
     }
   }, [isPercent])
@@ -82,10 +86,12 @@ export function NumberInput({
   const handleKeyboard = useCallback((e: React.KeyboardEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (e.key === 'Enter' || e.key === 'Escape') {
+    if (e.key === 'Enter' || e.key === 'Escape' || e.key === 'Tab') {
       commitAndClose()
-    } else if (e.key === 'Backspace') {
+    } else if (e.key === 'Backspace' || e.key === 'Delete') {
       setBuffer(prev => prev.slice(0, -1))
+    } else if (e.key === '-') {
+      handleKey('±')
     } else if (/^[0-9.]$/.test(e.key)) {
       handleKey(e.key)
     }
@@ -103,27 +109,42 @@ export function NumberInput({
     ? `${prefix}${buffer || '0'}`
     : buffer || '0'
 
+  const padRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (open && padRef.current) padRef.current.focus()
+  }, [open])
+
   const padContent = (
-    <div className="bg-surface border border-border rounded-xl shadow-2xl overflow-hidden" onKeyDown={handleKeyboard} tabIndex={0}>
+    <div ref={padRef} className="bg-surface border border-border rounded-xl shadow-2xl overflow-hidden" onKeyDown={handleKeyboard} tabIndex={0}>
       <div className="px-4 py-3 border-b border-border bg-background">
         {label && <p className="text-[10px] text-text-muted uppercase tracking-wider mb-0.5">{label}</p>}
         <p className="text-2xl font-semibold text-text-primary tabular-nums text-right">{bufferDisplay}</p>
       </div>
       <div className="grid grid-cols-3 gap-px bg-border">
-        {KEYS.flat().map(key => (
+        {KEYS.slice(0, 4).flat().map(key => (
           <button
             type="button"
             key={key}
             onClick={() => handleKey(key)}
             className={`py-3.5 text-lg font-medium transition-colors ${
-              key === '⌫'
-                ? 'bg-surface text-red hover:bg-red/10'
+              key === '±'
+                ? 'bg-surface text-text-muted hover:bg-surface-hover'
                 : 'bg-surface text-text-primary hover:bg-surface-hover active:bg-accent/10'
             }`}
           >
             {key}
           </button>
         ))}
+      </div>
+      <div className="gap-px bg-border">
+        <button
+          type="button"
+          onClick={() => handleKey('⌫')}
+          className="w-full py-3 text-base font-medium bg-surface text-red hover:bg-red/10 transition-colors border-t border-border"
+        >
+          ⌫ Delete
+        </button>
       </div>
       <div className="grid grid-cols-2 gap-px bg-border">
         <button

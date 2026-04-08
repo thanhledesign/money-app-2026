@@ -269,20 +269,19 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
     'comp-pie': (
       <Card className="mb-6" key="comp-pie">
         <CardTitle>Paycheck Distribution</CardTitle>
-        <div className="h-72 mt-4">
+        <div className="h-80 mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%"
-                outerRadius={100} innerRadius={40} paddingAngle={2}
-                label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                labelLine={{ stroke: '#55556a' }}
-                fontSize={10}>
+              <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="40%"
+                outerRadius={80} innerRadius={30} paddingAngle={2}
+                fontSize={9}>
                 {pieData.map((entry, i) => (
                   <Cell key={i} fill={entry.color} stroke={entry.color + '60'} strokeWidth={1.5} />
                 ))}
               </Pie>
               <Tooltip {...TOOLTIP_STYLE}
                 formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
+              <Legend wrapperStyle={{ fontSize: '10px', lineHeight: '18px' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
