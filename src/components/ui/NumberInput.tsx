@@ -38,10 +38,8 @@ export function NumberInput({
   const [open, setOpen] = useState(false)
   const [buffer, setBuffer] = useState('')
   const wrapRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
   const isMobile = useIsMobile()
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return
     const handle = (e: MouseEvent) => {
@@ -74,7 +72,6 @@ export function NumberInput({
     } else {
       setBuffer(prev => {
         const next = prev + key
-        // Limit decimal places
         const parts = next.split('.')
         if (parts[1] && parts[1].length > (isPercent ? 4 : 2)) return prev
         return next
@@ -83,6 +80,8 @@ export function NumberInput({
   }, [isPercent])
 
   const handleKeyboard = useCallback((e: React.KeyboardEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     if (e.key === 'Enter' || e.key === 'Escape') {
       commitAndClose()
     } else if (e.key === 'Backspace') {
@@ -106,15 +105,14 @@ export function NumberInput({
 
   const padContent = (
     <div className="bg-surface border border-border rounded-xl shadow-2xl overflow-hidden" onKeyDown={handleKeyboard} tabIndex={0}>
-      {/* Display */}
       <div className="px-4 py-3 border-b border-border bg-background">
         {label && <p className="text-[10px] text-text-muted uppercase tracking-wider mb-0.5">{label}</p>}
         <p className="text-2xl font-semibold text-text-primary tabular-nums text-right">{bufferDisplay}</p>
       </div>
-      {/* Keypad */}
       <div className="grid grid-cols-3 gap-px bg-border">
         {KEYS.flat().map(key => (
           <button
+            type="button"
             key={key}
             onClick={() => handleKey(key)}
             className={`py-3.5 text-lg font-medium transition-colors ${
@@ -127,13 +125,14 @@ export function NumberInput({
           </button>
         ))}
       </div>
-      {/* Actions */}
       <div className="grid grid-cols-2 gap-px bg-border">
         <button
-          onClick={() => { setBuffer(''); }}
+          type="button"
+          onClick={() => { setBuffer('') }}
           className="py-3 text-sm font-medium bg-surface text-text-muted hover:bg-surface-hover"
         >Clear</button>
         <button
+          type="button"
           onClick={commitAndClose}
           className="py-3 text-sm font-medium bg-accent/20 text-accent hover:bg-accent/30"
         >Done</button>
@@ -143,32 +142,20 @@ export function NumberInput({
 
   return (
     <div ref={wrapRef} className={`relative ${className}`}>
-      {/* Trigger */}
       <button
+        type="button"
         onClick={openPad}
         className="w-full text-right px-3 py-1.5 bg-background border border-border rounded-lg text-sm tabular-nums text-text-primary hover:border-accent/50 transition-colors focus:outline-none focus:border-accent"
       >
         {displayValue}
       </button>
 
-      {/* Hidden input for keyboard passthrough */}
-      {open && (
-        <input
-          ref={inputRef}
-          className="sr-only"
-          autoFocus
-          onKeyDown={handleKeyboard}
-        />
-      )}
-
-      {/* Inline pad (desktop/tablet) */}
       {open && !isMobile && (
         <div className="absolute right-0 top-full mt-1 w-56 z-50">
           {padContent}
         </div>
       )}
 
-      {/* Bottom sheet (mobile) */}
       {open && isMobile && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/50" onClick={commitAndClose} />

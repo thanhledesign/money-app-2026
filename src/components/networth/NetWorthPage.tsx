@@ -389,6 +389,8 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                           : (prefs.accountColors[entry.id] ?? '#6b7280')
                       }
                       fillOpacity={0.85}
+                      stroke={(entry.id === '__debt__' ? '#ef4444' : (prefs.accountColors[entry.id] ?? '#6b7280')) + '60'}
+                      strokeWidth={1.5}
                     />
                   ))}
                 </Pie>

@@ -463,6 +463,8 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                       key={entry.id}
                       fill={prefs.accountColors[entry.id] ?? '#6b7280'}
                       fillOpacity={0.85}
+                      stroke={(prefs.accountColors[entry.id] ?? '#6b7280') + '60'}
+                      strokeWidth={1.5}
                     />
                   ))}
                 </Bar>

@@ -329,6 +329,8 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                         <Cell
                           key={entry.id}
                           fill={prefs.accountColors[entry.id] ?? '#6b7280'}
+                          stroke={(prefs.accountColors[entry.id] ?? '#6b7280') + '60'}
+                          strokeWidth={1.5}
                         />
                       ))}
                     </Pie>

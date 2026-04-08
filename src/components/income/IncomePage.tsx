@@ -146,7 +146,7 @@ function CompPackagePieChart({ comp }: { comp: CompBreakdown }) {
             labelLine={true}
           >
             {slices.map((s, i) => (
-              <Cell key={i} fill={s.color} />
+              <Cell key={i} fill={s.color} stroke={s.color + '60'} strokeWidth={1.5} />
             ))}
           </Pie>
           <Tooltip
@@ -342,7 +342,7 @@ function GrossDistPieChart({
             dataKey="value"
           >
             {slices.map((s, i) => (
-              <Cell key={i} fill={s.color} />
+              <Cell key={i} fill={s.color} stroke={s.color + '60'} strokeWidth={1.5} />
             ))}
           </Pie>
           <Tooltip
@@ -411,7 +411,7 @@ function GrossDistBarChart({
           />
           <Bar dataKey="Amount" radius={[0, 4, 4, 0]}>
             {chartData.map((d, i) => (
-              <Cell key={i} fill={d.color} />
+              <Cell key={i} fill={d.color} stroke={d.color + '60'} strokeWidth={1.5} />
             ))}
           </Bar>
         </BarChart>
@@ -764,10 +764,13 @@ function PaychecksFrequencySection({
 
   const perMonth = data.paychecksPerMonth.slice(0, 12)
   const total = perMonth.reduce((s, n) => s + n, 0)
+  // Semi-monthly = 2 checks per month always. paychecksPerMonth is weekly frequency for display only.
+  const checksPerMonth = 2
+  const monthlyNet = checksPerMonth * netSemiMonthly
 
   const chartData = perMonth.map((qty, i) => ({
     month: MONTH_LABELS[i],
-    Amount: qty * netSemiMonthly,
+    Amount: monthlyNet,
     qty,
   }))
 
@@ -793,7 +796,7 @@ function PaychecksFrequencySection({
                 <tr key={i} className="border-b border-border-light hover:bg-surface-hover transition-colors">
                   <td className="py-2 px-3 text-text-secondary">{MONTH_LABELS[i]}</td>
                   <td className="py-2 px-3 text-right tabular-nums text-text-primary">{qty}</td>
-                  <td className="py-2 px-3 text-right tabular-nums text-green">{formatCurrency(qty * netSemiMonthly)}</td>
+                  <td className="py-2 px-3 text-right tabular-nums text-green">{formatCurrency(monthlyNet)}</td>
                 </tr>
               ))}
             </tbody>
@@ -801,7 +804,7 @@ function PaychecksFrequencySection({
               <tr className="border-t-2 border-green/40 bg-green/5 font-semibold">
                 <td className="py-2.5 px-3 text-text-primary uppercase text-xs">TOTAL</td>
                 <td className="py-2.5 px-3 text-right tabular-nums text-text-primary">{total}</td>
-                <td className="py-2.5 px-3 text-right tabular-nums text-green">{formatCurrency(total * netSemiMonthly)}</td>
+                <td className="py-2.5 px-3 text-right tabular-nums text-green">{formatCurrency(12 * monthlyNet)}</td>
               </tr>
             </tfoot>
           </table>

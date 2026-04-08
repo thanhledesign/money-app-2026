@@ -56,7 +56,7 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
 
   return (
     <div>
-      <PageHeader icon="settings" title="Settings" subtitle="Customize your dashboard, colors, and preferences" />
+      <PageHeader icon="⚙️" title="Settings" subtitle="Customize your dashboard, colors, and preferences" />
 
       {/* Chart Preferences */}
       <Card className="mb-6">

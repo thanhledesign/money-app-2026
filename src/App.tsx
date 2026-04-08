@@ -15,6 +15,7 @@ import { IncomePage } from '@/components/income/IncomePage'
 import { BudgetPage } from '@/components/budget/BudgetPage'
 import { GoalsPage } from '@/components/goals/GoalsPage'
 import SettingsPage from '@/components/settings/SettingsPage'
+import { AdminDesigner } from '@/components/ui/AdminDesigner'
 
 export default function App() {
   const auth = useAuth()
@@ -55,6 +56,8 @@ export default function App() {
   const isLocal = !auth.isAuthenticated
 
   return (
+    <>
+    <AdminDesigner />
     <Routes>
       <Route element={
         <Layout
@@ -84,5 +87,6 @@ export default function App() {
         } />
       </Route>
     </Routes>
+    </>
   )
 }
