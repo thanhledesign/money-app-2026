@@ -10,6 +10,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { UVPBadge } from '@/components/ui/UVPBadge'
 import { NumberInput } from '@/components/ui/NumberInput'
+import { Plus, Trash2 } from 'lucide-react'
 
 interface IncomePageProps {
   data: AppData
@@ -117,12 +118,10 @@ function EditableInput({ label, value, onChange, format = 'currency' }: Editable
 // ── Chart 1: Total Compensation Package Donut ─────────────────────────────────
 
 function CompPackagePieChart({ comp }: { comp: CompBreakdown }) {
-  const [mode, setMode] = useState<'gross' | 'net'>('gross')
-  const mult = mode === 'net' ? (1 - comp.taxRate) : 1
   const slices = [
-    { name: 'Annual Pay', value: comp.annualSalary * mult, color: '#22c55e' },
-    { name: 'Bonus',      value: comp.bonus * mult,        color: '#f59e0b' },
-    { name: 'LTI',        value: comp.ltiPreTax * mult,    color: '#a855f7' },
+    { name: 'Annual Pay', value: comp.annualSalary, color: '#22c55e' },
+    { name: 'Bonus',      value: comp.bonus,        color: '#f59e0b' },
+    { name: 'LTI',        value: comp.ltiPreTax,    color: '#a855f7' },
   ].filter(s => s.value > 0)
 
   const total = slices.reduce((s, d) => s + d.value, 0)
@@ -130,18 +129,7 @@ function CompPackagePieChart({ comp }: { comp: CompBreakdown }) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Total Compensation Package</CardTitle>
-          <div className="flex gap-1">
-            {(['gross', 'net'] as const).map(m => (
-              <button key={m} type="button" onClick={() => setMode(m)}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                  mode === m ? 'bg-green/20 text-green' : 'text-text-muted hover:text-text-secondary'
-                }`}
-              >{m === 'gross' ? 'Gross' : 'Net'}</button>
-            ))}
-          </div>
-        </div>
+        <CardTitle>Total Compensation Package</CardTitle>
       </CardHeader>
       <ResponsiveContainer width="100%" height={260}>
         <PieChart>
@@ -520,6 +508,56 @@ function CompSection({
 
 // ── Section 2: Taxes & Deductions ─────────────────────────────────────────────
 
+function DeductionRow({
+  item,
+  grossSemiMonthly,
+  onAmountChange,
+  onPercentChange,
+  onDelete,
+}: {
+  item: PaycheckDeduction
+  grossSemiMonthly: number
+  onAmountChange: (v: number) => void
+  onPercentChange: (v: number) => void
+  onDelete: () => void
+}) {
+  const pct = grossSemiMonthly > 0 ? item.amount / grossSemiMonthly : 0
+  return (
+    <tr className="border-b border-border-light hover:bg-surface-hover transition-colors">
+      <td className="py-2 px-2 text-text-secondary">{item.name}</td>
+      <td className="py-2 px-2 text-right tabular-nums">
+        <NumberInput
+          value={item.amount}
+          onChange={onAmountChange}
+          label={item.name}
+          isCurrency={true}
+          className="w-28"
+        />
+      </td>
+      <td className="py-2 px-2 text-right tabular-nums">
+        <NumberInput
+          value={pct * 100}
+          onChange={v => onPercentChange(v / 100)}
+          label={`${item.name} %`}
+          isPercent={true}
+          min={0}
+          max={100}
+          className="w-20"
+        />
+      </td>
+      <td className="py-2 px-2">
+        <button
+          onClick={onDelete}
+          className="p-1 rounded text-text-muted hover:text-red hover:bg-red/10 transition-colors"
+          title="Delete"
+        >
+          <Trash2 size={13} />
+        </button>
+      </td>
+    </tr>
+  )
+}
+
 function DeductionsSection({
   deductions,
   comp,
@@ -532,7 +570,6 @@ function DeductionsSection({
   const taxes = deductions.filter(d => d.type === 'tax')
   const pretax = deductions.filter(d => d.type === 'pretax')
 
-  // Gross semi-monthly for percentage reference
   const grossSemiMonthly = comp.annualSalary / 24
 
   const taxTotal = taxes.reduce((s, d) => s + d.amount, 0)
@@ -542,14 +579,35 @@ function DeductionsSection({
     onChange(deductions.map(d => d.name === name ? { ...d, amount } : d))
   }
 
+  function handlePercentChange(name: string, pct: number) {
+    const newAmount = pct * grossSemiMonthly
+    onChange(deductions.map(d => d.name === name ? { ...d, amount: newAmount } : d))
+  }
+
+  function handleDelete(name: string) {
+    onChange(deductions.filter(d => d.name !== name))
+  }
+
+  function handleAddItem(type: 'tax' | 'pretax') {
+    const newItem: PaycheckDeduction = {
+      name: 'New Item',
+      amount: 0,
+      type,
+      isFixed: false,
+    }
+    onChange([...deductions, newItem])
+  }
+
   function DeductionGroup({
     items,
     title,
     total,
+    groupType,
   }: {
     items: PaycheckDeduction[]
     title: string
     total: number
+    groupType: 'tax' | 'pretax'
   }) {
     return (
       <div className="flex-1 min-w-0">
@@ -560,28 +618,40 @@ function DeductionsSection({
               <th className="py-2 px-2 text-left text-xs text-text-muted">Item</th>
               <th className="py-2 px-2 text-right text-xs text-text-muted">Amount</th>
               <th className="py-2 px-2 text-right text-xs text-text-muted">%</th>
+              <th className="py-2 px-2 w-6" />
             </tr>
           </thead>
           <tbody>
-            {items.map(d => {
-              const pct = grossSemiMonthly > 0 ? d.amount / grossSemiMonthly : 0
-              return (
-                <DeductionRow
-                  key={d.name}
-                  item={d}
-                  pct={pct}
-                  onAmountChange={v => handleAmountChange(d.name, v)}
-                />
-              )
-            })}
+            {items.map(d => (
+              <DeductionRow
+                key={d.name}
+                item={d}
+                grossSemiMonthly={grossSemiMonthly}
+                onAmountChange={v => handleAmountChange(d.name, v)}
+                onPercentChange={v => handlePercentChange(d.name, v)}
+                onDelete={() => handleDelete(d.name)}
+              />
+            ))}
           </tbody>
           <tfoot>
+            <tr>
+              <td colSpan={4} className="py-2 px-2">
+                <button
+                  onClick={() => handleAddItem(groupType)}
+                  className="flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded hover:bg-surface-hover transition-colors text-text-muted hover:text-text-secondary"
+                >
+                  <Plus size={12} />
+                  Add Item
+                </button>
+              </td>
+            </tr>
             <tr className="border-t border-border bg-accent/5">
               <td className="py-2.5 px-2 text-xs font-semibold text-text-secondary uppercase">Total</td>
               <td className="py-2.5 px-2 text-right tabular-nums text-sm font-semibold text-text-primary">{formatCurrency(total)}</td>
               <td className="py-2.5 px-2 text-right tabular-nums text-xs text-text-muted">
                 {grossSemiMonthly > 0 ? formatPercent(total / grossSemiMonthly) : '—'}
               </td>
+              <td />
             </tr>
           </tfoot>
         </table>
@@ -596,37 +666,11 @@ function DeductionsSection({
         <p className="text-xs text-text-muted mt-1">Per paycheck (semi-monthly). Gross: {formatCurrency(grossSemiMonthly)}</p>
       </CardHeader>
       <div className="flex gap-6 flex-wrap">
-        <DeductionGroup items={taxes} title="Taxes" total={taxTotal} />
+        <DeductionGroup items={taxes} title="Taxes" total={taxTotal} groupType="tax" />
         <div className="w-px bg-border hidden sm:block" />
-        <DeductionGroup items={pretax} title="Pre-Tax Deductions" total={pretaxTotal} />
+        <DeductionGroup items={pretax} title="Pre-Tax Deductions" total={pretaxTotal} groupType="pretax" />
       </div>
     </Card>
-  )
-}
-
-function DeductionRow({
-  item,
-  pct,
-  onAmountChange,
-}: {
-  item: PaycheckDeduction
-  pct: number
-  onAmountChange: (v: number) => void
-}) {
-  return (
-    <tr className="border-b border-border-light hover:bg-surface-hover transition-colors">
-      <td className="py-2 px-2 text-text-secondary">{item.name}</td>
-      <td className="py-2 px-2 text-right tabular-nums">
-        <NumberInput
-          value={item.amount}
-          onChange={onAmountChange}
-          label={item.name}
-          isCurrency={true}
-          className="w-28"
-        />
-      </td>
-      <td className="py-2 px-2 text-right tabular-nums text-xs text-text-muted">{formatPercent(pct)}</td>
-    </tr>
   )
 }
 
@@ -645,17 +689,36 @@ function AllocationSection({
   const totalDeductions = data.deductions.reduce((s, d) => s + d.amount, 0)
   const netPaycheck = grossSemiMonthly - totalDeductions
 
-  const totalAllocated = allocations.reduce((s, a) => s + a.percentage, 0)
+  // Compute the variable account's percentage as 1 - sum(all non-variable)
+  const variableId = allocations.find(a => a.adjustability === 'variable')?.accountId ?? null
+  const nonVariableSum = allocations
+    .filter(a => a.accountId !== variableId)
+    .reduce((s, a) => s + a.percentage, 0)
+  const variablePct = variableId !== null ? Math.max(0, 1 - nonVariableSum) : 0
+
+  const effectiveAllocations = allocations.map(a =>
+    a.accountId === variableId ? { ...a, percentage: variablePct } : a
+  )
+
+  const totalAllocated = effectiveAllocations.reduce((s, a) => s + a.percentage, 0)
   const balance = 1 - totalAllocated
 
   function handlePercentChange(accountId: string, pct: number) {
+    // Don't allow editing a variable account's percentage directly
+    if (accountId === variableId) return
     onChange(allocations.map(a => a.accountId === accountId ? { ...a, percentage: pct } : a))
   }
 
-  const adjustabilityColor = (adj: PaycheckAllocation['adjustability']) => {
-    if (adj === 'flexible') return 'text-green'
-    if (adj === 'variable') return 'text-blue'
-    return 'text-text-muted'
+  function handleAdjustabilityChange(accountId: string, adj: PaycheckAllocation['adjustability']) {
+    let updated = allocations.map(a => a.accountId === accountId ? { ...a, adjustability: adj } : a)
+    if (adj === 'variable') {
+      // Only one variable at a time — switch any other variable back to flexible
+      updated = updated.map(a => a.accountId !== accountId && a.adjustability === 'variable'
+        ? { ...a, adjustability: 'flexible' }
+        : a
+      )
+    }
+    onChange(updated)
   }
 
   return (
@@ -682,9 +745,10 @@ function AllocationSection({
             </tr>
           </thead>
           <tbody>
-            {allocations.map(alloc => {
+            {effectiveAllocations.map(alloc => {
               const account = data.accounts.find(a => a.id === alloc.accountId)
               const amount = netPaycheck * alloc.percentage
+              const isVariable = alloc.adjustability === 'variable'
               return (
                 <AllocationRow
                   key={alloc.accountId}
@@ -692,8 +756,9 @@ function AllocationSection({
                   adjustability={alloc.adjustability}
                   percentage={alloc.percentage}
                   amount={amount}
-                  adjustabilityColor={adjustabilityColor(alloc.adjustability)}
+                  isVariable={isVariable}
                   onPercentChange={pct => handlePercentChange(alloc.accountId, pct)}
+                  onAdjustabilityChange={adj => handleAdjustabilityChange(alloc.accountId, adj)}
                 />
               )
             })}
@@ -716,9 +781,9 @@ function AllocationSection({
         </table>
       </div>
 
-      {Math.abs(balance) >= 0.001 && (
+      {Math.abs(balance) >= 0.001 && variableId === null && (
         <p className="text-xs text-amber mt-3">
-          Allocations {balance > 0 ? 'under' : 'over'} by {formatPercent(Math.abs(balance))} ({formatCurrency(Math.abs(netPaycheck * balance))}). Adjust percentages to reach 100%.
+          Allocations {balance > 0 ? 'under' : 'over'} by {formatPercent(Math.abs(balance))} ({formatCurrency(Math.abs(netPaycheck * balance))}). Adjust percentages or mark one account as variable to auto-fill the remainder.
         </p>
       )}
     </Card>
@@ -730,32 +795,46 @@ function AllocationRow({
   adjustability,
   percentage,
   amount,
-  adjustabilityColor,
+  isVariable,
   onPercentChange,
+  onAdjustabilityChange,
 }: {
   accountName: string
   adjustability: PaycheckAllocation['adjustability']
   percentage: number
   amount: number
-  adjustabilityColor: string
+  isVariable: boolean
   onPercentChange: (pct: number) => void
+  onAdjustabilityChange: (adj: PaycheckAllocation['adjustability']) => void
 }) {
   return (
     <tr className="border-b border-border-light hover:bg-surface-hover transition-colors">
       <td className="py-2.5 px-3 text-text-primary">{accountName}</td>
-      <td className={`py-2.5 px-3 text-center text-xs font-medium capitalize ${adjustabilityColor}`}>
-        {adjustability}
+      <td className="py-2.5 px-3 text-center">
+        <select
+          value={adjustability}
+          onChange={e => onAdjustabilityChange(e.target.value as PaycheckAllocation['adjustability'])}
+          className="bg-surface border border-border rounded px-2 py-1 text-xs text-text-secondary focus:outline-none focus:ring-1 focus:ring-accent capitalize"
+        >
+          <option value="flexible">flexible</option>
+          <option value="variable">variable</option>
+          <option value="fixed">fixed</option>
+        </select>
       </td>
       <td className="py-2.5 px-3 text-right tabular-nums">
-        <NumberInput
-          value={percentage * 100}
-          onChange={v => onPercentChange(v / 100)}
-          label={accountName}
-          isPercent={true}
-          min={0}
-          max={100}
-          className="w-28"
-        />
+        {isVariable ? (
+          <span className="text-blue text-xs font-medium tabular-nums">{formatPercent(percentage)}</span>
+        ) : (
+          <NumberInput
+            value={percentage * 100}
+            onChange={v => onPercentChange(v / 100)}
+            label={accountName}
+            isPercent={true}
+            min={0}
+            max={100}
+            className="w-28"
+          />
+        )}
       </td>
       <td className="py-2.5 px-3 text-right tabular-nums text-text-primary">{formatCurrency(amount)}</td>
     </tr>
@@ -818,6 +897,14 @@ function PaychecksFrequencySection({
                 <td className="py-2.5 px-3 text-text-primary uppercase text-xs">TOTAL</td>
                 <td className="py-2.5 px-3 text-right tabular-nums text-text-primary">{total}</td>
                 <td className="py-2.5 px-3 text-right tabular-nums text-green">{formatCurrency(12 * monthlyNet)}</td>
+              </tr>
+              <tr className="border-t border-border-light">
+                <td className="py-2 px-3 text-xs text-text-muted" colSpan={2}>Bonus (annual)</td>
+                <td className="py-2 px-3 text-right tabular-nums text-xs text-amber">{formatCurrency(data.comp.bonus * (1 - data.comp.taxRate))}</td>
+              </tr>
+              <tr className="border-t border-border-light">
+                <td className="py-2 px-3 text-xs text-text-muted" colSpan={2}>LTI (annual)</td>
+                <td className="py-2 px-3 text-right tabular-nums text-xs text-purple">{formatCurrency(data.comp.ltiPreTax * (1 - data.comp.taxRate))}</td>
               </tr>
             </tfoot>
           </table>

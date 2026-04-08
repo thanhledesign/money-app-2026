@@ -47,13 +47,13 @@ const DEFAULT_LABEL_COLORS: Record<string, string> = {
 }
 
 const DEFAULT_DASHBOARD_ORDER = [
+  'warnings',
   'kpi-row-1',
   'kpi-row-2',
-  'warnings',
   'net-worth-chart',
+  'debt-trend',
   'cash-vs-investments',
   'comp-pie',
-  'debt-trend',
   'latest-changes',
 ]
 

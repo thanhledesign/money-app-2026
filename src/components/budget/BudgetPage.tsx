@@ -13,6 +13,9 @@ import { Card, CardHeader, CardTitle, KPICard } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Trash2, Plus } from 'lucide-react'
 
+// ── Per-row input mode tracking ───────────────────────────────────────────────
+type InputMode = '$' | '%'
+
 interface BudgetPageProps {
   data: AppData
   updateBudgetItems: (items: BudgetItem[]) => void
@@ -39,12 +42,24 @@ interface BudgetGroupProps {
   tier: Tier
   items: BudgetItem[]
   allItems: BudgetItem[]
+  monthlyNetPay: number
   onUpdate: (items: BudgetItem[]) => void
 }
 
-function BudgetGroup({ tier, items, allItems, onUpdate }: BudgetGroupProps) {
+function BudgetGroup({ tier, items, allItems, monthlyNetPay, onUpdate }: BudgetGroupProps) {
   const cfg = TIER_CONFIG[tier]
   const subtotal = items.reduce((s, i) => s + i.amount, 0)
+
+  // Track per-item input mode ($/%): keyed by item id
+  const [inputModes, setInputModes] = useState<Record<string, InputMode>>({})
+
+  function getMode(id: string): InputMode {
+    return inputModes[id] ?? '$'
+  }
+
+  function toggleMode(id: string) {
+    setInputModes(prev => ({ ...prev, [id]: prev[id] === '%' ? '$' : '%' }))
+  }
 
   function handleNameChange(id: string, name: string) {
     const updated = allItems.map(i => i.id === id ? { ...i, name } : i)
@@ -61,9 +76,17 @@ function BudgetGroup({ tier, items, allItems, onUpdate }: BudgetGroupProps) {
     onUpdate(updated)
   }
 
+  function handlePercentageAmountChange(id: string, pct: number) {
+    // pct is 0–100; compute dollar amount
+    const amount = (pct / 100) * monthlyNetPay
+    handleAmountChange(id, amount)
+  }
+
   function handleDelete(id: string) {
     const updated = allItems.filter(i => i.id !== id)
     onUpdate(updated)
+    // clean up mode state
+    setInputModes(prev => { const n = { ...prev }; delete n[id]; return n })
   }
 
   function handleAdd() {
@@ -102,46 +125,77 @@ function BudgetGroup({ tier, items, allItems, onUpdate }: BudgetGroupProps) {
             </tr>
           </thead>
           <tbody>
-            {items.map(item => (
-              <tr key={item.id} className="border-b border-border-light hover:bg-surface-hover transition-colors">
-                <td className="py-2 px-3">
-                  <input
-                    type="text"
-                    value={item.name}
-                    onChange={e => handleNameChange(item.id, e.target.value)}
-                    placeholder="Item name"
-                    className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent"
-                  />
-                </td>
-                <td className="py-2 px-3">
-                  <input
-                    type="text"
-                    value={item.category}
-                    onChange={e => handleCategoryChange(item.id, e.target.value)}
-                    placeholder="Category"
-                    className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent"
-                  />
-                </td>
-                <td className="py-2 px-3 text-right">
-                  <NumberInput
-                    value={item.amount}
-                    onChange={(v) => handleAmountChange(item.id, v)}
-                    isCurrency={true}
-                    label={item.name}
-                    className="w-24"
-                  />
-                </td>
-                <td className="py-2 px-3">
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="p-1 rounded text-text-muted hover:text-red hover:bg-red/10 transition-colors"
-                    title="Delete item"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {items.map(item => {
+              const mode = getMode(item.id)
+              const pctValue = monthlyNetPay > 0 ? (item.amount / monthlyNetPay) * 100 : 0
+              const computedDollar = (pctValue / 100) * monthlyNetPay
+              return (
+                <tr key={item.id} className="border-b border-border-light hover:bg-surface-hover transition-colors">
+                  <td className="py-2 px-3">
+                    <input
+                      type="text"
+                      value={item.name}
+                      onChange={e => handleNameChange(item.id, e.target.value)}
+                      placeholder="Item name"
+                      className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                    />
+                  </td>
+                  <td className="py-2 px-3">
+                    <input
+                      type="text"
+                      value={item.category}
+                      onChange={e => handleCategoryChange(item.id, e.target.value)}
+                      placeholder="Category"
+                      className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                    />
+                  </td>
+                  <td className="py-2 px-3 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {mode === '$' ? (
+                        <NumberInput
+                          value={item.amount}
+                          onChange={(v) => handleAmountChange(item.id, v)}
+                          isCurrency={true}
+                          label={item.name}
+                          className="w-24"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <NumberInput
+                            value={pctValue}
+                            onChange={(v) => handlePercentageAmountChange(item.id, v)}
+                            isPercent={true}
+                            min={0}
+                            max={100}
+                            label={item.name}
+                            className="w-24"
+                          />
+                          <span className="text-xs text-text-muted tabular-nums">
+                            {formatCurrency(computedDollar)}
+                          </span>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => toggleMode(item.id)}
+                        title={mode === '$' ? 'Switch to % of net pay' : 'Switch to dollar amount'}
+                        className="px-1.5 py-0.5 rounded text-xs font-medium border border-border text-text-muted hover:text-text-secondary hover:border-accent transition-colors"
+                      >
+                        {mode === '$' ? '%' : '$'}
+                      </button>
+                    </div>
+                  </td>
+                  <td className="py-2 px-3">
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="p-1 rounded text-text-muted hover:text-red hover:bg-red/10 transition-colors"
+                      title="Delete item"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
           <tfoot>
             <tr className="border-t border-border">
@@ -203,6 +257,11 @@ export function BudgetPage({ data, updateBudgetItems }: BudgetPageProps) {
   }
 
   const { totalMonthly, needs, wants, savings, pct } = computeSummary(localItems)
+
+  // Monthly net pay from comp data
+  const grossSemiMonthly = data.comp.annualSalary / 24
+  const totalDeductions = data.deductions.reduce((s, d) => s + d.amount, 0)
+  const monthlyNetPay = (grossSemiMonthly - totalDeductions) * 2
 
   // Actionable insight metrics
   const savingsRate = getSavingsRate(data)
@@ -291,6 +350,7 @@ export function BudgetPage({ data, updateBudgetItems }: BudgetPageProps) {
           tier={tier}
           items={grouped[tier]}
           allItems={localItems}
+          monthlyNetPay={monthlyNetPay}
           onUpdate={handleUpdate}
         />
       ))}

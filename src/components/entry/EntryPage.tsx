@@ -93,8 +93,8 @@ export default function EntryPage({ data, addSnapshot, deleteSnapshot, addAccoun
     <PageTheme page="enter">
     <div>
       <PageHeader
-        icon="+"
-        title="Enter Data"
+        icon="💵📸"
+        title="Add Snapshot"
         subtitle="Record a new financial snapshot"
       />
 
@@ -232,7 +232,7 @@ export default function EntryPage({ data, addSnapshot, deleteSnapshot, addAccoun
                         deleteSnapshot(s.id)
                       }
                     }}
-                    className="text-text-muted hover:text-red opacity-0 group-hover:opacity-100 transition-all p-1"
+                    className="text-text-muted hover:text-red opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all p-1"
                     title="Delete snapshot"
                   >
                     <span className="text-xs">✕</span>

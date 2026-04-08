@@ -165,7 +165,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
         <CardTitle>Net Worth Overview</CardTitle>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
           {/* Pie: current net worth breakdown */}
-          <div className="h-48">
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -234,6 +234,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
                 dot={prefs.showDots ? { r: 3, fill: '#22c55e' } : false} />
               <Line type={curveType} dataKey="investments" stroke="#3b82f6" strokeWidth={2}
                 dot={prefs.showDots ? { r: 3, fill: '#3b82f6' } : false} />
+              <Legend wrapperStyle={{ fontSize: '11px' }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -295,7 +296,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
               </defs>
               <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
-                tickFormatter={(v: number) => `$${(v / 1000).toFixed(1)}K`} />
+                tickFormatter={(v: number) => `$${(v / 1000).toFixed(1)}K`} reversed={true} />
               <Tooltip {...TOOLTIP_STYLE} formatter={(v: any) => [calc.formatCurrency(v), 'Debt']} />
               <Area type={curveType} dataKey="debt" stroke="#ef4444" fill="url(#debtGrad)" strokeWidth={2}
                 dot={prefs.showDots ? { r: 3, fill: '#ef4444' } : false} />
@@ -387,22 +388,25 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
         subtitle={`Last updated: ${lastUpdated}`}
         rightContent={
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setEditMode(!editMode)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-colors ${
-                editMode
-                  ? 'border-accent bg-accent/10 text-accent'
-                  : 'border-border text-text-muted hover:text-text-secondary'
-              }`}
-            >
-              {editMode ? <X size={14} /> : <Pencil size={14} />}
-              {editMode ? 'Done' : 'Edit Layout'}
-            </button>
             <UVPBadge label="Unique" description="Financial Health Score — a composite of 7 metrics no other app tracks together. Hover for details." />
             <HealthScoreTooltip data={data} score={metrics.healthScore} />
           </div>
         }
       />
+
+      <div className="mb-4">
+        <button
+          onClick={() => setEditMode(!editMode)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+            editMode
+              ? 'border-accent bg-accent/10 text-accent'
+              : 'border-border text-text-muted hover:text-text-secondary'
+          }`}
+        >
+          {editMode ? <X size={14} /> : <Pencil size={14} />}
+          {editMode ? 'Done' : 'Edit Layout'}
+        </button>
+      </div>
 
       {editMode && (
         <div className="mb-6 p-4 rounded-xl border border-accent/30 bg-accent/5 space-y-4">

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Save, Trash2, RotateCcw } from 'lucide-react'
+import { Save, Trash2, RotateCcw, Download, Upload, Copy } from 'lucide-react'
 import { Card, CardTitle } from '@/components/ui/Card'
 import {
   type ThemeVars, type SavedTheme, DEFAULT_VARS, PRESET_THEMES,
@@ -144,6 +144,53 @@ export function ThemeEditor() {
     }
   }, [userThemes, activeTheme, handleSelectTheme])
 
+  const importRef = useRef<HTMLInputElement>(null)
+
+  const handleExportTheme = useCallback(() => {
+    const payload = { name: activeTheme, vars: editVars, customCSS: customCSSText }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${activeTheme.replace(/\s+/g, '-').toLowerCase()}-theme.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [activeTheme, editVars, customCSSText])
+
+  const handleImportTheme = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const payload = JSON.parse(ev.target?.result as string)
+        const name: string = payload.name || 'Imported Theme'
+        const vars: Partial<ThemeVars> = payload.vars || {}
+        const customCSS: string = payload.customCSS || ''
+        const imported: SavedTheme = { name, vars, customCSS }
+        const updated = userThemes.filter(t => t.name !== name)
+        updated.push(imported)
+        setUserThemes(updated)
+        saveSavedThemes(updated)
+        handleSelectTheme(name)
+      } catch {
+        alert('Invalid theme file.')
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }, [userThemes, handleSelectTheme])
+
+  const handleCopyCSS = useCallback(() => {
+    const lines = Object.entries(editVars)
+      .map(([k, v]) => `  --${k}: ${v};`)
+      .join('\n')
+    const css = `:root {\n${lines}\n}\n\n${customCSSText}`
+    navigator.clipboard.writeText(css).then(() => {
+      alert('CSS copied to clipboard.')
+    })
+  }, [editVars, customCSSText])
+
   const handleReset = useCallback(() => {
     setEditVars({ ...DEFAULT_VARS })
     applyThemeVars({})
@@ -248,6 +295,25 @@ export function ThemeEditor() {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-red/10 text-red border border-red/30 rounded-lg text-xs hover:bg-red/20 transition-colors"
           >
             <RotateCcw size={14} /> Reset
+          </button>
+          <button
+            onClick={handleExportTheme}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface text-text-secondary border border-border rounded-lg text-xs hover:text-text-primary hover:border-accent/50 transition-colors"
+          >
+            <Download size={14} /> Export Theme
+          </button>
+          <button
+            onClick={() => importRef.current?.click()}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface text-text-secondary border border-border rounded-lg text-xs hover:text-text-primary hover:border-accent/50 transition-colors"
+          >
+            <Upload size={14} /> Import Theme
+          </button>
+          <input ref={importRef} type="file" accept=".json" onChange={handleImportTheme} className="hidden" />
+          <button
+            onClick={handleCopyCSS}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface text-text-secondary border border-border rounded-lg text-xs hover:text-text-primary hover:border-accent/50 transition-colors"
+          >
+            <Copy size={14} /> Copy CSS
           </button>
         </div>
       </Card>

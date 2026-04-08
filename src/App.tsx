@@ -18,6 +18,7 @@ import SettingsPage from '@/components/settings/SettingsPage'
 import BusinessPage from '@/components/pro/BusinessPage'
 import PropertiesPage from '@/components/pro/PropertiesPage'
 import { AdminDesigner } from '@/components/ui/AdminDesigner'
+import ToolsPage from '@/components/tools/ToolsPage'
 
 export default function App() {
   const auth = useAuth()
@@ -84,6 +85,7 @@ export default function App() {
         <Route path="goals" element={<GoalsPage data={data} addGoal={addGoal} />} />
         <Route path="business" element={<BusinessPage />} />
         <Route path="properties" element={<PropertiesPage />} />
+        <Route path="tools" element={<ToolsPage />} />
         <Route path="settings" element={
           <SettingsPage data={data} prefs={prefs}
             setAccountColor={setAccountColor} setLabelColor={setLabelColor}

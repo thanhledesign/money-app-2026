@@ -110,18 +110,20 @@ export function HealthScoreTooltip({ data, score }: Props) {
   const barColors = { good: 'bg-green', warn: 'bg-amber', bad: 'bg-red' }
 
   return (
-    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      <div className="cursor-help">
+    <div className="relative">
+      <button type="button" onClick={() => setOpen(!open)} className="cursor-pointer text-right">
         <div className="text-xs text-text-muted">Health Score</div>
         <div className={`text-3xl font-bold tabular-nums ${
           score >= 70 ? 'text-green' : score >= 40 ? 'text-amber' : 'text-red'
         }`}>
           {score}<span className="text-lg text-text-muted">/100</span>
         </div>
-      </div>
+      </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-surface border border-border rounded-xl p-4 shadow-2xl z-50">
+        <>
+        <div className="fixed inset-0 z-40 md:hidden" onClick={() => setOpen(false)} />
+        <div className="fixed inset-x-4 bottom-4 md:absolute md:right-0 md:left-auto md:bottom-auto md:top-full md:mt-2 md:w-80 md:inset-x-auto max-w-[calc(100vw-2rem)] bg-surface border border-border rounded-xl p-4 shadow-2xl z-50 max-h-[80vh] overflow-y-auto">
           <h4 className="text-sm font-semibold text-text-primary mb-1">Financial Health Score</h4>
           <p className="text-xs text-text-muted mb-3">
             Composite score based on 7 key financial metrics. Higher is better.
@@ -154,7 +156,12 @@ export function HealthScoreTooltip({ data, score }: Props) {
                 : 'Needs attention. Prioritize paying down debt and building emergency savings.'}
             </p>
           </div>
+          <button type="button" onClick={() => setOpen(false)}
+            className="mt-3 w-full py-2 text-xs text-text-muted border border-border rounded-lg hover:text-text-secondary md:hidden">
+            Close
+          </button>
         </div>
+        </>
       )}
     </div>
   )

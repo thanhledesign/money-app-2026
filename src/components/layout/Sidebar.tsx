@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
-  LayoutDashboard, PlusCircle, Landmark, TrendingUp,
+  LayoutDashboard, Camera, Landmark, TrendingUp,
   Skull, Diamond, Scale, Trophy, DollarSign, Settings,
-  Menu, X, Building2, Home as HomeIcon,
+  Menu, X, Building2, Home as HomeIcon, Wrench,
 } from 'lucide-react'
 import { UserMenu } from '@/components/auth/UserMenu'
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/enter', icon: PlusCircle, label: 'Enter Data' },
+  { to: '/enter', icon: Camera, label: 'Add Snapshot' },
   { to: '/accounts', icon: Landmark, label: 'Cash Accounts' },
   { to: '/investments', icon: TrendingUp, label: 'Investments' },
   { to: '/debt', icon: Skull, label: 'Debt' },
@@ -17,6 +17,7 @@ const navItems = [
   { to: '/income', icon: DollarSign, label: 'Income' },
   { to: '/budget', icon: Scale, label: 'Budget' },
   { to: '/goals', icon: Trophy, label: 'Goals' },
+  { to: '/tools', icon: Wrench, label: 'Tools' },
 ]
 
 const proItems = [
