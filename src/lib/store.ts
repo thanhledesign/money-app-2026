@@ -151,6 +151,49 @@ export function resetData(): AppData {
   return data
 }
 
+export function resetSnapshots(): AppData {
+  const data = loadData()
+  data.snapshots = []
+  saveData(data)
+  return data
+}
+
+export function resetAccounts(): AppData {
+  const data = loadData()
+  data.accounts = []
+  saveData(data)
+  return data
+}
+
+export function resetBudget(): AppData {
+  const data = loadData()
+  data.budgetItems = []
+  data.budgetActuals = []
+  saveData(data)
+  return data
+}
+
+export function resetGoals(): AppData {
+  const data = loadData()
+  data.goals = []
+  saveData(data)
+  return data
+}
+
+export function resetIncome(): AppData {
+  const data = loadData()
+  data.comp = { annualSalary: 0, bonus: 0, ltiPreTax: 0, taxRate: 0 }
+  data.deductions = []
+  data.allocations = []
+  saveData(data)
+  return data
+}
+
+export function nukeAllData(): void {
+  localStorage.removeItem(getStorageKey('data'))
+  localStorage.removeItem(getStorageKey('wizard-done'))
+}
+
 export function exportData(): string {
   return localStorage.getItem(getStorageKey('data')) || '{}'
 }

@@ -3,7 +3,11 @@ import type { ChartPrefs } from '@/data/chartPrefs'
 import { Card, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { ColorPicker } from '@/components/ui/ColorPicker'
-import { exportData, importData } from '@/lib/store'
+import {
+  exportData, importData,
+  resetSnapshots, resetAccounts, resetBudget, resetGoals, resetIncome, nukeAllData,
+} from '@/lib/store'
+import { getStorageKey } from '@/lib/store'
 import { ThemeEditor } from '@/components/ui/ThemeEditor'
 import { useState } from 'react'
 
@@ -16,23 +20,82 @@ interface Props {
   resetPrefs: () => void
 }
 
-export default function SettingsPage({ data, prefs, setAccountColor, setLabelColor, onUpdatePrefs, resetPrefs }: Props) {
-  const [exportMsg, setExportMsg] = useState('')
+function downloadFile(content: string, filename: string, type: string) {
+  const blob = new Blob([content], { type })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
-  const handleExport = () => {
-    const json = exportData()
-    const blob = new Blob([json], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `money-app-backup-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-    setExportMsg('Exported!')
-    setTimeout(() => setExportMsg(''), 2000)
+function dateSuffix() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function snapshotsToCsv(data: AppData): string {
+  const accounts = data.accounts.filter(a => a.isActive)
+  const header = ['Date', 'Paycheck', 'Credit Score', ...accounts.map(a => a.name)]
+  const rows = data.snapshots.map(s => {
+    const date = new Date(s.timestamp).toLocaleDateString('en-US')
+    const paycheck = s.paycheckAmount?.toString() ?? ''
+    const score = s.creditScore?.toString() ?? ''
+    const balances = accounts.map(a => (s.balances[a.id] ?? 0).toString())
+    return [date, paycheck, score, ...balances]
+  })
+  return [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+}
+
+function budgetToCsv(data: AppData): string {
+  const header = ['Name', 'Amount', 'Tier', 'Category']
+  const rows = data.budgetItems.map(b => [b.name, b.amount.toString(), b.tier, b.category])
+  return [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+}
+
+function accountsToCsv(data: AppData): string {
+  const header = ['Name', 'Institution', 'Type', 'Category', 'Active', 'Credit Limit']
+  const rows = data.accounts.map(a => [
+    a.name, a.institution, a.type, a.category,
+    a.isActive ? 'Yes' : 'No', a.creditLimit?.toString() ?? '',
+  ])
+  return [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+}
+
+export default function SettingsPage({ data, prefs, setAccountColor, setLabelColor, onUpdatePrefs, resetPrefs }: Props) {
+  const [statusMsg, setStatusMsg] = useState('')
+  const [importPreview, setImportPreview] = useState<AppData | null>(null)
+  const [nukeConfirm, setNukeConfirm] = useState('')
+  const [categoryConfirm, setCategoryConfirm] = useState<string | null>(null)
+
+  function showStatus(msg: string) {
+    setStatusMsg(msg)
+    setTimeout(() => setStatusMsg(''), 3000)
   }
 
-  const handleImport = () => {
+  // ── Export handlers ──
+  const handleExportJSON = () => {
+    downloadFile(exportData(), `money-app-backup-${dateSuffix()}.json`, 'application/json')
+    showStatus('JSON exported!')
+  }
+
+  const handleExportSnapshotsCSV = () => {
+    downloadFile(snapshotsToCsv(data), `money-app-snapshots-${dateSuffix()}.csv`, 'text/csv')
+    showStatus('Snapshots CSV exported!')
+  }
+
+  const handleExportBudgetCSV = () => {
+    downloadFile(budgetToCsv(data), `money-app-budget-${dateSuffix()}.csv`, 'text/csv')
+    showStatus('Budget CSV exported!')
+  }
+
+  const handleExportAccountsCSV = () => {
+    downloadFile(accountsToCsv(data), `money-app-accounts-${dateSuffix()}.csv`, 'text/csv')
+    showStatus('Accounts CSV exported!')
+  }
+
+  // ── Import handler ──
+  const handleImportClick = () => {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.json'
@@ -42,13 +105,57 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
       const reader = new FileReader()
       reader.onload = () => {
         try {
-          importData(reader.result as string)
-          window.location.reload()
-        } catch { setExportMsg('Invalid file') }
+          const parsed = JSON.parse(reader.result as string) as AppData
+          setImportPreview(parsed)
+        } catch {
+          showStatus('Invalid JSON file')
+        }
       }
       reader.readAsText(file)
     }
     input.click()
+  }
+
+  const handleImportConfirm = () => {
+    if (!importPreview) return
+    importData(JSON.stringify(importPreview))
+    setImportPreview(null)
+    window.location.reload()
+  }
+
+  // ── Category reset handlers ──
+  const categoryResets: Record<string, { label: string; description: string; fn: () => void }> = {
+    snapshots: {
+      label: 'Snapshots',
+      description: `${data.snapshots.length} snapshots`,
+      fn: () => { resetSnapshots(); window.location.reload() },
+    },
+    accounts: {
+      label: 'Accounts',
+      description: `${data.accounts.length} accounts`,
+      fn: () => { resetAccounts(); window.location.reload() },
+    },
+    budget: {
+      label: 'Budget',
+      description: `${data.budgetItems.length} items`,
+      fn: () => { resetBudget(); window.location.reload() },
+    },
+    goals: {
+      label: 'Goals',
+      description: `${data.goals.length} goals`,
+      fn: () => { resetGoals(); window.location.reload() },
+    },
+    income: {
+      label: 'Income & Comp',
+      description: `salary, deductions, allocations`,
+      fn: () => { resetIncome(); window.location.reload() },
+    },
+  }
+
+  const handleNukeAll = () => {
+    if (nukeConfirm !== 'DELETE') return
+    nukeAllData()
+    window.location.reload()
   }
 
   const activeAccounts = data.accounts.filter(a => a.isActive)
@@ -141,7 +248,7 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
         </div>
       </Card>
 
-      {/* Reset */}
+      {/* Reset Colors */}
       <Card className="mb-6">
         <CardTitle>Reset Colors</CardTitle>
         <p className="text-xs text-text-muted mt-1 mb-4">Restore all colors and chart settings to defaults</p>
@@ -156,19 +263,134 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
       {/* Theme Editor */}
       <ThemeEditor />
 
-      {/* Data Management */}
-      <Card>
-        <CardTitle>Data Management</CardTitle>
-        <div className="mt-4 flex gap-3">
-          <button onClick={handleExport}
-            className="px-4 py-2 bg-accent/10 text-accent border border-accent/30 rounded-lg text-sm hover:bg-accent/20 transition-colors">
-            Export Data
-          </button>
-          <button onClick={handleImport}
+      {/* ── Export Data ── */}
+      <Card className="mb-6">
+        <CardTitle>Export Data</CardTitle>
+        <p className="text-xs text-text-muted mt-1 mb-4">Download your data as JSON (full backup) or CSV (spreadsheet-friendly)</p>
+
+        <div className="space-y-3">
+          <div>
+            <p className="text-xs text-text-secondary mb-2 font-medium">Full Backup (JSON)</p>
+            <button onClick={handleExportJSON}
+              className="px-4 py-2 bg-accent/10 text-accent border border-accent/30 rounded-lg text-sm hover:bg-accent/20 transition-colors">
+              Export JSON
+            </button>
+          </div>
+
+          <div>
+            <p className="text-xs text-text-secondary mb-2 font-medium">Spreadsheet Exports (CSV)</p>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={handleExportSnapshotsCSV}
+                className="px-3 py-1.5 bg-surface-hover text-text-secondary border border-border rounded-lg text-xs hover:text-text-primary transition-colors">
+                Snapshots CSV
+              </button>
+              <button onClick={handleExportBudgetCSV}
+                className="px-3 py-1.5 bg-surface-hover text-text-secondary border border-border rounded-lg text-xs hover:text-text-primary transition-colors">
+                Budget CSV
+              </button>
+              <button onClick={handleExportAccountsCSV}
+                className="px-3 py-1.5 bg-surface-hover text-text-secondary border border-border rounded-lg text-xs hover:text-text-primary transition-colors">
+                Accounts CSV
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {statusMsg && <p className="text-xs text-green mt-3">{statusMsg}</p>}
+      </Card>
+
+      {/* ── Import Data ── */}
+      <Card className="mb-6">
+        <CardTitle>Import Data</CardTitle>
+        <p className="text-xs text-text-muted mt-1 mb-4">Restore from a JSON backup file. This replaces all current data.</p>
+
+        {!importPreview ? (
+          <button onClick={handleImportClick}
             className="px-4 py-2 bg-surface-hover text-text-secondary border border-border rounded-lg text-sm hover:text-text-primary transition-colors">
-            Import Data
+            Choose JSON File
           </button>
-          {exportMsg && <span className="text-xs text-green self-center">{exportMsg}</span>}
+        ) : (
+          <div className="p-4 rounded-lg border border-amber/30 bg-amber/5 space-y-3">
+            <p className="text-sm text-amber font-medium">Import Preview</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-text-secondary">
+              <div>{importPreview.accounts?.length ?? 0} accounts</div>
+              <div>{importPreview.snapshots?.length ?? 0} snapshots</div>
+              <div>{importPreview.budgetItems?.length ?? 0} budget items</div>
+              <div>{importPreview.goals?.length ?? 0} goals</div>
+              <div>{importPreview.deductions?.length ?? 0} deductions</div>
+              <div>{importPreview.allocations?.length ?? 0} allocations</div>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={handleImportConfirm}
+                className="px-4 py-2 bg-amber/10 text-amber border border-amber/30 rounded-lg text-sm hover:bg-amber/20 transition-colors">
+                Confirm Import
+              </button>
+              <button onClick={() => setImportPreview(null)}
+                className="px-4 py-2 border border-border text-text-muted rounded-lg text-sm hover:text-text-secondary transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* ── Reset Data ── */}
+      <Card className="mb-6">
+        <CardTitle>Reset Data</CardTitle>
+        <p className="text-xs text-text-muted mt-1 mb-4">Clear specific categories or wipe everything. This cannot be undone — export first!</p>
+
+        {/* Per-category resets */}
+        <div className="space-y-2 mb-6">
+          <p className="text-xs text-text-secondary font-medium mb-2">Reset by Category</p>
+          {Object.entries(categoryResets).map(([key, { label, description, fn }]) => (
+            <div key={key} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+              <div>
+                <p className="text-sm text-text-primary">{label}</p>
+                <p className="text-xs text-text-muted">{description}</p>
+              </div>
+              {categoryConfirm === key ? (
+                <div className="flex gap-2">
+                  <button onClick={fn}
+                    className="px-3 py-1.5 bg-red/10 text-red border border-red/30 rounded-lg text-xs hover:bg-red/20 transition-colors">
+                    Yes, Reset
+                  </button>
+                  <button onClick={() => setCategoryConfirm(null)}
+                    className="px-3 py-1.5 border border-border text-text-muted rounded-lg text-xs hover:text-text-secondary transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => setCategoryConfirm(key)}
+                  className="px-3 py-1.5 border border-border text-text-muted rounded-lg text-xs hover:text-red hover:border-red/30 transition-colors">
+                  Reset
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* System-wide nuke */}
+        <div className="p-4 rounded-lg border border-red/30 bg-red/5">
+          <p className="text-sm text-red font-medium mb-1">Delete All Data & Start Over</p>
+          <p className="text-xs text-text-muted mb-3">
+            This permanently deletes all your data and returns you to the setup wizard. Type DELETE to confirm.
+          </p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={nukeConfirm}
+              onChange={e => setNukeConfirm(e.target.value)}
+              placeholder='Type "DELETE"'
+              className="px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-text-primary w-36"
+            />
+            <button
+              onClick={handleNukeAll}
+              disabled={nukeConfirm !== 'DELETE'}
+              className="px-4 py-1.5 bg-red text-white rounded-lg text-sm hover:bg-red/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Delete Everything
+            </button>
+          </div>
         </div>
       </Card>
 
@@ -197,8 +419,7 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}?fresh=true`)
-                  setExportMsg('Link copied!')
-                  setTimeout(() => setExportMsg(''), 2000)
+                  showStatus('Link copied!')
                 }}
                 className="px-3 py-2 border border-border rounded-lg text-xs text-text-muted hover:text-text-secondary transition-colors"
               >
@@ -210,7 +431,7 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
             <p className="text-xs text-text-secondary mb-1">Re-run the setup wizard (keeps your existing data):</p>
             <button
               onClick={() => {
-                localStorage.removeItem('money-app-wizard-done')
+                localStorage.removeItem(getStorageKey('wizard-done'))
                 window.location.reload()
               }}
               className="px-4 py-2 bg-accent/10 text-accent border border-accent/30 rounded-lg text-sm hover:bg-accent/20 transition-colors"
