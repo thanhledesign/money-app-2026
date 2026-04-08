@@ -302,13 +302,37 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
       {/* ── Import Data ── */}
       <Card className="mb-6">
         <CardTitle>Import Data</CardTitle>
-        <p className="text-xs text-text-muted mt-1 mb-4">Restore from a JSON backup file. This replaces all current data.</p>
+        <p className="text-xs text-text-muted mt-1 mb-4">Restore from a JSON backup or load a template. This replaces all current data.</p>
 
         {!importPreview ? (
-          <button onClick={handleImportClick}
-            className="px-4 py-2 bg-surface-hover text-text-secondary border border-border rounded-lg text-sm hover:text-text-primary transition-colors">
-            Choose JSON File
-          </button>
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs text-text-secondary mb-2 font-medium">From File</p>
+              <button onClick={handleImportClick}
+                className="px-4 py-2 bg-surface-hover text-text-secondary border border-border rounded-lg text-sm hover:text-text-primary transition-colors">
+                Choose JSON File
+              </button>
+            </div>
+
+            <div>
+              <p className="text-xs text-text-secondary mb-2 font-medium">From Template</p>
+              <p className="text-xs text-text-muted mb-2">Pre-built data sets you can load instantly. Your current data will be replaced.</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/templates/thanh-2026.json')
+                      const parsed = await res.json()
+                      setImportPreview(parsed)
+                    } catch { showStatus('Failed to load template') }
+                  }}
+                  className="px-3 py-1.5 bg-purple/10 text-purple border border-purple/30 rounded-lg text-xs hover:bg-purple/20 transition-colors"
+                >
+                  Thanh's 2026 Data ($175K comp, 21 accounts)
+                </button>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="p-4 rounded-lg border border-amber/30 bg-amber/5 space-y-3">
             <p className="text-sm text-amber font-medium">Import Preview</p>
