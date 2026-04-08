@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { AppData, Snapshot } from '@/data/types'
 import type { Account } from '@/data/types'
 import {
@@ -85,7 +86,18 @@ export default function EntryPage({ data, addSnapshot, deleteSnapshot, addAccoun
 
     addSnapshot(newSnapshot)
     setSubmittedSnapshot(newSnapshot)
+
+    // First snapshot after wizard? Redirect to dashboard with success message
+    if (localStorage.getItem('money-app-first-snapshot-pending') === 'true') {
+      localStorage.removeItem('money-app-first-snapshot-pending')
+      localStorage.setItem('money-app-first-snapshot-done', 'true')
+      navigate('/')
+      return
+    }
   }
+
+  const navigate = useNavigate()
+  const isFirstSnapshot = localStorage.getItem('money-app-first-snapshot-pending') === 'true'
 
   const diff = submittedSnapshot && latest ? getSnapshotDiff(submittedSnapshot, latest, data) : null
 

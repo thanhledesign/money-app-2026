@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { AppData, Snapshot, Account, BudgetItem, Goal, Dashboard } from '@/data/types'
 import * as store from '@/lib/store'
+import { loadFromCloud } from '@/lib/sync'
 
 export function useAppData(userId?: string, dashboard?: Dashboard) {
   const dashboardId = dashboard?.id ?? 'default'
@@ -19,16 +20,30 @@ export function useAppData(userId?: string, dashboard?: Dashboard) {
     return store.loadData()
   })
 
-  // When userId or dashboard changes, reload
+  // When userId or dashboard changes, reload from local then try cloud
   useEffect(() => {
     store.setStoragePrefix(userId)
     if (dashboard?.mode === 'combined' && dashboard.mergeIds?.length) {
       setData(store.getMergedData(dashboard.mergeIds))
     } else {
-      store.setDashboardId(
-        dashboard?.mode === 'view' ? (dashboard.sourceId ?? 'default') : dashboardId
-      )
+      const effectiveDashboardId = dashboard?.mode === 'view' ? (dashboard.sourceId ?? 'default') : dashboardId
+      store.setDashboardId(effectiveDashboardId)
       setData(store.loadData())
+
+      // Hydrate from cloud if authenticated and data is empty/default
+      if (userId && dashboard?.mode !== 'combined') {
+        loadFromCloud(userId, `d-${effectiveDashboardId}-data`).then(cloudData => {
+          if (cloudData && typeof cloudData === 'object') {
+            const cd = cloudData as AppData
+            // Use cloud data if it has more snapshots than local (cloud is newer)
+            const localData = store.loadData()
+            if (cd.snapshots && cd.snapshots.length > localData.snapshots.length) {
+              store.saveData(cd)
+              setData(cd)
+            }
+          }
+        })
+      }
     }
   }, [userId, dashboardId, dashboard?.mode, dashboard?.sourceId])
 

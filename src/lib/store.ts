@@ -3,13 +3,16 @@ import {
   defaultAccounts, seedSnapshots, defaultComp, defaultDeductions,
   defaultAllocations, defaultBudgetItems, defaultGoals,
 } from '@/data/seed'
+import { debouncedSync } from './sync'
 
 // ── Prefix system ──
 // Format: money-app-[u-{userId}-]d-{dashboardId}-
 let _userPrefix = 'money-app-'
 let _dashboardId = 'default'
+let _userId: string | undefined
 
 export function setStoragePrefix(userId?: string) {
+  _userId = userId
   _userPrefix = userId ? `money-app-u-${userId}-` : 'money-app-'
 }
 
@@ -113,6 +116,7 @@ export function loadDashboardIndex(): DashboardIndex {
 
 export function saveDashboardIndex(index: DashboardIndex): void {
   localStorage.setItem(getUserKey('dashboards'), JSON.stringify(index))
+  if (_userId) debouncedSync(_userId, 'dashboards', index)
 }
 
 export function createDashboardEntry(dashboard: Dashboard): DashboardIndex {
@@ -284,7 +288,9 @@ export function loadData(): AppData {
 }
 
 export function saveData(data: AppData): void {
-  localStorage.setItem(getStorageKey('data'), JSON.stringify(data))
+  const key = getStorageKey('data')
+  localStorage.setItem(key, JSON.stringify(data))
+  if (_userId) debouncedSync(_userId, `d-${_dashboardId}-data`, data)
 }
 
 export function addSnapshot(snapshot: Snapshot): AppData {

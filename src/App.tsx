@@ -21,6 +21,7 @@ import SettingsPage from '@/components/settings/SettingsPage'
 import BusinessPage from '@/components/pro/BusinessPage'
 import PropertiesPage from '@/components/pro/PropertiesPage'
 import { AdminDesigner } from '@/components/ui/AdminDesigner'
+import { isAdmin } from '@/lib/roles'
 import ToolsPage from '@/components/tools/ToolsPage'
 import { getStorageKey } from '@/lib/store'
 
@@ -90,7 +91,7 @@ function AppInner({ userId, isLocal, auth }: {
 
   return (
     <>
-    <AdminDesigner />
+    {isAdmin(auth.user?.email) && <AdminDesigner />}
     <Routes>
       <Route element={
         <Layout

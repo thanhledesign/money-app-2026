@@ -601,14 +601,17 @@ function StepBudget({
                     <div className="relative">
                       <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted text-xs">$</span>
                       <input
-                        type="number"
-                        value={item.amount}
+                        type="text"
+                        inputMode="decimal"
+                        value={item.amount === 0 ? '' : item.amount}
+                        placeholder="0"
                         onChange={e => {
                           const updated = [...budgetItems]
                           updated[i] = { ...item, amount: parseFloat(e.target.value) || 0 }
                           setBudgetItems(updated)
                         }}
-                        className="bg-surface-hover border border-border rounded-lg pl-5 pr-2 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent transition-colors w-full"
+                        onFocus={e => e.target.select()}
+                        className="bg-surface-hover border border-border rounded-lg pl-5 pr-2 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent transition-colors w-full tabular-nums"
                       />
                     </div>
                   </div>
@@ -775,12 +778,28 @@ function StepDone({
         )}
       </div>
 
-      <button
-        onClick={onFinish}
-        className="px-10 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl transition-colors text-sm"
-      >
-        Go to Dashboard
-      </button>
+      <div className="space-y-3">
+        <button
+          onClick={() => {
+            onFinish()
+            // Set flag so Entry page shows first-snapshot guidance
+            localStorage.setItem('money-app-first-snapshot-pending', 'true')
+            window.location.hash = ''
+            window.location.pathname = '/enter'
+          }}
+          className="px-10 py-3 bg-green hover:bg-green-dim text-white font-semibold rounded-xl transition-colors text-sm w-full sm:w-auto"
+        >
+          Take Your First Snapshot
+        </button>
+        <div>
+          <button
+            onClick={onFinish}
+            className="px-6 py-2 text-text-muted hover:text-text-secondary transition-colors text-xs"
+          >
+            Skip — go to dashboard
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   Area, AreaChart, PieChart, Pie, Cell, BarChart, Bar, Legend,
@@ -36,6 +36,16 @@ const CHART_KEYS = [
 
 export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
   const [editMode, setEditMode] = useState(false)
+  const [showFirstSnapshotBanner, setShowFirstSnapshotBanner] = useState(false)
+
+  useEffect(() => {
+    if (localStorage.getItem('money-app-first-snapshot-done') === 'true') {
+      setShowFirstSnapshotBanner(true)
+      localStorage.removeItem('money-app-first-snapshot-done')
+      const timer = setTimeout(() => setShowFirstSnapshotBanner(false), 8000)
+      return () => clearTimeout(timer)
+    }
+  }, [])
   const [dragIdx, setDragIdx] = useState<number | null>(null)
   const [dashTitle, setDashTitle] = useState(() => localStorage.getItem('money-app-dash-title') || 'Dashboard')
   const latest = calc.getLatestSnapshot(data)
@@ -444,6 +454,11 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
 
   return (
     <div>
+      {showFirstSnapshotBanner && (
+        <div className="mb-4 px-4 py-3 bg-green/10 border border-green/30 rounded-lg text-sm text-green animate-fadeIn">
+          Your first snapshot is recorded! Your dashboard is now tracking your finances. Add a new snapshot each pay period to see trends over time.
+        </div>
+      )}
       <PageHeader
         icon="📊"
         title={dashTitle}
