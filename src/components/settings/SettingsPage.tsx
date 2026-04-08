@@ -171,6 +171,55 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
           {exportMsg && <span className="text-xs text-green self-center">{exportMsg}</span>}
         </div>
       </Card>
+
+      {/* Preview & Testing */}
+      <Card>
+        <CardTitle>Preview & Testing</CardTitle>
+        <p className="text-xs text-text-muted mt-1 mb-4">Test the new-user experience or share a fresh link</p>
+        <div className="space-y-3">
+          <div>
+            <p className="text-xs text-text-secondary mb-1">Preview as a new user (opens wizard in a new tab):</p>
+            <a
+              href={`${window.location.origin}?fresh=true`}
+              target="_blank"
+              rel="noopener"
+              className="inline-flex px-4 py-2 bg-amber/10 text-amber border border-amber/30 rounded-lg text-sm hover:bg-amber/20 transition-colors"
+            >
+              Open Fresh Preview
+            </a>
+          </div>
+          <div>
+            <p className="text-xs text-text-secondary mb-1">Share this link for others to try the wizard:</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-xs text-text-muted font-mono truncate">
+                {window.location.origin}?fresh=true
+              </code>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}?fresh=true`)
+                  setExportMsg('Link copied!')
+                  setTimeout(() => setExportMsg(''), 2000)
+                }}
+                className="px-3 py-2 border border-border rounded-lg text-xs text-text-muted hover:text-text-secondary transition-colors"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-text-secondary mb-1">Re-run the setup wizard (keeps your existing data):</p>
+            <button
+              onClick={() => {
+                localStorage.removeItem('money-app-wizard-done')
+                window.location.reload()
+              }}
+              className="px-4 py-2 bg-accent/10 text-accent border border-accent/30 rounded-lg text-sm hover:bg-accent/20 transition-colors"
+            >
+              Re-run Wizard
+            </button>
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }

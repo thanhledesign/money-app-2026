@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Routes, Route, useSearchParams } from 'react-router-dom'
 import { useAppData } from '@/hooks/useAppData'
 import { useChartPrefs } from '@/hooks/useChartPrefs'
 import { useAuth } from '@/hooks/useAuth'
+import { PasswordGate, isPasswordRequired, isPasswordValid } from '@/components/auth/PasswordGate'
 import Layout from '@/components/layout/Layout'
 import { LoginPage } from '@/components/auth/LoginPage'
 import WizardPage from '@/components/wizard/WizardPage'
@@ -22,8 +23,12 @@ import { AdminDesigner } from '@/components/ui/AdminDesigner'
 import ToolsPage from '@/components/tools/ToolsPage'
 
 export default function App() {
+  const [searchParams] = useSearchParams()
+  const freshMode = searchParams.get('fresh') === 'true'
   const auth = useAuth()
+  const [passwordOk, setPasswordOk] = useState(() => isPasswordValid())
   const [skippedLogin, setSkippedLogin] = useState(() => {
+    if (freshMode) return true
     return localStorage.getItem('money-app-skipped-login') === 'true'
   })
 
@@ -31,15 +36,31 @@ export default function App() {
     data, addSnapshot, deleteSnapshot, addGoal,
     addAccount, updateAccounts,
     updateComp, updateDeductions, updateAllocations, updateBudgetItems,
+    resetData,
   } = useAppData()
 
   const { prefs, update: updatePrefs, setAccountColor, setLabelColor, reset: resetPrefs } = useChartPrefs()
 
-  const [wizardComplete, setWizardComplete] = useState(() =>
-    localStorage.getItem('money-app-wizard-done') === 'true' || data.snapshots.length > 0
-  )
+  const [wizardComplete, setWizardComplete] = useState(() => {
+    if (freshMode) return false
+    return localStorage.getItem('money-app-wizard-done') === 'true' || data.snapshots.length > 0
+  })
 
-  // Show login if not authenticated and hasn't skipped
+  // Fresh mode: reset data on mount
+  useEffect(() => {
+    if (freshMode) {
+      resetData()
+      localStorage.removeItem('money-app-wizard-done')
+      localStorage.removeItem('money-app-skipped-login')
+    }
+  }, [freshMode])
+
+  // Password gate
+  if (isPasswordRequired() && !passwordOk) {
+    return <PasswordGate onSuccess={() => setPasswordOk(true)} />
+  }
+
+  // Loading
   if (auth.loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
