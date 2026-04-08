@@ -11,6 +11,7 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { HealthScoreTooltip } from '@/components/ui/HealthScoreTooltip'
 import { UVPBadge } from '@/components/ui/UVPBadge'
 import * as calc from '@/lib/calculations'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 interface Props {
   data: AppData
@@ -119,7 +120,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
   }, [data])
 
   if (!latest || !metrics) {
-    return <div className="text-text-muted text-center py-20">No data yet. Enter your first snapshot.</div>
+    return <EmptyState icon="📊" title="Welcome to Money 2026" message="Your dashboard is empty. Run the setup wizard to add your accounts, income, budget, and goals — or switch to the Sample Dashboard to explore." />
   }
 
   const lastUpdated = new Date(latest.timestamp).toLocaleDateString('en-US', {

@@ -19,6 +19,7 @@ import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
 import { Card, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { PageTheme } from '@/components/ui/PageTheme'
 import { AccountManager } from '@/components/ui/AccountManager'
 import {
@@ -156,11 +157,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
   )
 
   if (!latest) {
-    return (
-      <div className="text-text-muted text-center py-20">
-        No snapshots yet. Enter your first snapshot to see debt data.
-      </div>
-    )
+    return <EmptyState icon="💀" title="No debt data" message="Run the setup wizard to add your credit cards and loans." />
   }
 
   const utilizationBarColor = (pct: number) => {

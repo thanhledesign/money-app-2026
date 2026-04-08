@@ -9,6 +9,7 @@ import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
 import { Card, CardTitle, KPICard } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { PageTheme } from '@/components/ui/PageTheme'
 import { AccountManager } from '@/components/ui/AccountManager'
 import {
@@ -181,7 +182,10 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
         />
       </div>
 
-      {accounts.length === 0 && (
+      {accounts.length === 0 && !latest && (
+        <EmptyState icon="📈" title="No investments" message="Run the setup wizard to add your 401K, IRAs, and brokerage accounts." />
+      )}
+      {accounts.length === 0 && latest && (
         <p className="text-text-muted text-center py-20">No active investment accounts found.</p>
       )}
 

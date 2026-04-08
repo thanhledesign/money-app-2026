@@ -18,6 +18,7 @@ import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
 import { Card, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { PageTheme } from '@/components/ui/PageTheme'
 import { AccountManager } from '@/components/ui/AccountManager'
 import {
@@ -156,11 +157,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
   const prevMonthKey = monthKeys.length >= 2 ? monthKeys[monthKeys.length - 2] : null
 
   if (!latest) {
-    return (
-      <div className="text-text-muted text-center py-20">
-        No snapshots yet. Enter your first snapshot to see net worth data.
-      </div>
-    )
+    return <EmptyState icon="💎" title="No net worth data" message="Run the setup wizard to add your accounts and record your first snapshot." />
   }
 
   const categoryLabel: Record<string, string> = {

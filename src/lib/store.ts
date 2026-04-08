@@ -217,10 +217,8 @@ function getSeededData(): AppData {
 }
 
 function getDefaultData(): AppData {
-  // Only the default dashboard of a local user gets seed data
-  const isUserScoped = _userPrefix !== 'money-app-'
-  if (isUserScoped) return getEmptyData()
-  return _dashboardId === 'default' ? getSeededData() : getEmptyData()
+  // All dashboards start empty — sample dashboard is initialized separately
+  return getEmptyData()
 }
 
 export function loadData(): AppData {

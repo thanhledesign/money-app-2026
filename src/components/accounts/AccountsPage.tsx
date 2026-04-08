@@ -9,6 +9,7 @@ import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
 import { Card, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { PageTheme } from '@/components/ui/PageTheme'
 import { AccountManager } from '@/components/ui/AccountManager'
 import {
@@ -143,7 +144,10 @@ export default function AccountsPage({ data, prefs, addAccount, updateAccounts }
         onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
       />
 
-      {accounts.length === 0 && (
+      {accounts.length === 0 && !latest && (
+        <EmptyState icon="🏦" title="No cash accounts" message="Run the setup wizard to add your checking and savings accounts." />
+      )}
+      {accounts.length === 0 && latest && (
         <p className="text-text-muted text-center py-20">No active cash accounts found.</p>
       )}
 
