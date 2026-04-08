@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronDown, Plus, Trash2, Pencil, Download, Upload } from 'lucide-react'
+import { ChevronDown, Plus, Settings, Pencil, Trash2, Download, Upload, Copy } from 'lucide-react'
 import type { Dashboard } from '@/data/types'
 import { MAX_FREE_DASHBOARDS } from '@/data/types'
 import { setDashboardId, exportData, importData } from '@/lib/store'
@@ -12,6 +12,7 @@ interface Props {
   onCreateClick: () => void
   onDelete: (id: string) => void
   onRename: (id: string, name: string, emoji: string) => void
+  onDuplicate: (id: string) => void
 }
 
 const MODE_BADGE: Record<string, { label: string; color: string }> = {
@@ -20,12 +21,13 @@ const MODE_BADGE: Record<string, { label: string; color: string }> = {
   combined: { label: 'Combined', color: 'text-purple bg-purple/10 border-purple/30' },
 }
 
-export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, onCreateClick, onDelete, onRename }: Props) {
+export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, onCreateClick, onDelete, onRename, onDuplicate }: Props) {
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editEmoji, setEditEmoji] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [cogMenuId, setCogMenuId] = useState<string | null>(null)
   const ref = useRef<HTMLDivElement>(null)
 
   const active = dashboards.find(d => d.id === activeId) ?? dashboards[0]
@@ -37,6 +39,7 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
         setOpen(false)
         setEditingId(null)
         setConfirmDeleteId(null)
+        setCogMenuId(null)
       }
     }
     document.addEventListener('mousedown', handle)
@@ -44,6 +47,7 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
   }, [open])
 
   const startEdit = (d: Dashboard) => {
+    setCogMenuId(null)
     setEditingId(d.id)
     setEditName(d.name)
     setEditEmoji(d.emoji)
@@ -57,6 +61,7 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
   }
 
   const handleExportDashboard = (d: Dashboard) => {
+    setCogMenuId(null)
     setDashboardId(d.mode === 'view' ? (d.sourceId ?? 'default') : d.id)
     const json = exportData()
     const blob = new Blob([json], { type: 'application/json' })
@@ -66,11 +71,11 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
     a.download = `${d.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
-    // Restore active dashboard prefix
     setDashboardId(activeId)
   }
 
   const handleImportToDashboard = (d: Dashboard) => {
+    setCogMenuId(null)
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.json'
@@ -89,6 +94,16 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
       reader.readAsText(file)
     }
     input.click()
+  }
+
+  const handleDuplicate = (d: Dashboard) => {
+    setCogMenuId(null)
+    onDuplicate(d.id)
+  }
+
+  const handleDeleteClick = (d: Dashboard) => {
+    setCogMenuId(null)
+    setConfirmDeleteId(d.id)
   }
 
   return (
@@ -164,24 +179,64 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
                       {MODE_BADGE[d.mode]?.label ?? d.mode}
                     </span>
                   </button>
-                  <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                    {d.mode === 'scenario' && (
-                      <>
-                        <button onClick={() => handleExportDashboard(d)} className="p-1 text-text-muted hover:text-green" title="Export">
-                          <Download size={12} />
-                        </button>
-                        <button onClick={() => handleImportToDashboard(d)} className="p-1 text-text-muted hover:text-blue" title="Import">
-                          <Upload size={12} />
-                        </button>
-                      </>
-                    )}
-                    <button onClick={() => startEdit(d)} className="p-1 text-text-muted hover:text-text-primary" title="Rename">
-                      <Pencil size={12} />
+
+                  {/* Cog wheel — reveals action menu on click */}
+                  <div className="relative flex-shrink-0">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setCogMenuId(cogMenuId === d.id ? null : d.id) }}
+                      className="p-1 text-text-muted hover:text-text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Actions"
+                    >
+                      <Settings size={13} />
                     </button>
-                    {d.id !== 'default' && (
-                      <button onClick={() => setConfirmDeleteId(d.id)} className="p-1 text-text-muted hover:text-red" title="Delete">
-                        <Trash2 size={12} />
-                      </button>
+
+                    {cogMenuId === d.id && (
+                      <div
+                        className="absolute right-0 top-full mt-1 w-40 bg-surface border border-border rounded-lg shadow-2xl z-[60] py-1"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={() => startEdit(d)}
+                          className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-text-secondary hover:bg-surface-hover transition-colors"
+                        >
+                          <Pencil size={12} /> Rename
+                        </button>
+                        {d.mode === 'scenario' && (
+                          <button
+                            onClick={() => handleDuplicate(d)}
+                            className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-text-secondary hover:bg-surface-hover transition-colors"
+                          >
+                            <Copy size={12} /> Duplicate
+                          </button>
+                        )}
+                        {d.mode === 'scenario' && (
+                          <>
+                            <button
+                              onClick={() => handleExportDashboard(d)}
+                              className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-text-secondary hover:bg-surface-hover transition-colors"
+                            >
+                              <Download size={12} /> Export
+                            </button>
+                            <button
+                              onClick={() => handleImportToDashboard(d)}
+                              className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-text-secondary hover:bg-surface-hover transition-colors"
+                            >
+                              <Upload size={12} /> Import
+                            </button>
+                          </>
+                        )}
+                        {d.id !== 'default' && (
+                          <>
+                            <div className="border-t border-border my-1" />
+                            <button
+                              onClick={() => handleDeleteClick(d)}
+                              className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-red hover:bg-red/5 transition-colors"
+                            >
+                              <Trash2 size={12} /> Delete
+                            </button>
+                          </>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

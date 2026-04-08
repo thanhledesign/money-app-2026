@@ -29,7 +29,8 @@
 - Nuke all data (type DELETE to confirm)
 - Personal data template (importable JSON at /templates/thanh-2026.json)
 - Multi-dashboard: 3 free, scenario/view/combined modes
-- Dashboard switcher in sidebar with rename/delete/export/import
+- Dashboard switcher in sidebar with cog wheel action menu (rename/delete/export/import/duplicate)
+- Duplicate dashboard feature (copies all data to a new scenario dashboard)
 - Preloaded Sample Dashboard with fake bank names
 - Empty state with "Start Setup Wizard" prompt on all pages
 

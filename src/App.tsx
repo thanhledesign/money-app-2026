@@ -108,6 +108,7 @@ function AppInner({ userId, isLocal, auth }: {
           onCreateDashboard={db.createDashboard}
           onDeleteDashboard={db.deleteDashboard}
           onRenameDashboard={db.renameDashboard}
+          onDuplicateDashboard={db.duplicateDashboard}
         />
       }>
         <Route index element={<DashboardPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} />} />

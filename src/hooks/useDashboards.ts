@@ -4,6 +4,7 @@ import { MAX_FREE_DASHBOARDS } from '@/data/types'
 import {
   setStoragePrefix, loadDashboardIndex, saveDashboardIndex,
   createDashboardEntry, deleteDashboardEntry, renameDashboardEntry,
+  duplicateDashboardEntry,
 } from '@/lib/store'
 
 export function useDashboards(userId?: string) {
@@ -46,6 +47,11 @@ export function useDashboards(userId?: string) {
     setIndex(idx)
   }, [])
 
+  const duplicateDashboard = useCallback((id: string) => {
+    const idx = duplicateDashboardEntry(id)
+    setIndex(idx)
+  }, [])
+
   return {
     dashboards,
     activeId,
@@ -56,5 +62,6 @@ export function useDashboards(userId?: string) {
     createDashboard,
     deleteDashboard,
     renameDashboard,
+    duplicateDashboard,
   }
 }

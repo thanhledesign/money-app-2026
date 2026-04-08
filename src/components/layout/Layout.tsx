@@ -32,12 +32,13 @@ interface Props {
   onCreateDashboard: (d: Dashboard) => void
   onDeleteDashboard: (id: string) => void
   onRenameDashboard: (id: string, name: string, emoji: string) => void
+  onDuplicateDashboard: (id: string) => void
 }
 
 export default function Layout({
   userEmail, userAvatar, userName, onSignOut, onSignIn, isLocal,
   dashboards, activeId, activeDashboard, canCreateDashboard,
-  onSwitchDashboard, onCreateDashboard, onDeleteDashboard, onRenameDashboard,
+  onSwitchDashboard, onCreateDashboard, onDeleteDashboard, onRenameDashboard, onDuplicateDashboard,
 }: Props) {
   const [sidebarWidth, setSidebarWidth] = useState(loadWidth)
 
@@ -66,6 +67,7 @@ export default function Layout({
         onCreateDashboard={onCreateDashboard}
         onDeleteDashboard={onDeleteDashboard}
         onRenameDashboard={onRenameDashboard}
+        onDuplicateDashboard={onDuplicateDashboard}
       />
       <main
         className="flex-1 pt-16 md:pt-0 p-4 md:p-6 max-w-[1200px] w-full"

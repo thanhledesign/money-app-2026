@@ -130,6 +130,36 @@ export function deleteDashboardEntry(id: string): DashboardIndex {
   return idx
 }
 
+export function duplicateDashboardEntry(sourceId: string): DashboardIndex {
+  const idx = loadDashboardIndex()
+  const source = idx.dashboards.find(d => d.id === sourceId)
+  if (!source || source.mode !== 'scenario') return idx
+
+  const newId = `dash-${Date.now()}`
+  const newDash: Dashboard = {
+    id: newId,
+    name: `${source.name} (Copy)`,
+    emoji: source.emoji,
+    mode: 'scenario',
+    createdAt: new Date().toISOString(),
+  }
+  idx.dashboards.push(newDash)
+  idx.activeId = newId
+  saveDashboardIndex(idx)
+
+  // Copy localStorage data from source to new dashboard
+  const sourceData = localStorage.getItem(`${_userPrefix}d-${sourceId}-data`)
+  if (sourceData) {
+    localStorage.setItem(`${_userPrefix}d-${newId}-data`, sourceData)
+  }
+  const sourceWizard = localStorage.getItem(`${_userPrefix}d-${sourceId}-wizard-done`)
+  if (sourceWizard) {
+    localStorage.setItem(`${_userPrefix}d-${newId}-wizard-done`, sourceWizard)
+  }
+
+  return idx
+}
+
 export function renameDashboardEntry(id: string, name: string, emoji: string): DashboardIndex {
   const idx = loadDashboardIndex()
   const dash = idx.dashboards.find(d => d.id === id)

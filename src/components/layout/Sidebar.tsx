@@ -45,13 +45,14 @@ interface Props {
   onCreateDashboard: (d: Dashboard) => void
   onDeleteDashboard: (id: string) => void
   onRenameDashboard: (id: string, name: string, emoji: string) => void
+  onDuplicateDashboard: (id: string) => void
 }
 
 export default function Sidebar({
   userEmail, userAvatar, userName, onSignOut, onSignIn, isLocal,
   width, onWidthChange,
   dashboards, activeId, canCreateDashboard,
-  onSwitchDashboard, onCreateDashboard, onDeleteDashboard, onRenameDashboard,
+  onSwitchDashboard, onCreateDashboard, onDeleteDashboard, onRenameDashboard, onDuplicateDashboard,
 }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
@@ -113,6 +114,7 @@ export default function Sidebar({
         onCreateClick={() => setShowCreateModal(true)}
         onDelete={onDeleteDashboard}
         onRename={onRenameDashboard}
+        onDuplicate={onDuplicateDashboard}
       />
 
       <nav className="flex-1 py-2 overflow-y-auto">
