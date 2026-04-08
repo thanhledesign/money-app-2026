@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const SITE_PASSWORD = import.meta.env.VITE_SITE_PASSWORD || ''
+const SITE_PASSWORD = import.meta.env.VITE_SITE_PASSWORD || 'shoryuken'
 const STORAGE_KEY = 'money-app-password-ok'
 
 export function isPasswordRequired(): boolean {
