@@ -13,6 +13,7 @@ import { Card, CardTitle } from '@/components/ui/Card'
 import { UVPBadge } from '@/components/ui/UVPBadge'
 import { AccountManager } from '@/components/ui/AccountManager'
 import { PageTheme } from '@/components/ui/PageTheme'
+import { NumberInput } from '@/components/ui/NumberInput'
 
 interface Props {
   data: AppData
@@ -243,13 +244,13 @@ function FieldRow({ label, sublabel, value, onChange, prevValue, isCurrency, pla
       </div>
 
       {/* Input */}
-      <input
-        type="number"
-        step="any"
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder ?? (isCurrency ? '0.00' : '')}
-        className="w-36 bg-background border border-border rounded-lg px-3 py-2 text-sm text-text-primary text-right tabular-nums placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors"
+      <NumberInput
+        value={value === '' ? 0 : parseFloat(value) || 0}
+        onChange={v => onChange(String(v))}
+        isCurrency={isCurrency}
+        isPercent={false}
+        label={label}
+        className="w-36"
       />
 
       {/* Previous value */}

@@ -9,6 +9,7 @@ import { formatCurrency, formatPercent } from '@/lib/calculations'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { UVPBadge } from '@/components/ui/UVPBadge'
+import { NumberInput } from '@/components/ui/NumberInput'
 
 interface IncomePageProps {
   data: AppData
@@ -88,54 +89,27 @@ function computePayRows(comp: CompBreakdown): PayRow[] {
 }
 
 // ── Editable Number Input ─────────────────────────────────────────────────────
+// (replaced by NumberInput — local wrapper kept for layout only)
 
 interface EditableInputProps {
   label: string
   value: number
   onChange: (v: number) => void
   format?: 'currency' | 'percent'
-  prefix?: string
-  suffix?: string
 }
 
 function EditableInput({ label, value, onChange, format = 'currency' }: EditableInputProps) {
-  const [editing, setEditing] = useState(false)
-  const [raw, setRaw] = useState('')
-
-  const display =
-    format === 'percent'
-      ? formatPercent(value, 4)
-      : formatCurrency(value)
-
   return (
     <div className="flex items-center justify-between py-2 border-b border-border-light">
       <span className="text-sm text-text-secondary">{label}</span>
-      {editing ? (
-        <input
-          autoFocus
-          type="number"
-          step="any"
-          value={raw}
-          onChange={e => setRaw(e.target.value)}
-          onBlur={() => {
-            const parsed = parseFloat(raw)
-            if (!isNaN(parsed)) onChange(parsed)
-            setEditing(false)
-          }}
-          onKeyDown={e => {
-            if (e.key === 'Enter') e.currentTarget.blur()
-            if (e.key === 'Escape') setEditing(false)
-          }}
-          className="w-36 bg-surface border border-accent rounded px-2 py-1 text-sm text-green text-right focus:outline-none"
-        />
-      ) : (
-        <button
-          onClick={() => { setRaw(String(value)); setEditing(true) }}
-          className="text-sm font-medium text-green tabular-nums hover:text-accent transition-colors cursor-pointer bg-transparent border-none"
-        >
-          {display}
-        </button>
-      )}
+      <NumberInput
+        value={value}
+        onChange={onChange}
+        label={label}
+        isCurrency={format === 'currency'}
+        isPercent={format === 'percent'}
+        className="w-36"
+      />
     </div>
   )
 }
@@ -626,39 +600,17 @@ function DeductionRow({
   pct: number
   onAmountChange: (v: number) => void
 }) {
-  const [editing, setEditing] = useState(false)
-  const [raw, setRaw] = useState('')
-
   return (
     <tr className="border-b border-border-light hover:bg-surface-hover transition-colors">
       <td className="py-2 px-2 text-text-secondary">{item.name}</td>
       <td className="py-2 px-2 text-right tabular-nums">
-        {editing ? (
-          <input
-            autoFocus
-            type="number"
-            step="0.01"
-            value={raw}
-            onChange={e => setRaw(e.target.value)}
-            onBlur={() => {
-              const parsed = parseFloat(raw)
-              if (!isNaN(parsed)) onAmountChange(parsed)
-              setEditing(false)
-            }}
-            onKeyDown={e => {
-              if (e.key === 'Enter') e.currentTarget.blur()
-              if (e.key === 'Escape') setEditing(false)
-            }}
-            className="w-24 bg-surface border border-accent rounded px-2 py-0.5 text-sm text-green text-right focus:outline-none"
-          />
-        ) : (
-          <button
-            onClick={() => { setRaw(String(item.amount)); setEditing(true) }}
-            className="text-green tabular-nums text-sm hover:text-accent transition-colors cursor-pointer bg-transparent border-none"
-          >
-            {formatCurrency(item.amount)}
-          </button>
-        )}
+        <NumberInput
+          value={item.amount}
+          onChange={onAmountChange}
+          label={item.name}
+          isCurrency={true}
+          className="w-28"
+        />
       </td>
       <td className="py-2 px-2 text-right tabular-nums text-xs text-text-muted">{formatPercent(pct)}</td>
     </tr>
@@ -775,9 +727,6 @@ function AllocationRow({
   adjustabilityColor: string
   onPercentChange: (pct: number) => void
 }) {
-  const [editing, setEditing] = useState(false)
-  const [raw, setRaw] = useState('')
-
   return (
     <tr className="border-b border-border-light hover:bg-surface-hover transition-colors">
       <td className="py-2.5 px-3 text-text-primary">{accountName}</td>
@@ -785,34 +734,15 @@ function AllocationRow({
         {adjustability}
       </td>
       <td className="py-2.5 px-3 text-right tabular-nums">
-        {editing ? (
-          <input
-            autoFocus
-            type="number"
-            step="0.1"
-            min="0"
-            max="100"
-            value={raw}
-            onChange={e => setRaw(e.target.value)}
-            onBlur={() => {
-              const parsed = parseFloat(raw)
-              if (!isNaN(parsed)) onPercentChange(parsed / 100)
-              setEditing(false)
-            }}
-            onKeyDown={e => {
-              if (e.key === 'Enter') e.currentTarget.blur()
-              if (e.key === 'Escape') setEditing(false)
-            }}
-            className="w-20 bg-surface border border-accent rounded px-2 py-0.5 text-sm text-green text-right focus:outline-none"
-          />
-        ) : (
-          <button
-            onClick={() => { setRaw((percentage * 100).toFixed(1)); setEditing(true) }}
-            className="text-green tabular-nums text-sm hover:text-accent transition-colors cursor-pointer bg-transparent border-none"
-          >
-            {formatPercent(percentage)}
-          </button>
-        )}
+        <NumberInput
+          value={percentage * 100}
+          onChange={v => onPercentChange(v / 100)}
+          label={accountName}
+          isPercent={true}
+          min={0}
+          max={100}
+          className="w-28"
+        />
       </td>
       <td className="py-2.5 px-3 text-right tabular-nums text-text-primary">{formatCurrency(amount)}</td>
     </tr>

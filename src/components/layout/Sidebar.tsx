@@ -3,6 +3,7 @@ import {
   LayoutDashboard, PlusCircle, Landmark, TrendingUp,
   Skull, Diamond, Scale, Trophy, DollarSign, Settings,
 } from 'lucide-react'
+import { UserMenu } from '@/components/auth/UserMenu'
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -16,7 +17,15 @@ const navItems = [
   { to: '/goals', icon: Trophy, label: 'Goals' },
 ]
 
-export default function Sidebar() {
+interface Props {
+  userEmail?: string
+  userAvatar?: string
+  userName?: string
+  onSignOut: () => void
+  isLocal: boolean
+}
+
+export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, isLocal }: Props) {
   return (
     <aside className="fixed left-0 top-0 h-screen w-56 bg-surface border-r border-border flex flex-col z-50">
       <div className="p-4 border-b border-border">
@@ -44,7 +53,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-border">
+      <div className="p-3 border-t border-border space-y-2">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
@@ -56,6 +65,13 @@ export default function Sidebar() {
           <Settings size={16} />
           Settings
         </NavLink>
+        <UserMenu
+          email={userEmail}
+          avatarUrl={userAvatar}
+          displayName={userName}
+          onSignOut={onSignOut}
+          isLocal={isLocal}
+        />
       </div>
     </aside>
   )

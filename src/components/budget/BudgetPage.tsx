@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { AppData, BudgetItem } from '@/data/types'
+import { NumberInput } from '@/components/ui/NumberInput'
 import {
   formatCurrency,
   getSavingsRate,
@@ -55,8 +56,7 @@ function BudgetGroup({ tier, items, allItems, onUpdate }: BudgetGroupProps) {
     onUpdate(updated)
   }
 
-  function handleAmountChange(id: string, raw: string) {
-    const amount = parseFloat(raw) || 0
+  function handleAmountChange(id: string, amount: number) {
     const updated = allItems.map(i => i.id === id ? { ...i, amount } : i)
     onUpdate(updated)
   }
@@ -123,13 +123,12 @@ function BudgetGroup({ tier, items, allItems, onUpdate }: BudgetGroupProps) {
                   />
                 </td>
                 <td className="py-2 px-3 text-right">
-                  <input
-                    type="number"
+                  <NumberInput
                     value={item.amount}
-                    min={0}
-                    step={1}
-                    onChange={e => handleAmountChange(item.id, e.target.value)}
-                    className="w-24 text-right px-2 py-1 bg-background border border-border rounded text-sm tabular-nums text-text-primary focus:outline-none focus:ring-1 focus:ring-accent"
+                    onChange={(v) => handleAmountChange(item.id, v)}
+                    isCurrency={true}
+                    label={item.name}
+                    className="w-24"
                   />
                 </td>
                 <td className="py-2 px-3">

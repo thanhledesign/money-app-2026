@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { useAppData } from '@/hooks/useAppData'
 import { useChartPrefs } from '@/hooks/useChartPrefs'
+import { useAuth } from '@/hooks/useAuth'
 import Layout from '@/components/layout/Layout'
+import { LoginPage } from '@/components/auth/LoginPage'
 import DashboardPage from '@/components/dashboard/DashboardPage'
 import EntryPage from '@/components/entry/EntryPage'
 import AccountsPage from '@/components/accounts/AccountsPage'
@@ -14,6 +17,11 @@ import { GoalsPage } from '@/components/goals/GoalsPage'
 import SettingsPage from '@/components/settings/SettingsPage'
 
 export default function App() {
+  const auth = useAuth()
+  const [skippedLogin, setSkippedLogin] = useState(() => {
+    return localStorage.getItem('money-app-skipped-login') === 'true'
+  })
+
   const {
     data, addSnapshot, addGoal,
     addAccount, updateAccounts,
@@ -22,9 +30,41 @@ export default function App() {
 
   const { prefs, update: updatePrefs, setAccountColor, setLabelColor, reset: resetPrefs } = useChartPrefs()
 
+  // Show login if not authenticated and hasn't skipped
+  if (auth.loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-text-muted text-sm">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!auth.isAuthenticated && !skippedLogin) {
+    return (
+      <LoginPage
+        onSignInWithGoogle={auth.signInWithGoogle}
+        configured={auth.configured}
+        onSkip={() => {
+          localStorage.setItem('money-app-skipped-login', 'true')
+          setSkippedLogin(true)
+        }}
+      />
+    )
+  }
+
+  const isLocal = !auth.isAuthenticated
+
   return (
     <Routes>
-      <Route element={<Layout />}>
+      <Route element={
+        <Layout
+          userEmail={auth.user?.email}
+          userAvatar={auth.user?.user_metadata?.avatar_url}
+          userName={auth.user?.user_metadata?.full_name}
+          onSignOut={auth.signOut}
+          isLocal={isLocal}
+        />
+      }>
         <Route index element={<DashboardPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} />} />
         <Route path="enter" element={<EntryPage data={data} addSnapshot={addSnapshot} addAccount={addAccount} updateAccounts={updateAccounts} />} />
         <Route path="accounts" element={<AccountsPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} addAccount={addAccount} updateAccounts={updateAccounts} />} />
