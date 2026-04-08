@@ -1,0 +1,453 @@
+import { useMemo, useState, useRef } from 'react'
+import {
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  Area, AreaChart, PieChart, Pie, Cell, BarChart, Bar, Legend,
+} from 'recharts'
+import { GripVertical, Pencil, X } from 'lucide-react'
+import type { AppData } from '@/data/types'
+import type { ChartPrefs } from '@/data/chartPrefs'
+import { KPICard, Card, CardTitle } from '@/components/ui/Card'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { HealthScoreTooltip } from '@/components/ui/HealthScoreTooltip'
+import * as calc from '@/lib/calculations'
+
+interface Props {
+  data: AppData
+  prefs: ChartPrefs
+  onUpdatePrefs: (partial: Partial<ChartPrefs>) => void
+}
+
+const TOOLTIP_STYLE = {
+  contentStyle: { background: '#12121a', border: '1px solid #2a2a3a', borderRadius: '8px', fontSize: '12px' },
+  labelStyle: { color: '#8888a0' },
+}
+
+export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
+  const [editMode, setEditMode] = useState(false)
+  const [dragIdx, setDragIdx] = useState<number | null>(null)
+  const latest = calc.getLatestSnapshot(data)
+  const prev = calc.getPreviousSnapshot(data)
+
+  const curveType = prefs.curveType === 'smooth' ? 'monotone' : 'linear'
+
+  const metrics = useMemo(() => {
+    if (!latest) return null
+    const cash = calc.getTotalCash(latest, data)
+    const investments = calc.getTotalInvestments(latest, data)
+    const debt = calc.getTotalDebt(latest, data)
+    const netWorth = calc.getNetWorth(latest, data)
+    const disneyConc = calc.getDisneyConcentration(latest, data)
+    const utilization = calc.getCreditUtilization(latest, data)
+    const runway = calc.getRunwayMonths(data)
+    const savingsRate = calc.getSavingsRate(data)
+    const healthScore = calc.getHealthScore(data)
+    let nwDelta = 0
+    if (prev) nwDelta = netWorth - calc.getNetWorth(prev, data)
+    return { cash, investments, debt, netWorth, nwDelta, disneyConc, utilization, runway, savingsRate, healthScore }
+  }, [latest, prev, data])
+
+  const netWorthHistory = useMemo(() => {
+    return data.snapshots.map(s => ({
+      date: calc.formatDateShort(s.timestamp),
+      netWorth: calc.getNetWorth(s, data),
+      cash: calc.getTotalCash(s, data),
+      investments: calc.getTotalInvestments(s, data),
+    }))
+  }, [data])
+
+  const debtHistory = useMemo(() => {
+    return data.snapshots.map(s => ({
+      date: calc.formatDateShort(s.timestamp),
+      debt: Math.abs(calc.getTotalDebt(s, data)),
+    }))
+  }, [data])
+
+  // Pie chart: paycheck distribution
+  const pieData = useMemo(() => {
+    const totalTaxes = data.deductions.filter(d => d.type === 'tax').reduce((s, d) => s + d.amount, 0)
+    const totalPretax = data.deductions.filter(d => d.type === 'pretax').reduce((s, d) => s + d.amount, 0)
+    const grossSemiMonthly = data.comp.annualSalary / 24
+    const netPay = grossSemiMonthly - totalTaxes - totalPretax
+    const items = [
+      { name: 'Taxes', value: totalTaxes, color: '#ef4444' },
+      ...data.deductions.filter(d => d.type === 'pretax').map(d => ({
+        name: d.name, value: d.amount,
+        color: d.name.includes('401k') ? '#3b82f6' : d.name.includes('Dental') ? '#06b6d4' : d.name.includes('Medical') ? '#22c55e' : '#8b5cf6',
+      })),
+    ]
+    // Add allocations as slices
+    data.allocations.forEach(alloc => {
+      const acc = data.accounts.find(a => a.id === alloc.accountId)
+      if (acc) {
+        items.push({
+          name: acc.name.replace('Wells Fargo ', 'WF ').replace(' Account', '').replace('Fidelity Individual ', 'Fidelity '),
+          value: netPay * alloc.percentage,
+          color: prefs.accountColors[alloc.accountId] || '#6b7280',
+        })
+      }
+    })
+    return items
+  }, [data, prefs.accountColors])
+
+  // Annual bar chart: monthly totals by category
+  const annualBarData = useMemo(() => {
+    const monthly = calc.getMonthlySnapshots(data)
+    const months = Array.from(monthly.keys()).sort()
+    return months.map(m => {
+      const s = monthly.get(m)!
+      const label = new Date(m + '-15').toLocaleDateString('en-US', { month: 'short' })
+      return {
+        month: label,
+        Cash: calc.getTotalCash(s, data),
+        Investments: calc.getTotalInvestments(s, data),
+        Debt: Math.abs(calc.getTotalDebt(s, data)),
+        'Net Worth': calc.getNetWorth(s, data),
+      }
+    })
+  }, [data])
+
+  if (!latest || !metrics) {
+    return <div className="text-text-muted text-center py-20">No data yet. Enter your first snapshot.</div>
+  }
+
+  const lastUpdated = new Date(latest.timestamp).toLocaleDateString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
+
+  // Dashboard sections as orderable blocks
+  const sectionMap: Record<string, React.ReactNode> = {
+    'kpi-row-1': (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6" key="kpi-row-1">
+        <KPICard label="Net Worth" value={calc.formatCurrency(metrics.netWorth, true)}
+          trend={metrics.nwDelta >= 0 ? 'up' : 'down'} trendValue={calc.formatCurrency(metrics.nwDelta, true)} accent="purple" />
+        <KPICard label="Cash" value={calc.formatCurrency(metrics.cash, true)}
+          subValue={`${data.accounts.filter(a => a.category === 'cash' && a.isActive).length} accounts`} accent="green" />
+        <KPICard label="Investments" value={calc.formatCurrency(metrics.investments, true)}
+          subValue={`Disney: ${calc.formatPercent(metrics.disneyConc)}`}
+          accent={metrics.disneyConc > 0.70 ? 'amber' : 'blue'} />
+        <KPICard label="Debt" value={calc.formatCurrency(metrics.debt)}
+          subValue={`${calc.formatPercent(metrics.utilization)} utilization`}
+          accent={metrics.debt < 0 ? 'red' : 'green'} />
+      </div>
+    ),
+    'kpi-row-2': (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6" key="kpi-row-2">
+        <KPICard label="Credit Score" value={String(latest.creditScore || '—')}
+          accent={latest.creditScore && latest.creditScore >= 750 ? 'green' : latest.creditScore && latest.creditScore >= 700 ? 'amber' : 'red'} />
+        <KPICard label="Savings Rate" value={calc.formatPercent(metrics.savingsRate)}
+          accent={metrics.savingsRate > 0.30 ? 'green' : 'amber'} />
+        <KPICard label="Runway" value={`${metrics.runway.toFixed(1)} mo`}
+          subValue="months of expenses" accent={metrics.runway > 6 ? 'green' : metrics.runway > 3 ? 'amber' : 'red'} />
+        <KPICard label="Latest Paycheck" value={latest.paycheckAmount ? calc.formatCurrency(latest.paycheckAmount) : '—'} accent="cyan" />
+      </div>
+    ),
+    'warnings': (
+      <div key="warnings">
+        {metrics.disneyConc > 0.70 && (
+          <div className="bg-amber/10 border border-amber/30 rounded-xl p-4 mb-6">
+            <p className="text-amber text-sm font-medium">
+              Disney concentration at {calc.formatPercent(metrics.disneyConc)} of investments. Single-employer equity risk is elevated above 70%.
+            </p>
+          </div>
+        )}
+        {latest.balances['chase-sw'] < -2000 && (
+          <div className="bg-red/10 border border-red/30 rounded-xl p-4 mb-6">
+            <p className="text-red text-sm font-medium">
+              Chase Southwest balance: {calc.formatCurrency(latest.balances['chase-sw'])}.
+              Trending up — was {prev ? calc.formatCurrency(prev.balances['chase-sw'] || 0) : '—'} last snapshot.
+              At ~20% APR, this costs ~${Math.round(Math.abs(latest.balances['chase-sw']) * 0.20 / 12)}/mo in interest.
+            </p>
+          </div>
+        )}
+      </div>
+    ),
+    'net-worth-chart': (
+      <Card className="mb-6" key="net-worth-chart">
+        <CardTitle>Net Worth Over Time</CardTitle>
+        <div className="h-64 mt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={netWorthHistory}>
+              <defs>
+                <linearGradient id="nwGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
+                tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
+              <Tooltip {...TOOLTIP_STYLE} formatter={(v: any) => [calc.formatCurrency(v), 'Net Worth']} />
+              <Area type={curveType} dataKey="netWorth" stroke="#a855f7" fill="url(#nwGrad)" strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: '#a855f7' } : false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+    ),
+    'cash-vs-investments': (
+      <Card className="mb-6" key="cash-vs-investments">
+        <CardTitle>Cash vs Investments</CardTitle>
+        <div className="h-56 mt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={netWorthHistory}>
+              <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
+                tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
+              <Tooltip {...TOOLTIP_STYLE}
+                formatter={(v: any, name: any) => [calc.formatCurrency(v), name === 'cash' ? 'Cash' : 'Investments']} />
+              <Line type={curveType} dataKey="cash" stroke="#22c55e" strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: '#22c55e' } : false} />
+              <Line type={curveType} dataKey="investments" stroke="#3b82f6" strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: '#3b82f6' } : false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+    ),
+    'comp-pie': (
+      <Card className="mb-6" key="comp-pie">
+        <CardTitle>Paycheck Distribution</CardTitle>
+        <div className="h-72 mt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%"
+                outerRadius={100} innerRadius={40} paddingAngle={2}
+                label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={{ stroke: '#55556a' }}
+                fontSize={10}>
+                {pieData.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} stroke={entry.color + '60'} strokeWidth={1.5} />
+                ))}
+              </Pie>
+              <Tooltip {...TOOLTIP_STYLE}
+                formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+    ),
+    'annual-bar': (
+      <Card className="mb-6" key="annual-bar">
+        <CardTitle>Monthly Summary by Category</CardTitle>
+        <div className="h-72 mt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={annualBarData}>
+              <XAxis dataKey="month" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
+                tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
+              <Tooltip {...TOOLTIP_STYLE}
+                formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
+              <Legend wrapperStyle={{ fontSize: '11px' }} />
+              <Bar dataKey="Cash" fill="#22c55e" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="Investments" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="Debt" fill="#ef4444" radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+    ),
+    'debt-trend': debtHistory.some(d => d.debt > 0) ? (
+      <Card className="mb-6" key="debt-trend">
+        <CardTitle>Debt Trend</CardTitle>
+        <div className="h-48 mt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={debtHistory}>
+              <defs>
+                <linearGradient id="debtGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
+                tickFormatter={(v: number) => `$${(v / 1000).toFixed(1)}K`} />
+              <Tooltip {...TOOLTIP_STYLE} formatter={(v: any) => [calc.formatCurrency(v), 'Debt']} />
+              <Area type={curveType} dataKey="debt" stroke="#ef4444" fill="url(#debtGrad)" strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: '#ef4444' } : false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+    ) : null,
+    'latest-changes': prev ? (
+      <Card className="mb-6" key="latest-changes">
+        <CardTitle>Latest Changes</CardTitle>
+        <p className="text-xs text-text-muted mb-3">{calc.formatDate(prev.timestamp)} → {calc.formatDate(latest.timestamp)}</p>
+        <div className="space-y-1.5">
+          {calc.getSnapshotDiff(latest, prev, data).slice(0, 10).map(ch => (
+            <div key={ch.accountId} className="flex justify-between items-center text-sm">
+              <span className="text-text-secondary truncate">{ch.name}</span>
+              <span className={`tabular-nums font-medium ${ch.diff > 0 ? 'text-green' : 'text-red'}`}>
+                {ch.diff > 0 ? '+' : ''}{calc.formatCurrency(ch.diff)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </Card>
+    ) : null,
+  }
+
+  const order = prefs.dashboardOrder.length > 0 ? prefs.dashboardOrder : Object.keys(sectionMap)
+  // Add any sections not in saved order
+  const allKeys = Object.keys(sectionMap)
+  const finalOrder = [...order.filter(k => allKeys.includes(k)), ...allKeys.filter(k => !order.includes(k))]
+  const visibleOrder = finalOrder.filter(k => !prefs.hiddenSections?.includes(k))
+
+  const SECTION_LABELS: Record<string, string> = {
+    'kpi-row-1': 'KPI Row 1 (Net Worth, Cash, Investments, Debt)',
+    'kpi-row-2': 'KPI Row 2 (Credit Score, Savings Rate, Runway, Paycheck)',
+    'warnings': 'Warnings',
+    'net-worth-chart': 'Net Worth Chart',
+    'cash-vs-investments': 'Cash vs Investments',
+    'comp-pie': 'Paycheck Distribution',
+    'annual-bar': 'Monthly Summary by Category',
+    'debt-trend': 'Debt Trend',
+    'latest-changes': 'Latest Changes',
+  }
+
+  function handleSaveLayout() {
+    const name = window.prompt('Enter a name for this layout:')
+    if (!name) return
+    const newLayouts = {
+      ...prefs.savedLayouts,
+      [name]: { order: finalOrder, hidden: prefs.hiddenSections ?? [] },
+    }
+    onUpdatePrefs({ savedLayouts: newLayouts })
+  }
+
+  function handleLoadLayout(name: string) {
+    if (!name) return
+    const layout = prefs.savedLayouts[name]
+    if (!layout) return
+    onUpdatePrefs({ dashboardOrder: layout.order, hiddenSections: layout.hidden })
+  }
+
+  function handleResetLayout() {
+    onUpdatePrefs({ dashboardOrder: [], hiddenSections: [] })
+  }
+
+  function handleToggleSection(key: string) {
+    const hidden = prefs.hiddenSections ?? []
+    const next = hidden.includes(key) ? hidden.filter(k => k !== key) : [...hidden, key]
+    onUpdatePrefs({ hiddenSections: next })
+  }
+
+  const handleDragStart = (idx: number) => setDragIdx(idx)
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault()
+    if (dragIdx === null || dragIdx === idx) return
+    const newOrder = [...finalOrder]
+    const [removed] = newOrder.splice(dragIdx, 1)
+    newOrder.splice(idx, 0, removed)
+    onUpdatePrefs({ dashboardOrder: newOrder })
+    setDragIdx(idx)
+  }
+  const handleDragEnd = () => setDragIdx(null)
+
+  return (
+    <div>
+      <PageHeader
+        icon="$"
+        title="2026 Money"
+        subtitle={`Last updated: ${lastUpdated}`}
+        rightContent={
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setEditMode(!editMode)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+                editMode
+                  ? 'border-accent bg-accent/10 text-accent'
+                  : 'border-border text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              {editMode ? <X size={14} /> : <Pencil size={14} />}
+              {editMode ? 'Done' : 'Edit Layout'}
+            </button>
+            <HealthScoreTooltip data={data} score={metrics.healthScore} />
+          </div>
+        }
+      />
+
+      {editMode && (
+        <div className="mb-6 p-4 rounded-xl border border-accent/30 bg-accent/5 space-y-4">
+          <p className="text-xs font-semibold text-accent uppercase tracking-wide">Layout Editor</p>
+
+          {/* Section visibility checkboxes */}
+          <div>
+            <p className="text-xs text-text-muted mb-2">Show / Hide Sections</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              {allKeys.map(key => (
+                <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-text-secondary">
+                  <input
+                    type="checkbox"
+                    checked={!(prefs.hiddenSections ?? []).includes(key)}
+                    onChange={() => handleToggleSection(key)}
+                    className="accent-accent"
+                  />
+                  {SECTION_LABELS[key] ?? key}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Save / Load / Reset */}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={handleSaveLayout}
+              className="px-3 py-1.5 rounded-lg text-xs bg-accent text-white hover:bg-accent-hover transition-colors"
+            >
+              Save Layout
+            </button>
+
+            {Object.keys(prefs.savedLayouts ?? {}).length > 0 && (
+              <select
+                defaultValue=""
+                onChange={e => { handleLoadLayout(e.target.value); e.target.value = '' }}
+                className="px-2 py-1.5 rounded-lg text-xs bg-background border border-border text-text-secondary"
+              >
+                <option value="" disabled>Load saved layout…</option>
+                {Object.keys(prefs.savedLayouts).map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+            )}
+
+            <button
+              onClick={handleResetLayout}
+              className="px-3 py-1.5 rounded-lg text-xs border border-border text-text-muted hover:text-text-secondary transition-colors"
+            >
+              Reset to Default
+            </button>
+          </div>
+        </div>
+      )}
+
+      {(editMode ? finalOrder : visibleOrder).map((key, idx) => {
+        const section = sectionMap[key]
+        if (!section) return null
+        if (editMode) {
+          return (
+            <div
+              key={key}
+              draggable
+              onDragStart={() => handleDragStart(idx)}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDragEnd={handleDragEnd}
+              className={`relative group cursor-grab active:cursor-grabbing ${
+                dragIdx === idx ? 'opacity-50' : ''
+              }`}
+            >
+              <div className="absolute -left-8 top-4 opacity-0 group-hover:opacity-100 transition-opacity text-text-muted">
+                <GripVertical size={16} />
+              </div>
+              <div className="ring-1 ring-accent/20 ring-dashed rounded-xl">
+                {section}
+              </div>
+            </div>
+          )
+        }
+        return <div key={key}>{section}</div>
+      })}
+    </div>
+  )
+}
