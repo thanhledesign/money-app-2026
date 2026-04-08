@@ -1,3 +1,5 @@
+export type SectionWidth = 'full' | 'half'
+
 export interface ChartPrefs {
   curveType: 'smooth' | 'sharp'
   showDots: boolean
@@ -6,6 +8,7 @@ export interface ChartPrefs {
   dashboardOrder: string[]
   savedLayouts: Record<string, { order: string[]; hidden: string[] }>
   hiddenSections: string[]
+  sectionWidths: Record<string, SectionWidth>
 }
 
 const PREFS_KEY = 'money-app-chart-prefs'
@@ -63,6 +66,7 @@ function getDefaults(): ChartPrefs {
     dashboardOrder: [...DEFAULT_DASHBOARD_ORDER],
     savedLayouts: {},
     hiddenSections: [],
+    sectionWidths: {},
   }
 }
 
@@ -84,6 +88,7 @@ export function loadChartPrefs(): ChartPrefs {
       dashboardOrder: stored.dashboardOrder?.length ? stored.dashboardOrder : defaults.dashboardOrder,
       savedLayouts: stored.savedLayouts ?? defaults.savedLayouts,
       hiddenSections: stored.hiddenSections ?? defaults.hiddenSections,
+      sectionWidths: stored.sectionWidths ?? defaults.sectionWidths,
     }
   } catch {
     return getDefaults()

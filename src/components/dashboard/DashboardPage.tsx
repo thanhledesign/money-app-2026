@@ -3,7 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   Area, AreaChart, PieChart, Pie, Cell, BarChart, Bar, Legend,
 } from 'recharts'
-import { GripVertical, Pencil, X } from 'lucide-react'
+import { GripVertical, Pencil, X, Columns2, Square } from 'lucide-react'
 import type { AppData } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
 import { KPICard, Card, CardTitle } from '@/components/ui/Card'
@@ -508,21 +508,46 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
             </div>
           </div>
 
-          {/* Chart section toggles */}
+          {/* Chart section toggles + width */}
           <div>
             <p className="text-xs text-text-muted mb-2">Chart Sections</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              {CHART_KEYS.map(key => (
-                <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-text-secondary">
-                  <input
-                    type="checkbox"
-                    checked={!hiddenSections.includes(key)}
-                    onChange={() => handleToggleSection(key)}
-                    className="accent-accent"
-                  />
-                  {SECTION_LABELS[key] ?? key}
-                </label>
-              ))}
+              {CHART_KEYS.map(key => {
+                const w = prefs.sectionWidths?.[key] ?? 'full'
+                return (
+                  <div key={key} className="flex items-center gap-2">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm text-text-secondary flex-1 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={!hiddenSections.includes(key)}
+                        onChange={() => handleToggleSection(key)}
+                        className="accent-accent shrink-0"
+                      />
+                      <span className="truncate">{SECTION_LABELS[key] ?? key}</span>
+                    </label>
+                    {!hiddenSections.includes(key) && (
+                      <div className="flex gap-0.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => onUpdatePrefs({ sectionWidths: { ...prefs.sectionWidths, [key]: 'full' } })}
+                          title="Full width"
+                          className={`p-1 rounded transition-colors ${w === 'full' ? 'bg-accent/20 text-accent' : 'text-text-muted hover:text-text-secondary'}`}
+                        >
+                          <Square size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onUpdatePrefs({ sectionWidths: { ...prefs.sectionWidths, [key]: 'half' } })}
+                          title="Half width"
+                          className={`p-1 rounded transition-colors ${w === 'half' ? 'bg-accent/20 text-accent' : 'text-text-muted hover:text-text-secondary'}`}
+                        >
+                          <Columns2 size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 
@@ -592,11 +617,18 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
           )
         })
       ) : (
-        nonKPIOrder.map(key => {
-          const section = sectionMap[key]
-          if (!section) return null
-          return <div key={key}>{section}</div>
-        })
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+          {nonKPIOrder.map(key => {
+            const section = sectionMap[key]
+            if (!section) return null
+            const w = prefs.sectionWidths?.[key] ?? 'full'
+            return (
+              <div key={key} className={w === 'half' ? 'lg:col-span-1' : 'lg:col-span-2'}>
+                {section}
+              </div>
+            )
+          })}
+        </div>
       )}
     </div>
   )

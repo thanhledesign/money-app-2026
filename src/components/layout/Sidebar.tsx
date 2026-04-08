@@ -11,8 +11,8 @@ import { DashboardSwitcher } from '@/components/dashboard/DashboardSwitcher'
 import { CreateDashboardModal } from '@/components/dashboard/CreateDashboardModal'
 
 const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/enter', icon: Camera, label: 'Add Snapshot' },
+  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/accounts', icon: Landmark, label: 'Cash Accounts' },
   { to: '/investments', icon: TrendingUp, label: 'Investments' },
   { to: '/debt', icon: Skull, label: 'Debt' },
