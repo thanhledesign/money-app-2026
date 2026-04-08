@@ -215,6 +215,7 @@ export default function Sidebar({
         {sidebarContent}
         <div
           onMouseDown={handleMouseDown}
+          onDoubleClick={() => onWidthChange(224)}
           className={`absolute right-0 top-0 h-full w-1 cursor-col-resize transition-colors hover:bg-accent/40 ${
             isResizing ? 'bg-accent/60' : 'bg-transparent'
           }`}

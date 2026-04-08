@@ -74,6 +74,12 @@ export default function Layout({
         style={{ marginLeft: undefined }}
       >
         <div className="hidden md:block" style={{ marginLeft: sidebarWidth }} />
+        {/* Sample dashboard banner */}
+        {activeId === 'sample' && (
+          <div className="mb-4 px-4 py-2 bg-amber/10 border border-amber/30 rounded-lg text-xs text-amber">
+            Sample data — this dashboard uses demo data to show how the app works. Your real data lives in other dashboards.
+          </div>
+        )}
         {/* Combined dashboard read-only banner */}
         {activeDashboard?.mode === 'combined' && (
           <div className="mb-4 px-4 py-2 bg-purple/10 border border-purple/30 rounded-lg text-xs text-purple">

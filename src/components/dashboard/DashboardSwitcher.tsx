@@ -118,7 +118,7 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
       </button>
 
       {open && (
-        <div className="absolute left-2 right-2 top-full mt-1 bg-surface border border-border rounded-lg shadow-2xl z-50 py-1 max-h-96 overflow-y-auto">
+        <div className="absolute left-2 top-full mt-1 bg-surface border border-border rounded-lg shadow-2xl z-50 py-1 max-h-96 overflow-y-auto min-w-[260px]" style={{ right: '-20px' }}>
           {dashboards.map(d => (
             <div key={d.id}>
               {editingId === d.id ? (
@@ -184,7 +184,7 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
                   <div className="relative flex-shrink-0">
                     <button
                       onClick={(e) => { e.stopPropagation(); setCogMenuId(cogMenuId === d.id ? null : d.id) }}
-                      className="p-1 text-text-muted hover:text-text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="p-1 text-text-muted hover:text-text-primary opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                       title="Actions"
                     >
                       <Settings size={13} />

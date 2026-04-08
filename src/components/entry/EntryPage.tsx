@@ -270,32 +270,44 @@ function FieldRow({ label, sublabel, value, onChange, prevValue, isCurrency, pla
         : String(prevValue)
       : null
 
-  return (
-    <div className="flex items-center gap-3">
-      {/* Label */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-text-primary truncate">{label}</p>
-        {sublabel && <p className="text-xs text-text-muted truncate">{sublabel}</p>}
-      </div>
+  const liveDiff = (() => {
+    const curr = parseFloat(value)
+    if (isNaN(curr) || prevValue === null) return null
+    const d = curr - prevValue
+    if (Math.abs(d) < 0.01) return null
+    const sign = d > 0 ? '+' : ''
+    const color = d > 0 ? 'text-green' : 'text-red'
+    return (
+      <span className={`text-[10px] tabular-nums font-medium ${color}`}>
+        {sign}{isCurrency ? formatCurrency(d) : d.toFixed(0)}
+      </span>
+    )
+  })()
 
-      {/* Input */}
+  return (
+    <div className="space-y-1">
+      {/* Label row */}
+      <div className="flex items-baseline justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-sm text-text-primary truncate">{label}</p>
+          {sublabel && <p className="text-xs text-text-muted truncate">{sublabel}</p>}
+        </div>
+        {prevDisplay !== null && (
+          <div className="flex items-baseline gap-1.5 flex-shrink-0">
+            <span className="text-xs text-text-muted tabular-nums">{prevDisplay}</span>
+            {liveDiff}
+          </div>
+        )}
+      </div>
+      {/* Input row */}
       <NumberInput
         value={value === '' ? 0 : parseFloat(value) || 0}
         onChange={v => onChange(String(v))}
         isCurrency={isCurrency}
         isPercent={false}
         label={label}
-        className="w-36"
+        className="w-full md:max-w-xs"
       />
-
-      {/* Previous value */}
-      <div className="w-28 text-right">
-        {prevDisplay !== null ? (
-          <span className="text-xs text-text-muted tabular-nums">{prevDisplay}</span>
-        ) : (
-          <span className="text-xs text-text-muted">—</span>
-        )}
-      </div>
     </div>
   )
 }
