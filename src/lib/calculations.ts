@@ -36,12 +36,24 @@ export function getNetWorth(snapshot: Snapshot, data: AppData): number {
   return getTotalCash(snapshot, data) + getTotalInvestments(snapshot, data) + getTotalDebt(snapshot, data)
 }
 
+// Returns the largest single-employer/institution concentration in investments
 export function getDisneyConcentration(snapshot: Snapshot, data: AppData): number {
-  const disneyAccounts = data.accounts.filter(a => a.institution === 'Disney Streaming' && a.category === 'investment')
-  const disneyTotal = getCategoryTotal(snapshot, disneyAccounts)
   const investmentTotal = getTotalInvestments(snapshot, data)
   if (investmentTotal <= 0) return 0
-  return disneyTotal / investmentTotal
+  const investAccounts = data.accounts.filter(a => a.category === 'investment' && a.isActive)
+  const byInstitution = new Map<string, number>()
+  for (const acc of investAccounts) {
+    const bal = snapshot.balances[acc.id] ?? 0
+    if (bal > 0) {
+      byInstitution.set(acc.institution, (byInstitution.get(acc.institution) ?? 0) + bal)
+    }
+  }
+  let maxConc = 0
+  for (const total of byInstitution.values()) {
+    const conc = total / investmentTotal
+    if (conc > maxConc) maxConc = conc
+  }
+  return maxConc
 }
 
 export function getCreditUtilization(snapshot: Snapshot, data: AppData): number {
@@ -96,10 +108,10 @@ export function getHealthScore(data: AppData): number {
   if (savingsRate > 0.30) score += 20
   else if (savingsRate > 0.15) score += 10
 
-  // Disney concentration < 50%: +15
-  const disney = getDisneyConcentration(latest, data)
-  if (disney < 0.50) score += 15
-  else if (disney < 0.70) score += 5
+  // Single-employer concentration < 50%: +15
+  const topConc = getDisneyConcentration(latest, data)
+  if (topConc < 0.50) score += 15
+  else if (topConc < 0.70) score += 5
 
   // Runway > 3 months: +15
   const runway = getRunwayMonths(data)

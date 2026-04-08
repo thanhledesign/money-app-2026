@@ -11,27 +11,24 @@ export interface ChartPrefs {
 const PREFS_KEY = 'money-app-chart-prefs'
 
 const DEFAULT_ACCOUNT_COLORS: Record<string, string> = {
-  'wf-cash': '#22c55e',
-  'wf-checking': '#3b82f6',
-  'wf-savings': '#06b6d4',
-  'wf-biz-checking': '#8b5cf6',
-  'wf-biz-savings': '#a855f7',
-  'abefcu-checking': '#f59e0b',
-  'abefcu-savings': '#eab308',
-  'fidelity-cma': '#6b7280',
-  'wf-bond': '#14b8a6',
-  'saks-401k': '#6b7280',
-  'fidelity-brokerage': '#ef4444',
-  'fidelity-roth': '#f97316',
-  'fidelity-trad': '#6b7280',
-  'disney-401k-sip': '#ec4899',
-  'disney-401k-rsp': '#d946ef',
-  'disney-equity': '#6b7280',
-  'disney-lti': '#f43f5e',
-  'apple-card': '#a3a3a3',
-  'capital-one': '#ef4444',
-  'chase-sw': '#3b82f6',
-  'discover': '#f59e0b',
+  // Cash
+  'hysa-1': '#22c55e',
+  'checking-1': '#3b82f6',
+  'savings-1': '#06b6d4',
+  'checking-2': '#8b5cf6',
+  'cu-checking': '#f59e0b',
+  'cu-savings': '#eab308',
+  // Investments
+  'bond-fund': '#14b8a6',
+  'brokerage-1': '#ef4444',
+  'roth-ira': '#f97316',
+  'employer-401k': '#ec4899',
+  'employer-match': '#d946ef',
+  'employer-lti': '#f43f5e',
+  // Debt
+  'cc-rewards': '#a3a3a3',
+  'cc-travel': '#3b82f6',
+  'cc-cashback': '#f59e0b',
 }
 
 const DEFAULT_LABEL_COLORS: Record<string, string> = {

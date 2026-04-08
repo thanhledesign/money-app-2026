@@ -138,7 +138,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
     ),
     'kpi-investments': (
       <KPICard key="kpi-investments" label="Investments" value={calc.formatCurrency(metrics.investments, true)}
-        subValue={`Disney: ${calc.formatPercent(metrics.disneyConc)}`} emoji="📈" />
+        subValue={`Top holding: ${calc.formatPercent(metrics.disneyConc)}`} emoji="📈" />
     ),
     'kpi-debt': (
       <KPICard key="kpi-debt" label="Debt" value={calc.formatCurrency(metrics.debt)}
@@ -157,26 +157,34 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
     'kpi-paycheck': (
       <KPICard key="kpi-paycheck" label="Latest Paycheck" value={latest.paycheckAmount ? calc.formatCurrency(latest.paycheckAmount) : '—'} emoji="💰" />
     ),
-    'warnings': (
-      <div key="warnings">
-        {metrics.disneyConc > 0.70 && (
-          <div className="bg-amber/10 border border-amber/30 rounded-xl p-4 mb-6">
-            <p className="text-amber text-sm font-medium">
-              Disney concentration at {calc.formatPercent(metrics.disneyConc)} of investments. Single-employer equity risk is elevated above 70%.
-            </p>
-          </div>
-        )}
-        {latest.balances['chase-sw'] < -2000 && (
-          <div className="bg-red/10 border border-red/30 rounded-xl p-4 mb-6">
-            <p className="text-red text-sm font-medium">
-              Chase Southwest balance: {calc.formatCurrency(latest.balances['chase-sw'])}.
-              Trending up — was {prev ? calc.formatCurrency(prev.balances['chase-sw'] || 0) : '—'} last snapshot.
-              At ~20% APR, this costs ~${Math.round(Math.abs(latest.balances['chase-sw']) * 0.20 / 12)}/mo in interest.
-            </p>
-          </div>
-        )}
-      </div>
-    ),
+    'warnings': (() => {
+      const debtAccounts = data.accounts.filter(a => a.category === 'debt' && a.isActive)
+      const highBalanceCards = debtAccounts.filter(a => (latest.balances[a.id] ?? 0) < -2000)
+      return (
+        <div key="warnings">
+          {metrics.disneyConc > 0.70 && (
+            <div className="bg-amber/10 border border-amber/30 rounded-xl p-4 mb-6">
+              <p className="text-amber text-sm font-medium">
+                Single-employer equity at {calc.formatPercent(metrics.disneyConc)} of investments. Concentration above 70% increases risk.
+              </p>
+            </div>
+          )}
+          {highBalanceCards.map(card => {
+            const bal = latest.balances[card.id] ?? 0
+            const prevBal = prev ? (prev.balances[card.id] ?? 0) : 0
+            return (
+              <div key={card.id} className="bg-red/10 border border-red/30 rounded-xl p-4 mb-6">
+                <p className="text-red text-sm font-medium">
+                  {card.name} balance: {calc.formatCurrency(bal)}.
+                  {prev && ` Was ${calc.formatCurrency(prevBal)} last snapshot.`}
+                  {` At ~20% APR, this costs ~$${Math.round(Math.abs(bal) * 0.20 / 12)}/mo in interest.`}
+                </p>
+              </div>
+            )
+          })}
+        </div>
+      )
+    })(),
     'net-worth-chart': (
       <Card className="mb-6" key="net-worth-chart">
         <CardTitle>Net Worth Overview</CardTitle>

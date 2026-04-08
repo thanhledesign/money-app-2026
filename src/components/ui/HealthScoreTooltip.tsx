@@ -43,15 +43,15 @@ export function HealthScoreTooltip({ data, score }: Props) {
         : `${calc.formatPercent(savingsRate)} — aim for 30%+ by reducing variable spending`,
     })
 
-    const disney = calc.getDisneyConcentration(latest, data)
+    const topConc = calc.getDisneyConcentration(latest, data)
     items.push({
       label: 'Diversification',
-      earned: disney < 0.50 ? 15 : disney < 0.70 ? 5 : 0,
+      earned: topConc < 0.50 ? 15 : topConc < 0.70 ? 5 : 0,
       max: 15,
-      status: disney < 0.50 ? 'good' : disney < 0.70 ? 'warn' : 'bad',
-      tip: disney < 0.50
-        ? 'Employer concentration below 50%'
-        : `Disney at ${calc.formatPercent(disney)} — sell vested equity and diversify into index funds`,
+      status: topConc < 0.50 ? 'good' : topConc < 0.70 ? 'warn' : 'bad',
+      tip: topConc < 0.50
+        ? 'No single employer above 50%'
+        : `Top holding at ${calc.formatPercent(topConc)} — consider diversifying into index funds`,
     })
 
     const runway = calc.getRunwayMonths(data)

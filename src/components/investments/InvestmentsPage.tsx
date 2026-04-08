@@ -149,13 +149,13 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
         onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
       />
 
-      {/* Disney Concentration Warning Banner */}
+      {/* Concentration Warning Banner */}
       {disneyConc > 0.70 && (
         <div className="bg-amber/10 border border-amber/30 rounded-xl p-4 mb-6 flex items-start gap-3">
           <span className="text-amber text-lg leading-none mt-0.5">⚠</span>
           <div>
             <p className="text-amber text-sm font-semibold">
-              High Disney Streaming Concentration: {formatPercent(disneyConc)}
+              High Single-Employer Concentration: {formatPercent(disneyConc)}
             </p>
             <p className="text-amber/70 text-xs mt-0.5">
               Single-employer equity above 70% creates concentrated risk. Consider diversifying
@@ -174,9 +174,9 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
           accent="blue"
         />
         <KPICard
-          label="Disney Streaming"
+          label="Top Concentration"
           value={formatPercent(disneyConc)}
-          subValue="of investment portfolio"
+          subValue="single-employer share"
           accent={disneyConc > 0.70 ? 'amber' : disneyConc > 0.50 ? 'amber' : 'green'}
         />
       </div>
