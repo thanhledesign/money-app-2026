@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { AppData, Snapshot } from '@/data/types'
+import type { Account } from '@/data/types'
 import {
   getLatestSnapshot,
   getActiveAccounts,
@@ -9,10 +10,15 @@ import {
 } from '@/lib/calculations'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Card, CardTitle } from '@/components/ui/Card'
+import { UVPBadge } from '@/components/ui/UVPBadge'
+import { AccountManager } from '@/components/ui/AccountManager'
+import { PageTheme } from '@/components/ui/PageTheme'
 
 interface Props {
   data: AppData
   addSnapshot: (s: Snapshot) => void
+  addAccount: (a: Account) => void
+  updateAccounts: (a: Account[]) => void
 }
 
 type FormValues = {
@@ -40,11 +46,11 @@ function buildInitialValues(latest: Snapshot | null, activeAccountIds: string[])
 
 const CATEGORY_CONFIG: { key: 'cash' | 'investment' | 'debt'; label: string; emoji: string }[] = [
   { key: 'cash', label: 'Cash Accounts', emoji: '💰' },
-  { key: 'investment', label: 'Investment Accounts', emoji: '🐢' },
-  { key: 'debt', label: 'Debt', emoji: '🦊' },
+  { key: 'investment', label: 'Investment Accounts', emoji: '📈' },
+  { key: 'debt', label: 'Debt', emoji: '💀' },
 ]
 
-export default function EntryPage({ data, addSnapshot }: Props) {
+export default function EntryPage({ data, addSnapshot, addAccount, updateAccounts }: Props) {
   const latest = getLatestSnapshot(data)
   const activeAccounts = getActiveAccounts(data)
   const activeAccountIds = activeAccounts.map(a => a.id)
@@ -82,12 +88,17 @@ export default function EntryPage({ data, addSnapshot }: Props) {
   const diff = submittedSnapshot && latest ? getSnapshotDiff(submittedSnapshot, latest, data) : null
 
   return (
+    <PageTheme page="enter">
     <div>
       <PageHeader
         icon="+"
         title="Enter Data"
         subtitle="Record a new financial snapshot"
       />
+
+      <div className="mb-4">
+        <UVPBadge label="Manual-First" description="Snapshot-based entry means you see your complete picture every time. No laggy bank syncs, no miscategorized transactions." />
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Paycheck & Credit Score */}
@@ -115,23 +126,31 @@ export default function EntryPage({ data, addSnapshot }: Props) {
         {/* Account groups */}
         {CATEGORY_CONFIG.map(({ key, label, emoji }) => {
           const accounts = activeAccounts.filter(a => a.category === key)
-          if (accounts.length === 0) return null
           return (
             <Card key={key}>
               <CardTitle className="mb-4">{emoji} {label}</CardTitle>
-              <div className="space-y-3">
-                {accounts.map(acc => (
-                  <FieldRow
-                    key={acc.id}
-                    label={acc.name}
-                    sublabel={acc.institution}
-                    value={values.balances[acc.id] ?? ''}
-                    onChange={v => setBalance(acc.id, v)}
-                    prevValue={latest?.balances[acc.id] ?? null}
-                    isCurrency
-                  />
-                ))}
-              </div>
+              <AccountManager
+                accounts={data.accounts}
+                category={key}
+                onAdd={addAccount}
+                onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
+                onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
+              />
+              {accounts.length > 0 && (
+                <div className="space-y-3">
+                  {accounts.map(acc => (
+                    <FieldRow
+                      key={acc.id}
+                      label={acc.name}
+                      sublabel={acc.institution}
+                      value={values.balances[acc.id] ?? ''}
+                      onChange={v => setBalance(acc.id, v)}
+                      prevValue={latest?.balances[acc.id] ?? null}
+                      isCurrency
+                    />
+                  ))}
+                </div>
+              )}
             </Card>
           )
         })}
@@ -189,6 +208,7 @@ export default function EntryPage({ data, addSnapshot }: Props) {
         </div>
       )}
     </div>
+    </PageTheme>
   )
 }
 

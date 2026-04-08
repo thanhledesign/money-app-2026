@@ -9,6 +9,7 @@ import type { ChartPrefs } from '@/data/chartPrefs'
 import { KPICard, Card, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { HealthScoreTooltip } from '@/components/ui/HealthScoreTooltip'
+import { UVPBadge } from '@/components/ui/UVPBadge'
 import * as calc from '@/lib/calculations'
 
 interface Props {
@@ -100,7 +101,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
         month: label,
         Cash: calc.getTotalCash(s, data),
         Investments: calc.getTotalInvestments(s, data),
-        Debt: Math.abs(calc.getTotalDebt(s, data)),
+        Debt: calc.getTotalDebt(s, data),
         'Net Worth': calc.getNetWorth(s, data),
       }
     })
@@ -163,24 +164,60 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
     ),
     'net-worth-chart': (
       <Card className="mb-6" key="net-worth-chart">
-        <CardTitle>Net Worth Over Time</CardTitle>
-        <div className="h-64 mt-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={netWorthHistory}>
-              <defs>
-                <linearGradient id="nwGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
-                tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
-              <Tooltip {...TOOLTIP_STYLE} formatter={(v: any) => [calc.formatCurrency(v), 'Net Worth']} />
-              <Area type={curveType} dataKey="netWorth" stroke="#a855f7" fill="url(#nwGrad)" strokeWidth={2}
-                dot={prefs.showDots ? { r: 3, fill: '#a855f7' } : false} />
-            </AreaChart>
-          </ResponsiveContainer>
+        <CardTitle>Net Worth Overview</CardTitle>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+          {/* Pie: current net worth breakdown */}
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Cash', value: calc.getTotalCash(latest, data), color: '#22c55e' },
+                    { name: 'Investments', value: calc.getTotalInvestments(latest, data), color: '#3b82f6' },
+                    { name: 'Debt', value: Math.abs(calc.getTotalDebt(latest, data)), color: '#ef4444' },
+                  ].filter(d => d.value > 0)}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={60}
+                  innerRadius={28}
+                  paddingAngle={2}
+                  label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  labelLine={{ stroke: '#55556a' }}
+                  fontSize={10}
+                >
+                  {[
+                    { name: 'Cash', value: calc.getTotalCash(latest, data), color: '#22c55e' },
+                    { name: 'Investments', value: calc.getTotalInvestments(latest, data), color: '#3b82f6' },
+                    { name: 'Debt', value: Math.abs(calc.getTotalDebt(latest, data)), color: '#ef4444' },
+                  ].filter(d => d.value > 0).map((entry, i) => (
+                    <Cell key={i} fill={entry.color} stroke={entry.color + '60'} strokeWidth={1.5} />
+                  ))}
+                </Pie>
+                <Tooltip {...TOOLTIP_STYLE} formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          {/* Area: net worth over time — takes 2 cols */}
+          <div className="lg:col-span-2 h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={netWorthHistory}>
+                <defs>
+                  <linearGradient id="nwGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
+                  tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
+                <Tooltip {...TOOLTIP_STYLE} formatter={(v: any) => [calc.formatCurrency(v), 'Net Worth']} />
+                <Area type={curveType} dataKey="netWorth" stroke="#a855f7" fill="url(#nwGrad)" strokeWidth={2}
+                  dot={prefs.showDots ? { r: 3, fill: '#a855f7' } : false} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </Card>
     ),
@@ -231,7 +268,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
         <CardTitle>Monthly Summary by Category</CardTitle>
         <div className="h-72 mt-4">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={annualBarData}>
+            <BarChart data={annualBarData} stackOffset="sign">
               <XAxis dataKey="month" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
@@ -363,6 +400,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
               {editMode ? <X size={14} /> : <Pencil size={14} />}
               {editMode ? 'Done' : 'Edit Layout'}
             </button>
+            <UVPBadge label="Unique" description="Financial Health Score — a composite of 7 metrics no other app tracks together. Hover for details." />
             <HealthScoreTooltip data={data} score={metrics.healthScore} />
           </div>
         }

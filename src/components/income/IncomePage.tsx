@@ -8,6 +8,7 @@ import type { AppData, CompBreakdown, PaycheckDeduction, PaycheckAllocation } fr
 import { formatCurrency, formatPercent } from '@/lib/calculations'
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { UVPBadge } from '@/components/ui/UVPBadge'
 
 interface IncomePageProps {
   data: AppData
@@ -192,20 +193,48 @@ function CompPackagePieChart({ comp }: { comp: CompBreakdown }) {
   )
 }
 
-// ── Chart 2: Gross Pay 2026 Horizontal Bar ────────────────────────────────────
+// ── Chart 2: Gross/Net Pay 2026 Horizontal Bar ───────────────────────────────
 
 function GrossPayBarChart({ comp }: { comp: CompBreakdown }) {
+  const [view, setView] = useState<'gross' | 'net'>('gross')
   const rows = computePayRows(comp)
   // Exclude the TOTAL row from the bar chart; show everything else
   const chartData = rows
     .filter(r => r.label !== 'TOTAL' && r.label !== 'LTI (Pre-Tax)')
     .concat(rows.filter(r => r.label === 'LTI (Pre-Tax)').map(r => ({ ...r, label: 'LTI' })))
-    .map(r => ({ name: r.label, Gross: r.gross }))
+    .map(r => ({ name: r.label, Pay: view === 'gross' ? r.gross : r.net }))
+
+  const barColor = view === 'gross' ? '#22c55e' : '#3b82f6'
+  const label = view === 'gross' ? 'Gross' : 'Net'
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Gross Pay — 2026</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>{label} Pay — 2026</CardTitle>
+          <div className="flex rounded-lg overflow-hidden border border-border text-xs">
+            <button
+              onClick={() => setView('gross')}
+              className={`px-3 py-1 transition-colors ${
+                view === 'gross'
+                  ? 'bg-green/20 text-green font-medium'
+                  : 'text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              Gross
+            </button>
+            <button
+              onClick={() => setView('net')}
+              className={`px-3 py-1 transition-colors border-l border-border ${
+                view === 'net'
+                  ? 'bg-blue/20 text-blue font-medium'
+                  : 'text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              Net
+            </button>
+          </div>
+        </div>
       </CardHeader>
       <ResponsiveContainer width="100%" height={260}>
         <BarChart
@@ -230,10 +259,10 @@ function GrossPayBarChart({ comp }: { comp: CompBreakdown }) {
           />
           <Tooltip
             contentStyle={TOOLTIP_STYLE}
-            formatter={(value: any) => [formatCurrency(value as number), 'Gross']}
+            formatter={(value: any) => [formatCurrency(value as number), label]}
             cursor={{ fill: 'rgba(255,255,255,0.04)' }}
           />
-          <Bar dataKey="Gross" fill="#22c55e" radius={[0, 4, 4, 0]} />
+          <Bar dataKey="Pay" fill={barColor} radius={[0, 4, 4, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </Card>
@@ -433,7 +462,10 @@ function CompSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Total Comp Breakdown</CardTitle>
+        <div className="flex items-center gap-2 flex-wrap">
+          <CardTitle>Total Comp Breakdown</CardTitle>
+          <UVPBadge label="Unique" description="Full total compensation modeling including RSUs, bonus, and LTI. YNAB and Monarch don't do this." />
+        </div>
       </CardHeader>
 
       {/* Editable inputs */}
@@ -664,7 +696,10 @@ function AllocationSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Paycheck Breakdown</CardTitle>
+        <div className="flex items-center gap-2 flex-wrap">
+          <CardTitle>Paycheck Breakdown</CardTitle>
+          <UVPBadge label="Exclusive" description="Paycheck allocation tool — split your net pay across accounts before it arrives. No other finance app does this." />
+        </div>
         <p className="text-xs text-text-muted mt-1">
           Net paycheck: <span className="text-green font-medium">{formatCurrency(netPaycheck)}</span>
           &nbsp;—&nbsp;How it splits across accounts
@@ -784,6 +819,97 @@ function AllocationRow({
   )
 }
 
+// ── Section 4: Paychecks Frequency ───────────────────────────────────────────
+
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function PaychecksFrequencySection({
+  data,
+}: {
+  data: AppData
+}) {
+  const grossSemiMonthly = data.comp.annualSalary / 24
+  const totalDeductions = data.deductions.reduce((s, d) => s + d.amount, 0)
+  const netSemiMonthly = grossSemiMonthly - totalDeductions
+
+  const perMonth = data.paychecksPerMonth.slice(0, 12)
+  const total = perMonth.reduce((s, n) => s + n, 0)
+
+  const chartData = perMonth.map((qty, i) => ({
+    month: MONTH_LABELS[i],
+    Amount: qty * netSemiMonthly,
+    qty,
+  }))
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Paychecks Frequency</CardTitle>
+        <p className="text-xs text-text-muted mt-1">Number of paychecks in 2026 with amounts</p>
+      </CardHeader>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-2">
+        {/* Left: Month / Qty table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="py-2 px-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Month</th>
+                <th className="py-2 px-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Qty</th>
+                <th className="py-2 px-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Net Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {perMonth.map((qty, i) => (
+                <tr key={i} className="border-b border-border-light hover:bg-surface-hover transition-colors">
+                  <td className="py-2 px-3 text-text-secondary">{MONTH_LABELS[i]}</td>
+                  <td className="py-2 px-3 text-right tabular-nums text-text-primary">{qty}</td>
+                  <td className="py-2 px-3 text-right tabular-nums text-green">{formatCurrency(qty * netSemiMonthly)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-green/40 bg-green/5 font-semibold">
+                <td className="py-2.5 px-3 text-text-primary uppercase text-xs">TOTAL</td>
+                <td className="py-2.5 px-3 text-right tabular-nums text-text-primary">{total}</td>
+                <td className="py-2.5 px-3 text-right tabular-nums text-green">{formatCurrency(total * netSemiMonthly)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {/* Right: Bar chart — net amount per month */}
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
+              <XAxis
+                dataKey="month"
+                tick={{ fill: '#6b7280', fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tickFormatter={(v: any) => `$${((v as number) / 1000).toFixed(0)}K`}
+                tick={{ fill: '#6b7280', fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                contentStyle={TOOLTIP_STYLE}
+                formatter={(value: any, _name: any, props: any) => [
+                  `${formatCurrency(value as number)} (${props.payload.qty} checks)`,
+                  'Net',
+                ]}
+                cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+              />
+              <Bar dataKey="Amount" fill="#22c55e" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </Card>
+  )
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export function IncomePage({ data, updateComp, updateDeductions, updateAllocations }: IncomePageProps) {
@@ -833,6 +959,9 @@ export function IncomePage({ data, updateComp, updateDeductions, updateAllocatio
           accounts={data.accounts}
         />
       </div>
+
+      {/* ── Section 4: Paychecks Frequency ── */}
+      <PaychecksFrequencySection data={data} />
     </div>
   )
 }

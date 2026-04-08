@@ -12,11 +12,15 @@ import {
   ResponsiveContainer,
   Legend,
   Cell,
+  LabelList,
 } from 'recharts'
 import type { AppData } from '@/data/types'
+import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
 import { Card, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { PageTheme } from '@/components/ui/PageTheme'
+import { AccountManager } from '@/components/ui/AccountManager'
 import {
   getAccountsByCategory,
   getMonthlySnapshots,
@@ -26,7 +30,13 @@ import {
   formatPercent,
 } from '@/lib/calculations'
 
-interface Props { data: AppData; prefs: ChartPrefs; onUpdatePrefs: (partial: Partial<ChartPrefs>) => void }
+interface Props {
+  data: AppData
+  prefs: ChartPrefs
+  onUpdatePrefs: (partial: Partial<ChartPrefs>) => void
+  addAccount: (a: Account) => void
+  updateAccounts: (a: Account[]) => void
+}
 
 const TOOLTIP_STYLE = {
   background: '#12121a',
@@ -35,7 +45,7 @@ const TOOLTIP_STYLE = {
   fontSize: '12px',
 }
 
-export default function DebtPage({ data, prefs }: Props) {
+export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Props) {
   const curveType = prefs.curveType === 'smooth' ? 'monotone' : 'linear'
 
   const latest = getLatestSnapshot(data)
@@ -113,6 +123,25 @@ export default function DebtPage({ data, prefs }: Props) {
     })
   }, [monthKeys, monthLabels, monthlyMap, debtAccounts])
 
+  // ----- Previous month key for delta computation -----
+  const prevMonthKey = monthKeys.length >= 2 ? monthKeys[monthKeys.length - 2] : null
+
+  // ----- Cumulative stacked bar chart data (one bar per month, stacked per debt account) -----
+  const cumulativeBarData = useMemo(() => {
+    return monthKeys.map((mk, i) => {
+      const snap = monthlyMap.get(mk)
+      const point: Record<string, string | number> = { month: monthLabels[i] }
+      let total = 0
+      debtAccounts.forEach(acc => {
+        const val = snap ? (snap.balances[acc.id] ?? 0) : 0
+        point[acc.id] = val
+        total += val
+      })
+      point['__total'] = total
+      return point
+    })
+  }, [monthKeys, monthLabels, monthlyMap, debtAccounts])
+
   // ----- FICO score history -----
   const ficoHistory = useMemo(
     () =>
@@ -148,6 +177,7 @@ export default function DebtPage({ data, prefs }: Props) {
   const latestMonthKey = getMonthKey(latest.timestamp)
 
   return (
+    <PageTheme page="debt">
     <div>
       <PageHeader
         icon="👿"
@@ -166,9 +196,17 @@ export default function DebtPage({ data, prefs }: Props) {
         }
       />
 
+      <AccountManager
+        accounts={data.accounts}
+        category="debt"
+        onAdd={addAccount}
+        onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
+        onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
+      />
+
       {/* ── Section 1: Monthly Balance Table ── */}
-      <Card className="mb-6">
-        <CardTitle>Monthly Balance History</CardTitle>
+      <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #f59e0b)' }}>
+        <CardTitle style={{ color: 'var(--page-accent, #f59e0b)' }}>Monthly Balance History</CardTitle>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-sm">
             <thead>
@@ -186,40 +224,57 @@ export default function DebtPage({ data, prefs }: Props) {
                     {label}
                   </th>
                 ))}
+                <th className="py-2.5 px-3 text-right font-medium text-xs uppercase tracking-wider whitespace-nowrap text-text-muted">
+                  Delta
+                </th>
               </tr>
             </thead>
             <tbody>
-              {debtAccounts.map(acc => (
-                <tr
-                  key={acc.id}
-                  className="border-b border-border-light hover:bg-surface-hover transition-colors"
-                >
-                  <td className="py-2.5 px-3 text-text-primary whitespace-nowrap">
-                    <div className="font-medium">{acc.name}</div>
-                    <div className="text-xs text-text-muted">{acc.institution}</div>
-                  </td>
-                  {monthKeys.map(mk => {
-                    const snap = monthlyMap.get(mk)
-                    const val = snap ? (snap.balances[acc.id] ?? null) : null
-                    return (
-                      <td
-                        key={mk}
-                        className={`py-2.5 px-3 text-right tabular-nums ${
-                          val === null
-                            ? 'text-text-muted'
-                            : val < 0
-                            ? 'text-red'
-                            : val > 0
-                            ? 'text-green'
-                            : 'text-text-secondary'
-                        }`}
-                      >
-                        {val !== null ? formatCurrency(val) : '—'}
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
+              {debtAccounts.map(acc => {
+                const lastMonthSnap = monthKeys.length > 0 ? monthlyMap.get(monthKeys[monthKeys.length - 1]) : null
+                const prevMonthSnap = prevMonthKey ? monthlyMap.get(prevMonthKey) : null
+                const lastVal = lastMonthSnap ? (lastMonthSnap.balances[acc.id] ?? 0) : 0
+                const prevVal = prevMonthSnap ? (prevMonthSnap.balances[acc.id] ?? 0) : 0
+                const delta = monthKeys.length >= 2 ? lastVal - prevVal : 0
+                return (
+                  <tr
+                    key={acc.id}
+                    className="border-b border-border-light hover:bg-surface-hover transition-colors"
+                  >
+                    <td className="py-2.5 px-3 text-text-primary whitespace-nowrap">
+                      <div className="font-medium">{acc.name}</div>
+                      <div className="text-xs text-text-muted">{acc.institution}</div>
+                    </td>
+                    {monthKeys.map(mk => {
+                      const snap = monthlyMap.get(mk)
+                      const val = snap ? (snap.balances[acc.id] ?? null) : null
+                      return (
+                        <td
+                          key={mk}
+                          className={`py-2.5 px-3 text-right tabular-nums ${
+                            val === null
+                              ? 'text-text-muted'
+                              : val < 0
+                              ? 'text-red'
+                              : val > 0
+                              ? 'text-green'
+                              : 'text-text-secondary'
+                          }`}
+                        >
+                          {val !== null ? formatCurrency(val) : '—'}
+                        </td>
+                      )
+                    })}
+                    <td
+                      className={`py-2.5 px-3 text-right tabular-nums font-medium ${
+                        delta > 0 ? 'text-green' : delta < 0 ? 'text-red' : 'text-text-muted'
+                      }`}
+                    >
+                      {delta !== 0 ? `${delta > 0 ? '+' : ''}${formatCurrency(delta)}` : '—'}
+                    </td>
+                  </tr>
+                )
+              })}
 
               {/* TOTAL row */}
               <tr className="bg-accent/5 font-semibold border-t border-border">
@@ -242,6 +297,28 @@ export default function DebtPage({ data, prefs }: Props) {
                     {total !== null ? formatCurrency(total) : '—'}
                   </td>
                 ))}
+                {(() => {
+                  const lastTotal = monthTotals[monthTotals.length - 1] ?? null
+                  const prevTotal = prevMonthKey ? monthTotals[monthKeys.indexOf(prevMonthKey)] ?? null : null
+                  const totalDelta = lastTotal !== null && prevTotal !== null ? lastTotal - prevTotal : null
+                  return (
+                    <td
+                      className={`py-2.5 px-3 text-right tabular-nums font-semibold ${
+                        totalDelta === null
+                          ? 'text-text-muted'
+                          : totalDelta > 0
+                          ? 'text-green'
+                          : totalDelta < 0
+                          ? 'text-red'
+                          : 'text-text-secondary'
+                      }`}
+                    >
+                      {totalDelta !== null && totalDelta !== 0
+                        ? `${totalDelta > 0 ? '+' : ''}${formatCurrency(totalDelta)}`
+                        : '—'}
+                    </td>
+                  )
+                })()}
               </tr>
             </tbody>
           </table>
@@ -448,7 +525,72 @@ export default function DebtPage({ data, prefs }: Props) {
         </Card>
       </div>
 
-      {/* ── Section 4: FICO Score History ── */}
+      {/* ── Section 4: Debt — Monthly Cumulative stacked bar ── */}
+      {cumulativeBarData.length > 0 && (
+        <Card className="mb-6">
+          <CardTitle>Debt — Monthly Cumulative</CardTitle>
+          <div className="h-80 mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={cumulativeBarData} margin={{ top: 24, right: 8, bottom: 0, left: 0 }}>
+                <XAxis
+                  dataKey="month"
+                  tick={{ fill: '#55556a', fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: '#55556a', fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v: number) => {
+                    const abs = Math.abs(v)
+                    if (abs >= 1000) return `$${(abs / 1000).toFixed(0)}K`
+                    return `$${abs.toFixed(0)}`
+                  }}
+                />
+                <Tooltip
+                  contentStyle={TOOLTIP_STYLE}
+                  labelStyle={{ color: '#8888a0' }}
+                  formatter={(v: any, id: any) => {
+                    const acc = debtAccounts.find(a => a.id === id)
+                    return [formatCurrency(v), acc ? acc.name : id]
+                  }}
+                />
+                <Legend
+                  formatter={(id: string) => {
+                    const acc = debtAccounts.find(a => a.id === id)
+                    return (
+                      <span style={{ color: '#8888a0', fontSize: 11 }}>
+                        {acc ? acc.name : id}
+                      </span>
+                    )
+                  }}
+                />
+                {debtAccounts.map((acc, idx) => (
+                  <Bar
+                    key={acc.id}
+                    dataKey={acc.id}
+                    stackId="debt"
+                    fill={prefs.accountColors[acc.id] ?? '#6b7280'}
+                    fillOpacity={0.85}
+                  >
+                    {idx === debtAccounts.length - 1 && (
+                      <LabelList
+                        dataKey="__total"
+                        position="top"
+                        style={{ fill: '#8888a0', fontSize: 10 }}
+                        formatter={(v: any) => v !== 0 ? formatCurrency(v) : ''}
+                      />
+                    )}
+                  </Bar>
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      )}
+
+      {/* ── Section 5: FICO Score History ── */}
       {ficoHistory.length > 0 && (
         <Card>
           <CardTitle>FICO Score History</CardTitle>
@@ -527,5 +669,6 @@ export default function DebtPage({ data, prefs }: Props) {
         </Card>
       )}
     </div>
+    </PageTheme>
   )
 }

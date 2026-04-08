@@ -16,6 +16,7 @@ import SettingsPage from '@/components/settings/SettingsPage'
 export default function App() {
   const {
     data, addSnapshot, addGoal,
+    addAccount, updateAccounts,
     updateComp, updateDeductions, updateAllocations, updateBudgetItems,
   } = useAppData()
 
@@ -25,11 +26,11 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<DashboardPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} />} />
-        <Route path="enter" element={<EntryPage data={data} addSnapshot={addSnapshot} />} />
-        <Route path="accounts" element={<AccountsPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} />} />
-        <Route path="investments" element={<InvestmentsPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} />} />
-        <Route path="debt" element={<DebtPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} />} />
-        <Route path="net-worth" element={<NetWorthPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} />} />
+        <Route path="enter" element={<EntryPage data={data} addSnapshot={addSnapshot} addAccount={addAccount} updateAccounts={updateAccounts} />} />
+        <Route path="accounts" element={<AccountsPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} addAccount={addAccount} updateAccounts={updateAccounts} />} />
+        <Route path="investments" element={<InvestmentsPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} addAccount={addAccount} updateAccounts={updateAccounts} />} />
+        <Route path="debt" element={<DebtPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} addAccount={addAccount} updateAccounts={updateAccounts} />} />
+        <Route path="net-worth" element={<NetWorthPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} addAccount={addAccount} updateAccounts={updateAccounts} />} />
         <Route path="income" element={
           <IncomePage data={data} updateComp={updateComp}
             updateDeductions={updateDeductions} updateAllocations={updateAllocations} />

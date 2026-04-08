@@ -14,9 +14,12 @@ import {
   Legend,
 } from 'recharts'
 import type { AppData } from '@/data/types'
+import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
 import { Card, CardTitle } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { PageTheme } from '@/components/ui/PageTheme'
+import { AccountManager } from '@/components/ui/AccountManager'
 import {
   getActiveAccounts,
   getLatestSnapshot,
@@ -29,7 +32,13 @@ import {
   formatCurrency,
 } from '@/lib/calculations'
 
-interface Props { data: AppData; prefs: ChartPrefs; onUpdatePrefs: (partial: Partial<ChartPrefs>) => void }
+interface Props {
+  data: AppData
+  prefs: ChartPrefs
+  onUpdatePrefs: (partial: Partial<ChartPrefs>) => void
+  addAccount: (a: Account) => void
+  updateAccounts: (a: Account[]) => void
+}
 
 const TOOLTIP_STYLE = {
   background: '#12121a',
@@ -38,7 +47,7 @@ const TOOLTIP_STYLE = {
   fontSize: '12px',
 }
 
-export default function NetWorthPage({ data, prefs }: Props) {
+export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }: Props) {
   const curveType = prefs.curveType === 'smooth' ? 'monotone' : 'linear'
 
   const latest = getLatestSnapshot(data)
@@ -141,6 +150,9 @@ export default function NetWorthPage({ data, prefs }: Props) {
     [monthKeys, monthLabels, monthlyMap, data]
   )
 
+  // Previous month key for delta column (second-to-last)
+  const prevMonthKey = monthKeys.length >= 2 ? monthKeys[monthKeys.length - 2] : null
+
   if (!latest) {
     return (
       <div className="text-text-muted text-center py-20">
@@ -162,6 +174,7 @@ export default function NetWorthPage({ data, prefs }: Props) {
   }
 
   return (
+    <PageTheme page="net-worth">
     <div>
       <PageHeader
         icon="💎"
@@ -177,9 +190,40 @@ export default function NetWorthPage({ data, prefs }: Props) {
         }
       />
 
+      {/* ── Account Managers ── */}
+      <div className="flex flex-wrap gap-4 mb-2">
+        <div className="flex-1 min-w-[200px]">
+          <AccountManager
+            accounts={data.accounts}
+            category="cash"
+            onAdd={addAccount}
+            onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
+            onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
+          />
+        </div>
+        <div className="flex-1 min-w-[200px]">
+          <AccountManager
+            accounts={data.accounts}
+            category="investment"
+            onAdd={addAccount}
+            onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
+            onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
+          />
+        </div>
+        <div className="flex-1 min-w-[200px]">
+          <AccountManager
+            accounts={data.accounts}
+            category="debt"
+            onAdd={addAccount}
+            onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
+            onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
+          />
+        </div>
+      </div>
+
       {/* ── Section 1: All-accounts monthly table ── */}
-      <Card className="mb-6">
-        <CardTitle>All Accounts — Monthly Balances</CardTitle>
+      <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #a855f7)' }}>
+        <CardTitle style={{ color: 'var(--page-accent, #a855f7)' }}>All Accounts — Monthly Balances</CardTitle>
         <div className="overflow-x-auto mt-4">
           <table className="w-full text-sm">
             <thead>
@@ -200,6 +244,9 @@ export default function NetWorthPage({ data, prefs }: Props) {
                     {label}
                   </th>
                 ))}
+                <th className="py-2.5 px-3 text-right font-medium text-text-muted text-xs uppercase tracking-wider whitespace-nowrap">
+                  Delta
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -210,47 +257,61 @@ export default function NetWorthPage({ data, prefs }: Props) {
                   // Category header row
                   <tr key={`header-${cat}`} className="bg-surface-hover">
                     <td
-                      colSpan={2 + monthKeys.length}
+                      colSpan={3 + monthKeys.length}
                       className={`py-1.5 px-3 text-xs font-semibold uppercase tracking-widest ${categoryHeaderStyle[cat]}`}
                     >
                       {categoryLabel[cat]}
                     </td>
                   </tr>,
                   // Account rows
-                  ...catAccounts.map(acc => (
-                    <tr
-                      key={acc.id}
-                      className="border-b border-border-light hover:bg-surface-hover transition-colors"
-                    >
-                      <td className="py-2.5 px-3 text-text-primary whitespace-nowrap">
-                        <div className="font-medium">{acc.name}</div>
-                        <div className="text-xs text-text-muted">{acc.institution}</div>
-                      </td>
-                      <td className="py-2.5 px-3 text-text-muted capitalize text-xs whitespace-nowrap">
-                        {acc.type}
-                      </td>
-                      {monthKeys.map(mk => {
-                        const snap = monthlyMap.get(mk)
-                        const val = snap ? (snap.balances[acc.id] ?? null) : null
-                        return (
-                          <td
-                            key={mk}
-                            className={`py-2.5 px-3 text-right tabular-nums ${
-                              val === null
-                                ? 'text-text-muted'
-                                : val < 0
-                                ? 'text-red'
-                                : val > 0
-                                ? 'text-text-primary'
-                                : 'text-text-secondary'
-                            }`}
-                          >
-                            {val !== null ? formatCurrency(val) : '—'}
-                          </td>
-                        )
-                      })}
-                    </tr>
-                  )),
+                  ...catAccounts.map(acc => {
+                    const lastMonthSnap = monthKeys.length > 0 ? monthlyMap.get(monthKeys[monthKeys.length - 1]) : null
+                    const prevMonthSnap = prevMonthKey ? monthlyMap.get(prevMonthKey) : null
+                    const lastVal = lastMonthSnap ? (lastMonthSnap.balances[acc.id] ?? 0) : 0
+                    const prevVal = prevMonthSnap ? (prevMonthSnap.balances[acc.id] ?? 0) : 0
+                    const delta = monthKeys.length >= 2 ? lastVal - prevVal : 0
+                    return (
+                      <tr
+                        key={acc.id}
+                        className="border-b border-border-light hover:bg-surface-hover transition-colors"
+                      >
+                        <td className="py-2.5 px-3 text-text-primary whitespace-nowrap">
+                          <div className="font-medium">{acc.name}</div>
+                          <div className="text-xs text-text-muted">{acc.institution}</div>
+                        </td>
+                        <td className="py-2.5 px-3 text-text-muted capitalize text-xs whitespace-nowrap">
+                          {acc.type}
+                        </td>
+                        {monthKeys.map(mk => {
+                          const snap = monthlyMap.get(mk)
+                          const val = snap ? (snap.balances[acc.id] ?? null) : null
+                          return (
+                            <td
+                              key={mk}
+                              className={`py-2.5 px-3 text-right tabular-nums ${
+                                val === null
+                                  ? 'text-text-muted'
+                                  : val < 0
+                                  ? 'text-red'
+                                  : val > 0
+                                  ? 'text-text-primary'
+                                  : 'text-text-secondary'
+                              }`}
+                            >
+                              {val !== null ? formatCurrency(val) : '—'}
+                            </td>
+                          )
+                        })}
+                        <td
+                          className={`py-2.5 px-3 text-right tabular-nums font-medium ${
+                            delta > 0 ? 'text-green' : delta < 0 ? 'text-red' : 'text-text-muted'
+                          }`}
+                        >
+                          {delta !== 0 ? `${delta > 0 ? '+' : ''}${formatCurrency(delta)}` : '—'}
+                        </td>
+                      </tr>
+                    )
+                  }),
                 ]
               })}
 
@@ -276,6 +337,26 @@ export default function NetWorthPage({ data, prefs }: Props) {
                     {total !== null ? formatCurrency(total) : '—'}
                   </td>
                 ))}
+                {(() => {
+                  const lastNW = monthNetWorthTotals[monthNetWorthTotals.length - 1] ?? null
+                  const prevNW = prevMonthKey ? monthNetWorthTotals[monthKeys.indexOf(prevMonthKey)] ?? null : null
+                  const nwDelta = lastNW !== null && prevNW !== null ? lastNW - prevNW : null
+                  return (
+                    <td
+                      className={`py-2.5 px-3 text-right tabular-nums font-semibold ${
+                        nwDelta === null
+                          ? 'text-text-muted'
+                          : nwDelta >= 0
+                          ? 'text-purple'
+                          : 'text-red'
+                      }`}
+                    >
+                      {nwDelta !== null && nwDelta !== 0
+                        ? `${nwDelta > 0 ? '+' : ''}${formatCurrency(nwDelta)}`
+                        : '—'}
+                    </td>
+                  )
+                })()}
               </tr>
             </tbody>
           </table>
@@ -520,5 +601,6 @@ export default function NetWorthPage({ data, prefs }: Props) {
         </div>
       </Card>
     </div>
+    </PageTheme>
   )
 }

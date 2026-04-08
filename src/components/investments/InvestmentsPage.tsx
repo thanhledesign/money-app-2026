@@ -5,9 +5,12 @@ import {
   BarChart, Bar,
 } from 'recharts'
 import type { AppData } from '@/data/types'
+import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
 import { Card, CardTitle, KPICard } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { PageTheme } from '@/components/ui/PageTheme'
+import { AccountManager } from '@/components/ui/AccountManager'
 import {
   getLatestSnapshot,
   getMonthKey,
@@ -18,7 +21,13 @@ import {
   formatPercent,
 } from '@/lib/calculations'
 
-interface Props { data: AppData; prefs: ChartPrefs; onUpdatePrefs: (partial: Partial<ChartPrefs>) => void }
+interface Props {
+  data: AppData
+  prefs: ChartPrefs
+  onUpdatePrefs: (partial: Partial<ChartPrefs>) => void
+  addAccount: (a: Account) => void
+  updateAccounts: (a: Account[]) => void
+}
 
 const TOOLTIP_STYLE = {
   background: '#12121a',
@@ -27,7 +36,7 @@ const TOOLTIP_STYLE = {
   fontSize: '12px',
 }
 
-export default function InvestmentsPage({ data, prefs }: Props) {
+export default function InvestmentsPage({ data, prefs, addAccount, updateAccounts }: Props) {
   const curveType = prefs.curveType === 'smooth' ? 'monotone' : 'linear'
 
   const accounts = useMemo(
@@ -114,12 +123,24 @@ export default function InvestmentsPage({ data, prefs }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monthKeys, accounts, monthlyMap])
 
+  // Previous month key for delta computation (second-to-last)
+  const prevMonthKey = monthKeys.length >= 2 ? monthKeys[monthKeys.length - 2] : null
+
   return (
+    <PageTheme page="investments">
     <div>
       <PageHeader
         icon="📈"
         title="Investments"
         subtitle="401K, brokerages, IRAs and investment balances"
+      />
+
+      <AccountManager
+        accounts={data.accounts}
+        category="investment"
+        onAdd={addAccount}
+        onRemove={(id) => updateAccounts(data.accounts.filter(a => a.id !== id))}
+        onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
       />
 
       {/* Disney Concentration Warning Banner */}
@@ -161,8 +182,8 @@ export default function InvestmentsPage({ data, prefs }: Props) {
       {accounts.length > 0 && (
         <>
           {/* ── Section 1: Monthly Balance Table ── */}
-          <Card className="mb-6">
-            <CardTitle>Monthly Balances</CardTitle>
+          <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #06b6d4)' }}>
+            <CardTitle style={{ color: 'var(--page-accent, #06b6d4)' }}>Monthly Balances</CardTitle>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-sm border-collapse">
                 <thead>
@@ -183,12 +204,18 @@ export default function InvestmentsPage({ data, prefs }: Props) {
                         Current
                       </th>
                     )}
+                    <th className="text-right py-2 px-3 font-medium text-text-muted whitespace-nowrap tabular-nums">
+                      Delta
+                    </th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {accounts.map(acc => {
                     const currentBal = latest ? (latest.balances[acc.id] ?? 0) : 0
+                    const lastMonthBal = monthKeys.length > 0 ? balanceFor(acc.id, monthKeys[monthKeys.length - 1]) : 0
+                    const deltaBase = currentIsNewColumn ? lastMonthBal : (prevMonthKey ? balanceFor(acc.id, prevMonthKey) : 0)
+                    const delta = currentIsNewColumn ? currentBal - lastMonthBal : (monthKeys.length >= 2 ? lastMonthBal - deltaBase : 0)
                     return (
                       <tr
                         key={acc.id}
@@ -220,6 +247,13 @@ export default function InvestmentsPage({ data, prefs }: Props) {
                             {formatCurrency(currentBal)}
                           </td>
                         )}
+                        <td
+                          className={`text-right py-2 px-3 tabular-nums whitespace-nowrap font-medium ${
+                            delta > 0 ? 'text-green' : delta < 0 ? 'text-red' : 'text-text-muted'
+                          }`}
+                        >
+                          {delta !== 0 ? `${delta > 0 ? '+' : ''}${formatCurrency(delta)}` : '—'}
+                        </td>
                       </tr>
                     )
                   })}
@@ -251,6 +285,23 @@ export default function InvestmentsPage({ data, prefs }: Props) {
                         {formatCurrency(currentTotal)}
                       </td>
                     )}
+                    {(() => {
+                      const prevTotal = currentIsNewColumn
+                        ? monthTotal(monthKeys[monthKeys.length - 1] ?? '')
+                        : (prevMonthKey ? monthTotal(prevMonthKey) : 0)
+                      const totalDelta = currentIsNewColumn
+                        ? currentTotal - prevTotal
+                        : (monthKeys.length >= 2 ? monthTotal(monthKeys[monthKeys.length - 1]) - prevTotal : 0)
+                      return (
+                        <td
+                          className={`text-right py-2 px-3 tabular-nums font-semibold whitespace-nowrap ${
+                            totalDelta > 0 ? 'text-green' : totalDelta < 0 ? 'text-red' : 'text-text-muted'
+                          }`}
+                        >
+                          {totalDelta !== 0 ? `${totalDelta > 0 ? '+' : ''}${formatCurrency(totalDelta)}` : '—'}
+                        </td>
+                      )
+                    })()}
                   </tr>
                 </tfoot>
               </table>
@@ -404,5 +455,6 @@ export default function InvestmentsPage({ data, prefs }: Props) {
         </>
       )}
     </div>
+    </PageTheme>
   )
 }

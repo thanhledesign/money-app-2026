@@ -3,11 +3,12 @@ import type { ReactNode } from 'react'
 interface CardProps {
   children: ReactNode
   className?: string
+  style?: React.CSSProperties
 }
 
-export function Card({ children, className = '' }: CardProps) {
+export function Card({ children, className = '', style }: CardProps) {
   return (
-    <div className={`bg-surface border border-border rounded-xl p-5 ${className}`}>
+    <div className={`bg-surface border border-border rounded-xl p-5 ${className}`} style={style}>
       {children}
     </div>
   )
@@ -17,8 +18,8 @@ export function CardHeader({ children, className = '' }: CardProps) {
   return <div className={`mb-4 ${className}`}>{children}</div>
 }
 
-export function CardTitle({ children, className = '' }: CardProps) {
-  return <h3 className={`text-sm font-medium text-text-secondary uppercase tracking-wider ${className}`}>{children}</h3>
+export function CardTitle({ children, className = '', style }: CardProps) {
+  return <h3 className={`text-sm font-medium text-text-secondary uppercase tracking-wider ${className}`} style={style}>{children}</h3>
 }
 
 interface KPICardProps {
