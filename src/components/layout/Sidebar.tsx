@@ -30,12 +30,13 @@ interface Props {
   userAvatar?: string
   userName?: string
   onSignOut: () => void
+  onSignIn?: () => void
   isLocal: boolean
   width: number
   onWidthChange: (w: number) => void
 }
 
-export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, isLocal, width, onWidthChange }: Props) {
+export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, onSignIn, isLocal, width, onWidthChange }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
   const startXRef = useRef(0)
@@ -155,6 +156,7 @@ export default function Sidebar({ userEmail, userAvatar, userName, onSignOut, is
           avatarUrl={userAvatar}
           displayName={userName}
           onSignOut={onSignOut}
+          onSignIn={onSignIn}
           isLocal={isLocal}
         />
       </div>

@@ -1,15 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
-import { LogOut, User } from 'lucide-react'
+import { LogIn, LogOut, User } from 'lucide-react'
 
 interface Props {
   email: string | undefined
   avatarUrl: string | undefined
   displayName: string | undefined
   onSignOut: () => void
+  onSignIn?: () => void
   isLocal: boolean
 }
 
-export function UserMenu({ email, avatarUrl, displayName, onSignOut, isLocal }: Props) {
+export function UserMenu({ email, avatarUrl, displayName, onSignOut, onSignIn, isLocal }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -55,6 +56,14 @@ export function UserMenu({ email, avatarUrl, displayName, onSignOut, isLocal }: 
                 : 'Data synced securely via Supabase.'}
             </p>
           </div>
+          {isLocal && onSignIn && (
+            <button
+              onClick={() => { onSignIn(); setOpen(false) }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-secondary hover:text-accent hover:bg-surface-hover transition-colors"
+            >
+              <LogIn size={14} /> Sign In with Google
+            </button>
+          )}
           {!isLocal && (
             <button
               onClick={() => { onSignOut(); setOpen(false) }}

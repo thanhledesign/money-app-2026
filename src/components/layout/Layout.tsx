@@ -21,10 +21,11 @@ interface Props {
   userAvatar?: string
   userName?: string
   onSignOut: () => void
+  onSignIn?: () => void
   isLocal: boolean
 }
 
-export default function Layout({ userEmail, userAvatar, userName, onSignOut, isLocal }: Props) {
+export default function Layout({ userEmail, userAvatar, userName, onSignOut, onSignIn, isLocal }: Props) {
   const [sidebarWidth, setSidebarWidth] = useState(loadWidth)
 
   const handleWidthChange = useCallback((w: number) => {
@@ -40,6 +41,7 @@ export default function Layout({ userEmail, userAvatar, userName, onSignOut, isL
         userAvatar={userAvatar}
         userName={userName}
         onSignOut={onSignOut}
+        onSignIn={onSignIn}
         isLocal={isLocal}
         width={sidebarWidth}
         onWidthChange={handleWidthChange}

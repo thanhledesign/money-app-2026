@@ -122,6 +122,7 @@ export default function App() {
           userAvatar={auth.user?.user_metadata?.avatar_url}
           userName={auth.user?.user_metadata?.full_name}
           onSignOut={auth.signOut}
+          onSignIn={auth.configured ? auth.signInWithGoogle : undefined}
           isLocal={isLocal}
         />
       }>
