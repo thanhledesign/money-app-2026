@@ -79,6 +79,86 @@ export const CSS_BACKGROUNDS: Record<string, { name: string; css: string; catego
       linear-gradient(160deg, #06060c 0%, #0a0a14 50%, #08080d 100%)
     `,
   },
+  neon: {
+    name: 'Neon Pulse',
+    category: 'Vibrant',
+    css: `
+      radial-gradient(ellipse at 0% 50%, rgba(236,72,153,0.12) 0%, transparent 40%),
+      radial-gradient(ellipse at 100% 50%, rgba(34,211,238,0.12) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 0%, rgba(124,111,247,0.08) 0%, transparent 35%),
+      linear-gradient(135deg, #0a0610 0%, #060810 50%, #08080d 100%)
+    `,
+  },
+  sunset: {
+    name: 'Sunset Fade',
+    category: 'Warm',
+    css: `
+      radial-gradient(ellipse at 0% 0%, rgba(251,146,60,0.12) 0%, transparent 45%),
+      radial-gradient(ellipse at 100% 30%, rgba(236,72,153,0.08) 0%, transparent 40%),
+      radial-gradient(ellipse at 30% 100%, rgba(124,111,247,0.06) 0%, transparent 40%),
+      linear-gradient(160deg, #110c08 0%, #0d080a 50%, #08080d 100%)
+    `,
+  },
+  forest: {
+    name: 'Forest Mist',
+    category: 'Nature',
+    css: `
+      radial-gradient(ellipse at 20% 80%, rgba(34,197,94,0.10) 0%, transparent 45%),
+      radial-gradient(ellipse at 80% 20%, rgba(20,184,166,0.08) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 50%, rgba(52,211,153,0.04) 0%, transparent 50%),
+      linear-gradient(145deg, #060d08 0%, #08080d 100%)
+    `,
+  },
+  ocean: {
+    name: 'Ocean Depth',
+    category: 'Nature',
+    css: `
+      radial-gradient(ellipse at 30% 90%, rgba(6,182,212,0.12) 0%, transparent 45%),
+      radial-gradient(ellipse at 70% 10%, rgba(59,130,246,0.10) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 50%, rgba(14,165,233,0.04) 0%, transparent 50%),
+      linear-gradient(180deg, #060810 0%, #040810 50%, #08080d 100%)
+    `,
+  },
+  royal: {
+    name: 'Royal Velvet',
+    category: 'Luxe',
+    css: `
+      radial-gradient(ellipse at 40% 10%, rgba(168,85,247,0.14) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 80%, rgba(124,58,237,0.08) 0%, transparent 40%),
+      radial-gradient(ellipse at 10% 70%, rgba(192,132,252,0.06) 0%, transparent 35%),
+      linear-gradient(150deg, #0c0812 0%, #08060e 50%, #08080d 100%)
+    `,
+  },
+  rose: {
+    name: 'Rose Gold',
+    category: 'Luxe',
+    css: `
+      radial-gradient(ellipse at 60% 20%, rgba(251,113,133,0.10) 0%, transparent 40%),
+      radial-gradient(ellipse at 20% 70%, rgba(244,114,182,0.08) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 80%, rgba(251,191,36,0.06) 0%, transparent 35%),
+      linear-gradient(135deg, #100a0c 0%, #0c0808 50%, #08080d 100%)
+    `,
+  },
+  ice: {
+    name: 'Frozen Glass',
+    category: 'Cool',
+    css: `
+      radial-gradient(ellipse at 50% 0%, rgba(186,230,253,0.10) 0%, transparent 40%),
+      radial-gradient(ellipse at 20% 60%, rgba(147,197,253,0.06) 0%, transparent 35%),
+      radial-gradient(ellipse at 80% 90%, rgba(165,180,252,0.06) 0%, transparent 35%),
+      linear-gradient(170deg, #0a0c12 0%, #08090e 50%, #08080d 100%)
+    `,
+  },
+  matrix: {
+    name: 'Matrix',
+    category: 'Vibrant',
+    css: `
+      radial-gradient(ellipse at 50% 30%, rgba(34,197,94,0.12) 0%, transparent 40%),
+      radial-gradient(ellipse at 20% 80%, rgba(16,185,129,0.06) 0%, transparent 35%),
+      radial-gradient(ellipse at 80% 70%, rgba(52,211,153,0.04) 0%, transparent 30%),
+      linear-gradient(180deg, #040804 0%, #060a06 50%, #08080d 100%)
+    `,
+  },
 }
 
 export const BACKGROUND_PRESETS = [

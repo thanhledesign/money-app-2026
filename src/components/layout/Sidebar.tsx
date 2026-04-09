@@ -112,18 +112,43 @@ export default function Sidebar({
 
   const sidebarContent = (
     <>
-      <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
-        <div className="min-w-0">
-          <h1 className="text-lg font-semibold text-text-primary tracking-tight truncate">Money 2026</h1>
-          <p className="text-xs text-text-muted mt-0.5 truncate">Financial Dashboard</p>
+      <div className="p-4 border-b border-border shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0">
+            <h1 className="text-lg font-semibold text-text-primary tracking-tight truncate">Money 2026</h1>
+            <p className="text-xs text-text-muted mt-0.5 truncate">Financial Dashboard</p>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <NavLink
+              to="/settings"
+              onClick={closeMobile}
+              className={({ isActive }) =>
+                `p-1.5 rounded-lg transition-colors ${isActive ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-text-secondary'}`
+              }
+              title="Settings"
+            >
+              <Settings size={16} />
+            </NavLink>
+            <button
+              type="button"
+              onClick={closeMobile}
+              className="lg:hidden p-1 text-text-muted hover:text-text-primary"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={closeMobile}
-          className="lg:hidden p-1 text-text-muted hover:text-text-primary flex-shrink-0"
-        >
-          <X size={20} />
-        </button>
+        {/* User status */}
+        <div className="mt-2">
+          <UserMenu
+            email={userEmail}
+            avatarUrl={userAvatar}
+            displayName={userName}
+            onSignOut={onSignOut}
+            onSignIn={onSignIn}
+            isLocal={isLocal}
+          />
+        </div>
       </div>
 
       {/* Dashboard Switcher */}
@@ -187,28 +212,6 @@ export default function Sidebar({
         })}
       </nav>
 
-      <div className="p-3 border-t border-border space-y-2 mt-auto shrink-0">
-        <NavLink
-          to="/settings"
-          onClick={closeMobile}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-              isActive ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-text-secondary'
-            }`
-          }
-        >
-          <Settings size={16} className="flex-shrink-0" />
-          <span className="truncate">Settings</span>
-        </NavLink>
-        <UserMenu
-          email={userEmail}
-          avatarUrl={userAvatar}
-          displayName={userName}
-          onSignOut={onSignOut}
-          onSignIn={onSignIn}
-          isLocal={isLocal}
-        />
-      </div>
     </>
   )
 
