@@ -37,15 +37,15 @@ const DEFAULT_ACCOUNT_COLORS: Record<string, string> = {
 }
 
 const DEFAULT_LABEL_COLORS: Record<string, string> = {
-  'Housing': '#ef4444',
-  'Transportation': '#f59e0b',
-  'Subscriptions': '#a855f7',
-  'Food & Living': '#22c55e',
-  'Savings': '#3b82f6',
-  'Investing': '#06b6d4',
-  'cash': '#22c55e',
-  'investment': '#3b82f6',
-  'debt': '#ef4444',
+  'Housing': '#fca5a5',
+  'Transportation': '#fcd34d',
+  'Subscriptions': '#c4b5fd',
+  'Food & Living': '#6ee7b7',
+  'Savings': '#93c5fd',
+  'Investing': '#67e8f9',
+  'cash': '#6ee7b7',
+  'investment': '#93c5fd',
+  'debt': '#fca5a5',
 }
 
 const DEFAULT_DASHBOARD_ORDER = [

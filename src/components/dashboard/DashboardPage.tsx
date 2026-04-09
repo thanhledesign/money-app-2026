@@ -22,7 +22,7 @@ interface Props {
   userId?: string
 }
 
-import { CHART_TOOLTIP, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
+import { CHART_TOOLTIP, AXIS_TICK, LEGEND_TEXT_STYLE, COLORS } from '@/components/ui/chartConstants'
 
 const KPI_KEYS = [
   'kpi-net-worth', 'kpi-cash', 'kpi-investments', 'kpi-debt',
@@ -93,10 +93,10 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
     const grossSemiMonthly = data.comp.annualSalary / 24
     const netPay = grossSemiMonthly - totalTaxes - totalPretax
     const items = [
-      { name: 'Taxes', value: totalTaxes, color: '#ef4444' },
+      { name: 'Taxes', value: totalTaxes, color: COLORS.taxes },
       ...data.deductions.filter(d => d.type === 'pretax').map(d => ({
         name: d.name, value: d.amount,
-        color: d.name.includes('401k') ? '#3b82f6' : d.name.includes('Dental') ? '#06b6d4' : d.name.includes('Medical') ? '#22c55e' : '#8b5cf6',
+        color: d.name.includes('401k') ? COLORS.k401 : d.name.includes('Dental') ? COLORS.dental : d.name.includes('Medical') ? COLORS.medical : '#c4b5fd',
       })),
     ]
     // Add allocations as slices
@@ -210,9 +210,9 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
               <PieChart>
                 <Pie
                   data={[
-                    { name: 'Cash', value: calc.getTotalCash(latest, data), color: '#22c55e' },
-                    { name: 'Investments', value: calc.getTotalInvestments(latest, data), color: '#3b82f6' },
-                    { name: 'Debt', value: Math.abs(calc.getTotalDebt(latest, data)), color: '#ef4444' },
+                    { name: 'Cash', value: calc.getTotalCash(latest, data), color: COLORS.cash },
+                    { name: 'Investments', value: calc.getTotalInvestments(latest, data), color: COLORS.investments },
+                    { name: 'Debt', value: Math.abs(calc.getTotalDebt(latest, data)), color: COLORS.debt },
                   ].filter(d => d.value > 0)}
                   dataKey="value"
                   nameKey="name"
@@ -223,9 +223,9 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
                   paddingAngle={2}
                 >
                   {[
-                    { name: 'Cash', value: calc.getTotalCash(latest, data), color: '#22c55e' },
-                    { name: 'Investments', value: calc.getTotalInvestments(latest, data), color: '#3b82f6' },
-                    { name: 'Debt', value: Math.abs(calc.getTotalDebt(latest, data)), color: '#ef4444' },
+                    { name: 'Cash', value: calc.getTotalCash(latest, data), color: COLORS.cash },
+                    { name: 'Investments', value: calc.getTotalInvestments(latest, data), color: COLORS.investments },
+                    { name: 'Debt', value: Math.abs(calc.getTotalDebt(latest, data)), color: COLORS.debt },
                   ].filter(d => d.value > 0).map((entry, i) => (
                     <Cell key={i} fill={entry.color} stroke={entry.color + '60'} strokeWidth={1.5} />
                   ))}
@@ -254,16 +254,16 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
               <AreaChart data={netWorthHistory}>
                 <defs>
                   <linearGradient id="nwGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                    <stop offset="5%" stopColor={COLORS.netWorth} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={COLORS.netWorth} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="date" tick={AXIS_TICK} axisLine={false} tickLine={false} />
                 <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false}
                   tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
                 <Tooltip {...CHART_TOOLTIP} formatter={(v: any) => [calc.formatCurrency(v), 'Net Worth']} />
-                <Area type={curveType} dataKey="netWorth" stroke="#a855f7" fill="url(#nwGrad)" strokeWidth={2}
-                  dot={prefs.showDots ? { r: 3, fill: '#a855f7' } : false} />
+                <Area type={curveType} dataKey="netWorth" stroke={COLORS.netWorth} fill="url(#nwGrad)" strokeWidth={2}
+                  dot={prefs.showDots ? { r: 3, fill: COLORS.netWorth } : false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -284,10 +284,10 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
               <Tooltip {...CHART_TOOLTIP}
                 formatter={(v: any, name: any) => [calc.formatCurrency(v), name === 'cash' ? 'Cash' : 'Investments']} />
-              <Line type={curveType} dataKey="cash" stroke="#22c55e" strokeWidth={2}
-                dot={prefs.showDots ? { r: 3, fill: '#22c55e' } : false} />
-              <Line type={curveType} dataKey="investments" stroke="#3b82f6" strokeWidth={2}
-                dot={prefs.showDots ? { r: 3, fill: '#3b82f6' } : false} />
+              <Line type={curveType} dataKey="cash" stroke={COLORS.cash} strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: COLORS.cash } : false} />
+              <Line type={curveType} dataKey="investments" stroke={COLORS.investments} strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: COLORS.investments } : false} />
               <Legend wrapperStyle={{ fontSize: '11px' }} />
             </LineChart>
           </ResponsiveContainer>
@@ -337,9 +337,9 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
               <Tooltip {...CHART_TOOLTIP}
                 formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
               <Legend wrapperStyle={{ fontSize: '11px' }} />
-              <Bar dataKey="Cash" fill="#22c55e" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="Investments" fill="#3b82f6" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="Debt" fill="#ef4444" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="Cash" fill={COLORS.cash} radius={[2, 2, 0, 0]} />
+              <Bar dataKey="Investments" fill={COLORS.investments} radius={[2, 2, 0, 0]} />
+              <Bar dataKey="Debt" fill={COLORS.debt} radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -356,16 +356,16 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
             <AreaChart data={debtHistory}>
               <defs>
                 <linearGradient id="debtGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                  <stop offset="5%" stopColor={COLORS.debt} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={COLORS.debt} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="date" tick={AXIS_TICK} axisLine={false} tickLine={false} />
               <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false}
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(1)}K`} reversed={true} />
               <Tooltip {...CHART_TOOLTIP} formatter={(v: any) => [calc.formatCurrency(v), 'Debt']} />
-              <Area type={curveType} dataKey="debt" stroke="#ef4444" fill="url(#debtGrad)" strokeWidth={2}
-                dot={prefs.showDots ? { r: 3, fill: '#ef4444' } : false} />
+              <Area type={curveType} dataKey="debt" stroke={COLORS.debt} fill="url(#debtGrad)" strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: COLORS.debt } : false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

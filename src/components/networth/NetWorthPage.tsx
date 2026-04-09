@@ -17,6 +17,7 @@ import type { AppData } from '@/data/types'
 import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
 import { Card, CardTitle, GlassCard } from '@/components/ui/Card'
+import { COLORS } from '@/components/ui/chartConstants'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageTheme } from '@/components/ui/PageTheme'
@@ -418,9 +419,9 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                   iconSize={10}
                   wrapperStyle={{ fontSize: '11px' }}
                 />
-                <Bar dataKey="cash" name="Cash" stackId="nw" fill="#22c55e" fillOpacity={0.85} radius={[0, 0, 0, 0]} />
-                <Bar dataKey="investments" name="Investments" stackId="nw" fill="#3b82f6" fillOpacity={0.85} radius={[0, 0, 0, 0]} />
-                <Bar dataKey="debt" name="Debt" stackId="nw" fill="#ef4444" fillOpacity={0.85} radius={[0, 0, 0, 0]} />
+                <Bar dataKey="cash" name="Cash" stackId="nw" fill={COLORS.cash} fillOpacity={0.85} radius={[0, 0, 0, 0]} />
+                <Bar dataKey="investments" name="Investments" stackId="nw" fill={COLORS.investments} fillOpacity={0.85} radius={[0, 0, 0, 0]} />
+                <Bar dataKey="debt" name="Debt" stackId="nw" fill={COLORS.debt} fillOpacity={0.85} radius={[0, 0, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -464,7 +465,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                   {netChangeData.map((entry, i) => (
                     <Cell
                       key={i}
-                      fill={entry.change >= 0 ? '#22c55e' : '#ef4444'}
+                      fill={entry.change >= 0 ? COLORS.cash : COLORS.debt}
                       fillOpacity={0.85}
                     />
                   ))}

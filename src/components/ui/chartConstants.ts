@@ -40,3 +40,18 @@ export const TOOLTIP_CONTENT_STYLE = CHART_TOOLTIP.contentStyle
 export const AXIS_TICK = { fill: '#55556a', fontSize: 11 }
 
 export const LEGEND_TEXT_STYLE: React.CSSProperties = { color: '#8888a0', fontSize: 11 }
+
+// Pastel chart palette — softer, modern, streaming-platform aesthetic
+export const COLORS = {
+  cash: '#6ee7b7',       // soft mint green
+  investments: '#93c5fd', // soft sky blue
+  debt: '#fca5a5',       // soft coral
+  netWorth: '#c4b5fd',   // soft lavender
+  taxes: '#fca5a5',      // soft coral
+  bonus: '#fcd34d',      // soft gold
+  lti: '#d8b4fe',        // soft purple
+  savings: '#6ee7b7',    // soft mint
+  medical: '#67e8f9',    // soft cyan
+  dental: '#a5f3fc',     // lighter cyan
+  k401: '#93c5fd',       // soft blue
+} as const
