@@ -732,68 +732,81 @@ function StepGoals({ goals, setGoals }: { goals: WizardGoal[]; setGoals: (g: Wiz
 
 // ── Step 6: Background ────────────────────────────────────────────────────────
 
+const CSS_BG_MAP: Record<string, { name: string; css: string }> = {
+  corporate: { name: 'Midnight Pro', css: 'radial-gradient(ellipse at 15% 5%, rgba(124,111,247,0.08) 0%, transparent 50%),radial-gradient(ellipse at 85% 90%, rgba(52,211,153,0.06) 0%, transparent 50%),radial-gradient(ellipse at 50% 50%, rgba(30,30,48,1) 0%, rgba(8,8,13,1) 100%)' },
+  mesh: { name: 'Soft Mesh', css: 'radial-gradient(at 20% 20%, rgba(124,111,247,0.12) 0%, transparent 50%),radial-gradient(at 80% 30%, rgba(52,211,153,0.10) 0%, transparent 50%),radial-gradient(at 40% 80%, rgba(248,113,113,0.08) 0%, transparent 50%),linear-gradient(135deg, #0c0c14 0%, #08080d 100%)' },
+  aurora_css: { name: 'Aurora Wave', css: 'radial-gradient(ellipse at 10% 0%, rgba(52,211,153,0.15) 0%, transparent 40%),radial-gradient(ellipse at 50% 10%, rgba(96,165,250,0.12) 0%, transparent 40%),radial-gradient(ellipse at 90% 0%, rgba(192,132,252,0.10) 0%, transparent 40%),linear-gradient(180deg, #0a0a12 0%, #08080d 100%)' },
+  ember: { name: 'Warm Ember', css: 'radial-gradient(ellipse at 30% 20%, rgba(251,191,36,0.10) 0%, transparent 45%),radial-gradient(ellipse at 70% 70%, rgba(248,113,113,0.08) 0%, transparent 45%),linear-gradient(145deg, #100c08 0%, #08080d 100%)' },
+  deep: { name: 'Deep Space', css: 'radial-gradient(ellipse at 25% 15%, rgba(96,165,250,0.10) 0%, transparent 45%),radial-gradient(ellipse at 75% 85%, rgba(124,111,247,0.12) 0%, transparent 50%),linear-gradient(160deg, #06060c 0%, #0a0a14 50%, #08080d 100%)' },
+}
+
 const BG_PRESETS = [
-  { id: 'none', name: 'No Background', url: '', thumb: '' },
   { id: 'aurora', name: 'Northern Lights', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=300&q=60' },
-  { id: 'mountains', name: 'Mountain Lake', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=60' },
   { id: 'stars', name: 'Starfield', url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=300&q=60' },
-  { id: 'nebula', name: 'Nebula', url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=300&q=60' },
   { id: 'city', name: 'City Skyline', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300&q=60' },
   { id: 'tokyo', name: 'Tokyo Nights', url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=300&q=60' },
-  { id: 'ocean', name: 'Deep Ocean', url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=300&q=60' },
-  { id: 'gradient', name: 'Gradient Mesh', url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=300&q=60' },
 ]
 
 function StepBackground() {
-  const [selected, setSelected] = useState('none')
+  const [selected, setSelected] = useState('corporate')
 
-  function apply(id: string) {
+  function applyCss(key: string) {
+    setSelected(key)
+    const bg = CSS_BG_MAP[key]
+    if (!bg) return
+    const config = { type: 'css', url: '', cssGradient: key, focalX: 50, focalY: 50, zoom: 1, blur: 0, scrimOpacity: 0.65, aspectRatio: 'fill' }
+    localStorage.setItem('money-app-background', JSON.stringify(config))
+    const el = document.getElementById('app-background')
+    const scrim = document.getElementById('app-scrim')
+    if (el) { el.style.display = 'block'; el.style.backgroundImage = bg.css; el.style.filter = 'none' }
+    if (scrim) scrim.style.opacity = '0'
+  }
+
+  function applyPhoto(id: string) {
     setSelected(id)
     const preset = BG_PRESETS.find(p => p.id === id)
     if (!preset) return
-    const config = {
-      type: preset.url ? 'preset' : 'none',
-      url: preset.url,
-      focalX: 50, focalY: 50, zoom: 1, blur: 0,
-      scrimOpacity: 0.75, aspectRatio: 'fill',
-    }
+    const config = { type: 'preset', url: preset.url, focalX: 50, focalY: 50, zoom: 1, blur: 0, scrimOpacity: 0.75, aspectRatio: 'fill' }
     localStorage.setItem('money-app-background', JSON.stringify(config))
-    // Apply live
-    const bg = document.getElementById('app-background')
+    const el = document.getElementById('app-background')
     const scrim = document.getElementById('app-scrim')
-    if (bg) {
-      if (preset.url) {
-        bg.style.display = 'block'
-        bg.style.backgroundImage = `url(${preset.url})`
-        bg.style.backgroundPosition = '50% 50%'
-        bg.style.backgroundSize = 'cover'
-      } else {
-        bg.style.display = 'none'
-      }
-    }
+    if (el) { el.style.display = 'block'; el.style.backgroundImage = `url(${preset.url})`; el.style.backgroundPosition = '50% 50%'; el.style.backgroundSize = 'cover'; el.style.filter = 'none' }
     if (scrim) scrim.style.opacity = '0.75'
   }
 
+  // Apply default on mount
+  useState(() => { applyCss('corporate') })
+
   return (
-    <StepShell title="Choose a background" subtitle="Optional — pick a background image for your dashboard. You can change this anytime in Settings.">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <StepShell title="Choose a background" subtitle="Pick a look for your dashboard. You can change this anytime in Settings.">
+      <p className="text-xs text-text-muted mb-2">Abstract Themes</p>
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
+        {Object.entries(CSS_BG_MAP).map(([key, bg]) => (
+          <button
+            key={key}
+            onClick={() => applyCss(key)}
+            className={`rounded-xl border-2 aspect-video overflow-hidden transition-all ${
+              selected === key ? 'border-accent scale-[1.03]' : 'border-border hover:border-accent/40'
+            }`}
+            style={{ background: bg.css }}
+          >
+            <span className="text-[9px] text-white/70 drop-shadow">{bg.name}</span>
+          </button>
+        ))}
+      </div>
+      <p className="text-xs text-text-muted mb-2">Photo Backgrounds</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {BG_PRESETS.map(preset => (
           <button
             key={preset.id}
-            onClick={() => apply(preset.id)}
+            onClick={() => applyPhoto(preset.id)}
             className={`relative rounded-xl overflow-hidden border-2 transition-all aspect-video ${
-              selected === preset.id ? 'border-accent scale-[1.02] shadow-lg' : 'border-border hover:border-accent/40'
+              selected === preset.id ? 'border-accent scale-[1.02]' : 'border-border hover:border-accent/40'
             }`}
           >
-            {preset.thumb ? (
-              <img src={preset.thumb} alt={preset.name} className="w-full h-full object-cover" loading="lazy" />
-            ) : (
-              <div className="w-full h-full bg-background flex items-center justify-center">
-                <span className="text-2xl">🚫</span>
-              </div>
-            )}
+            <img src={preset.thumb} alt={preset.name} className="w-full h-full object-cover" loading="lazy" />
             <div className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1">
-              <span className="text-[10px] text-white font-medium">{preset.name}</span>
+              <span className="text-[9px] text-white font-medium">{preset.name}</span>
             </div>
           </button>
         ))}

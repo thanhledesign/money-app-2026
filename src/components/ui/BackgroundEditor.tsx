@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { Upload, X, RotateCcw, Image as ImageIcon } from 'lucide-react'
 import { Card, CardTitle } from './Card'
-import { useBackground, BACKGROUND_PRESETS, type BackgroundConfig } from '@/hooks/useBackground'
+import { useBackground, BACKGROUND_PRESETS, CSS_BACKGROUNDS, type BackgroundConfig } from '@/hooks/useBackground'
 
 const ASPECT_RATIOS: { value: BackgroundConfig['aspectRatio']; label: string }[] = [
   { value: 'fill', label: 'Fill' },
@@ -59,8 +59,37 @@ export function BackgroundEditor() {
         Set a background image behind the glass UI. Adjust focal point, blur, and overlay darkness.
       </p>
 
+      {/* Built-in CSS backgrounds */}
+      <div className="mb-4">
+        <p className="text-xs text-text-muted mb-2">Built-in Themes</p>
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+          <button
+            onClick={() => update({ type: 'none', url: '', cssGradient: undefined })}
+            className={`rounded-lg border-2 aspect-video flex items-center justify-center transition-all ${
+              config.type === 'none' ? 'border-accent' : 'border-border hover:border-accent/40'
+            }`}
+            style={{ background: 'var(--color-background)' }}
+          >
+            <span className="text-[9px] text-text-muted">Plain</span>
+          </button>
+          {Object.entries(CSS_BACKGROUNDS).map(([key, bg]) => (
+            <button
+              key={key}
+              onClick={() => update({ type: 'css', url: '', cssGradient: key })}
+              className={`rounded-lg border-2 aspect-video overflow-hidden transition-all ${
+                config.type === 'css' && config.cssGradient === key ? 'border-accent scale-[1.03]' : 'border-border hover:border-accent/40'
+              }`}
+              style={{ background: bg.css.replace(/\n\s*/g, '') }}
+              title={bg.name}
+            >
+              <span className="text-[8px] text-white/60 drop-shadow">{bg.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Current background preview */}
-      {config.type !== 'none' && config.url && (
+      {config.type !== 'none' && config.type !== 'css' && config.url && (
         <div className="relative mb-4 rounded-lg overflow-hidden border border-border h-32">
           <img
             src={config.url}

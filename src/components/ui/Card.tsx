@@ -16,12 +16,12 @@ export function Card({ children, className = '', style }: CardProps) {
 
   return (
     <div
-      className={`glass-glow backdrop-blur-md border rounded-xl p-5 ${className}`}
+      className={`glass-glow backdrop-blur-sm border rounded-xl p-5 ${className}`}
       style={{
         ...style,
-        background: 'linear-gradient(135deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 85%, transparent) 100%)',
-        borderColor: 'color-mix(in oklab, var(--color-border) 60%, transparent)',
-        boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.2)',
+        background: 'linear-gradient(135deg, color-mix(in oklab, var(--color-surface) 70%, transparent) 0%, color-mix(in oklab, var(--color-surface) 55%, transparent) 100%)',
+        borderColor: 'color-mix(in oklab, var(--color-border) 40%, transparent)',
+        boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.03), 0 1px 3px rgba(0,0,0,0.15)',
       }}
       onMouseMove={handleMouseMove}
     >
