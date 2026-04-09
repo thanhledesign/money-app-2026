@@ -23,6 +23,7 @@ import PropertiesPage from '@/components/pro/PropertiesPage'
 import { AdminDesigner } from '@/components/ui/AdminDesigner'
 import { isAdmin } from '@/lib/roles'
 import ToolsPage from '@/components/tools/ToolsPage'
+import TransactionsPage from '@/components/pro/TransactionsPage'
 import { getStorageKey } from '@/lib/store'
 
 function ScrollToTop() {
@@ -137,6 +138,7 @@ function AppInner({ userId, isLocal, auth }: {
         } />
         <Route path="budget" element={<BudgetPage data={data} updateBudgetItems={updateBudgetItems} />} />
         <Route path="goals" element={<GoalsPage data={data} addGoal={addGoal} />} />
+        <Route path="transactions" element={<TransactionsPage />} />
         <Route path="business" element={<BusinessPage />} />
         <Route path="properties" element={<PropertiesPage />} />
         <Route path="tools" element={<ToolsPage />} />

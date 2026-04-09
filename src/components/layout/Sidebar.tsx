@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Camera, Landmark, TrendingUp,
   Skull, Diamond, Scale, Trophy, DollarSign, Settings,
-  Menu, X, Building2, Home as HomeIcon, Wrench,
+  Menu, X, Building2, Home as HomeIcon, Wrench, Receipt,
 } from 'lucide-react'
 import type { Dashboard } from '@/data/types'
 import { UserMenu } from '@/components/auth/UserMenu'
@@ -24,6 +24,7 @@ const navItems = [
 ]
 
 const proItems = [
+  { to: '/transactions', icon: Receipt, label: 'Transactions', pro: true },
   { to: '/business', icon: Building2, label: 'Business', pro: true },
   { to: '/properties', icon: HomeIcon, label: 'Properties', pro: true },
 ]
