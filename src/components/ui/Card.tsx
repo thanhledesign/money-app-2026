@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useCallback } from 'react'
 
 interface CardProps {
   children: ReactNode
@@ -7,9 +8,24 @@ interface CardProps {
 }
 
 export function Card({ children, className = '', style }: CardProps) {
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`)
+    e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`)
+  }, [])
+
   return (
-    <div className={`bg-surface border border-border rounded-xl p-5 ${className}`} style={style}>
-      {children}
+    <div
+      className={`glass-glow backdrop-blur-md border rounded-xl p-5 ${className}`}
+      style={{
+        ...style,
+        background: 'linear-gradient(135deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 85%, transparent) 100%)',
+        borderColor: 'color-mix(in oklab, var(--color-border) 60%, transparent)',
+        boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.2)',
+      }}
+      onMouseMove={handleMouseMove}
+    >
+      <div className="relative z-10">{children}</div>
     </div>
   )
 }
@@ -39,13 +55,22 @@ interface GlassCardProps {
 }
 
 export function GlassCard({ children, className = '', accent = '#6366f1' }: GlassCardProps) {
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`)
+    e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`)
+  }, [])
+
   return (
     <div
-      className={`relative overflow-hidden rounded-xl border p-5 backdrop-blur-sm ${className}`}
+      className={`glass-glow relative overflow-hidden rounded-xl border p-5 backdrop-blur-md ${className}`}
       style={{
-        borderColor: accent + '40',
-        background: `linear-gradient(135deg, ${accent}08 0%, ${accent}03 50%, transparent 100%)`,
-      }}
+        borderColor: accent + '30',
+        background: `linear-gradient(145deg, ${accent}12 0%, ${accent}06 40%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)`,
+        boxShadow: `inset 0 1px 0 0 ${accent}15, 0 2px 8px rgba(0,0,0,0.25)`,
+        '--glow-color': accent + '12',
+      } as React.CSSProperties}
+      onMouseMove={handleMouseMove}
     >
       {/* Subtle glow in corner */}
       <div

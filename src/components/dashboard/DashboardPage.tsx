@@ -175,7 +175,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
       return (
         <div key="warnings">
           {metrics.disneyConc > 0.70 && (
-            <div className="bg-amber/10 border border-amber/30 rounded-xl p-4 mb-6">
+            <div className="bg-amber/10 backdrop-blur-sm border border-amber/20 rounded-xl p-4 mb-6 shadow-sm">
               <p className="text-amber text-sm font-medium">
                 {metrics.topConc.institution} equity at {calc.formatPercent(metrics.disneyConc)} of investments. Single-employer concentration above 70% increases risk.
               </p>
@@ -185,7 +185,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
             const bal = latest.balances[card.id] ?? 0
             const prevBal = prev ? (prev.balances[card.id] ?? 0) : 0
             return (
-              <div key={card.id} className="bg-red/10 border border-red/30 rounded-xl p-4 mb-6">
+              <div key={card.id} className="bg-red/10 backdrop-blur-sm border border-red/20 rounded-xl p-4 mb-6 shadow-sm">
                 <p className="text-red text-sm font-medium">
                   {card.name} balance: {calc.formatCurrency(bal)}.
                   {prev && ` Was ${calc.formatCurrency(prevBal)} last snapshot.`}
@@ -550,7 +550,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
       </div>
 
       {editMode && (
-        <div className="sticky top-0 z-40 mb-6 p-4 rounded-xl border border-accent/30 bg-surface shadow-lg space-y-4">
+        <div className="sticky top-0 z-40 mb-6 p-4 rounded-xl border border-accent/20 bg-surface/90 backdrop-blur-xl shadow-2xl space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <p className="text-xs font-semibold text-accent uppercase tracking-wide">Layout Editor</p>

@@ -1,24 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0a0a0f;
-  --color-surface: #12121a;
-  --color-surface-hover: #1a1a26;
-  --color-border: #2a2a3a;
-  --color-border-light: #1e1e2e;
-  --color-text-primary: #e4e4eb;
-  --color-text-secondary: #8888a0;
-  --color-text-muted: #55556a;
-  --color-accent: #6366f1;
-  --color-accent-hover: #818cf8;
-  --color-green: #22c55e;
-  --color-green-dim: #16a34a;
-  --color-red: #ef4444;
-  --color-red-dim: #dc2626;
-  --color-amber: #f59e0b;
-  --color-blue: #3b82f6;
-  --color-purple: #a855f7;
-  --color-cyan: #06b6d4;
+  --color-background: #08080d;
+  --color-surface: #111118;
+  --color-surface-hover: #1a1a24;
+  --color-border: #252530;
+  --color-border-light: #1c1c28;
+  --color-text-primary: #eaeaf0;
+  --color-text-secondary: #9090a8;
+  --color-text-muted: #585870;
+  --color-accent: #7c6ff7;
+  --color-accent-hover: #9588ff;
+  --color-green: #34d399;
+  --color-green-dim: #10b981;
+  --color-red: #f87171;
+  --color-red-dim: #ef4444;
+  --color-amber: #fbbf24;
+  --color-blue: #60a5fa;
+  --color-purple: #c084fc;
+  --color-cyan: #22d3ee;
 }
 
 html {
@@ -50,9 +50,16 @@ html.light .recharts-sector { stroke-opacity: 0.3; }
 body {
   margin: 0;
   background-color: var(--color-background);
+  background-image: radial-gradient(ellipse at 20% 0%, rgba(124, 111, 247, 0.03) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 100%, rgba(52, 211, 153, 0.02) 0%, transparent 50%);
   color: var(--color-text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+html.light body {
+  background-image: radial-gradient(ellipse at 20% 0%, rgba(124, 111, 247, 0.04) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 100%, rgba(16, 185, 129, 0.03) 0%, transparent 50%);
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -67,6 +74,34 @@ body {
 
 .animate-fadeIn {
   animation: fadeIn 0.25s ease-out both;
+}
+
+/* Mouse glow effect on glass cards */
+.glass-glow {
+  position: relative;
+  overflow: hidden;
+}
+.glass-glow::before {
+  content: '';
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--glow-color, rgba(124, 111, 247, 0.045)) 0%, transparent 70%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  left: var(--mouse-x, -400px);
+  top: var(--mouse-y, -400px);
+  z-index: 0;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+}
+.glass-glow:hover::before {
+  opacity: 1;
+}
+
+html.light .glass-glow::before {
+  background: radial-gradient(circle, var(--glow-color, rgba(124, 111, 247, 0.035)) 0%, transparent 70%);
 }
 
 input[type="number"]::-webkit-inner-spin-button,

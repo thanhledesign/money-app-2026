@@ -76,7 +76,7 @@ export function ShareButton({ data, userId, dashboardName }: Props) {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 w-80 bg-surface border border-border rounded-xl p-4 shadow-2xl z-50">
+          <div className="absolute right-0 top-full mt-2 w-80 bg-surface/95 backdrop-blur-xl border border-border/50 rounded-xl p-4 shadow-2xl z-50">
             <h4 className="text-sm font-semibold text-text-primary mb-1">Share Dashboard</h4>
             <p className="text-xs text-text-muted mb-3">
               Generate a read-only link anyone can view without logging in.

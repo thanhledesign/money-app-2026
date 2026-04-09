@@ -26,15 +26,15 @@ export function CloudSyncPanel({ userId, dashboardId, data, onDataLoaded }: Prop
     if (!userId) return
     setStatus('uploading')
     setMessage('')
-    const ok = await syncToCloud(userId, key, data)
-    if (ok) {
+    const result = await syncToCloud(userId, key, data)
+    if (result.ok) {
       setStatus('success')
       setMessage(`Uploaded ${data.snapshots.length} snapshots to cloud`)
     } else {
       setStatus('error')
-      setMessage('Upload failed — check console for details')
+      setMessage(result.error ?? 'Upload failed')
     }
-    setTimeout(() => setStatus('idle'), 3000)
+    setTimeout(() => setStatus('idle'), 5000)
   }
 
   async function handleDownload() {
@@ -65,11 +65,11 @@ export function CloudSyncPanel({ userId, dashboardId, data, onDataLoaded }: Prop
     setStatus('uploading')
     setMessage('Syncing...')
     // Upload current data
-    const ok = await syncToCloud(userId, key, data)
-    if (!ok) {
+    const result = await syncToCloud(userId, key, data)
+    if (!result.ok) {
       setStatus('error')
-      setMessage('Sync failed during upload')
-      setTimeout(() => setStatus('idle'), 3000)
+      setMessage(result.error ?? 'Sync failed during upload')
+      setTimeout(() => setStatus('idle'), 5000)
       return
     }
     setStatus('success')

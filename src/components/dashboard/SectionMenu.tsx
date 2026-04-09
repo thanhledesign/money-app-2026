@@ -40,7 +40,7 @@ export function SectionMenu({ sectionKey, currentWidth, currentColor, onWidthCha
       </button>
       {open && (
         <div
-          className="absolute right-0 top-8 z-50 w-52 bg-surface border border-border rounded-xl p-3 shadow-xl space-y-3"
+          className="absolute right-0 top-8 z-50 w-52 bg-surface/95 backdrop-blur-xl border border-border/50 rounded-xl p-3 shadow-2xl space-y-3"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Width toggle */}

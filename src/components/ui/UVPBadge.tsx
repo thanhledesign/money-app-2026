@@ -22,7 +22,7 @@ export function UVPBadge({ label, description }: UVPBadgeProps) {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 w-56 bg-surface border border-border rounded-lg p-3 shadow-2xl z-50">
+          <div className="absolute right-0 top-full mt-1 w-56 bg-surface/95 backdrop-blur-xl border border-border/50 rounded-lg p-3 shadow-2xl z-50">
             <p className="text-xs text-text-secondary">{description}</p>
           </div>
         </>

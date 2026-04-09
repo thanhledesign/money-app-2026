@@ -657,10 +657,11 @@ function DeductionsSection({
   return (
     <Card>
       <CardHeader>
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center justify-between w-full text-left sm:pointer-events-none"
+          className="flex items-center justify-between w-full text-left sm:pointer-events-none cursor-pointer sm:cursor-default"
         >
           <div>
             <CardTitle>Taxes &amp; Deductions</CardTitle>
@@ -670,7 +671,7 @@ function DeductionsSection({
             <span className="text-sm font-semibold text-text-primary tabular-nums">{formatCurrency(totalDeductions)}</span>
             <ChevronDown size={16} className={`text-text-muted transition-transform ${collapsed ? '' : 'rotate-180'}`} />
           </div>
-        </button>
+        </div>
       </CardHeader>
       <div className={`${collapsed ? 'hidden sm:flex' : 'flex'} flex-col sm:flex-row gap-6`}>
         <DeductionGroup items={taxes} title="Taxes" total={taxTotal} groupType="tax" />
@@ -733,10 +734,11 @@ function AllocationSection({
   return (
     <Card>
       <CardHeader>
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center justify-between w-full text-left sm:pointer-events-none"
+          className="flex items-center justify-between w-full text-left sm:pointer-events-none cursor-pointer sm:cursor-default"
         >
           <div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -749,7 +751,7 @@ function AllocationSection({
             </p>
           </div>
           <ChevronDown size={16} className={`text-text-muted transition-transform sm:hidden shrink-0 ${collapsed ? '' : 'rotate-180'}`} />
-        </button>
+        </div>
       </CardHeader>
 
       <div className={collapsed ? 'hidden sm:block' : ''}>

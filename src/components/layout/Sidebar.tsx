@@ -190,7 +190,7 @@ export default function Sidebar({
   return (
     <>
       {/* Mobile header bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-surface border-b border-border flex items-center px-4 z-50">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-surface/90 backdrop-blur-lg border-b border-border/50 flex items-center px-4 z-50">
         <button type="button" onClick={() => setMobileOpen(true)} className="p-1 text-text-secondary">
           <Menu size={24} />
         </button>
@@ -209,8 +209,8 @@ export default function Sidebar({
 
       {/* Desktop sidebar */}
       <aside
-        className="hidden lg:flex fixed left-0 top-0 h-screen bg-surface border-r border-border flex-col z-50"
-        style={{ width }}
+        className="hidden lg:flex fixed left-0 top-0 h-screen border-r border-border/50 flex-col z-50 backdrop-blur-xl"
+        style={{ width, background: 'linear-gradient(180deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)' }}
       >
         {sidebarContent}
         <div

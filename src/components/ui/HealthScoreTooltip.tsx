@@ -123,7 +123,7 @@ export function HealthScoreTooltip({ data, score }: Props) {
       {open && (
         <>
         <div className="fixed inset-0 z-40 md:hidden" onClick={() => setOpen(false)} />
-        <div className="fixed inset-x-4 bottom-4 md:absolute md:right-0 md:left-auto md:bottom-auto md:top-full md:mt-2 md:w-80 md:inset-x-auto max-w-[calc(100vw-2rem)] bg-surface border border-border rounded-xl p-4 shadow-2xl z-50 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-x-4 bottom-4 md:absolute md:right-0 md:left-auto md:bottom-auto md:top-full md:mt-2 md:w-80 md:inset-x-auto max-w-[calc(100vw-2rem)] bg-surface/95 backdrop-blur-xl border border-border/50 rounded-xl p-4 shadow-2xl z-50 max-h-[80vh] overflow-y-auto">
           <h4 className="text-sm font-semibold text-text-primary mb-1">Financial Health Score</h4>
           <p className="text-xs text-text-muted mb-3">
             Composite score based on 7 key financial metrics. Higher is better.

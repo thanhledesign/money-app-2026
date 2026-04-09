@@ -118,7 +118,7 @@ export function NumberInput({
   const inputRef2 = useRef<HTMLInputElement>(null)
 
   const padContent = (
-    <div ref={padRef} className="bg-surface border border-border rounded-xl shadow-2xl overflow-hidden" onKeyDown={handleKeyboard} tabIndex={0}>
+    <div ref={padRef} className="bg-surface/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl overflow-hidden" onKeyDown={handleKeyboard} tabIndex={0}>
       <div className="px-4 py-3 border-b border-border bg-background">
         {label && <p className="text-[10px] text-text-muted uppercase tracking-wider mb-0.5">{label}</p>}
         {isMobile ? (

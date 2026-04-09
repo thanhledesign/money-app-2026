@@ -6,8 +6,9 @@ const SYNC_DEBOUNCE_MS = 2000
 let _debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 // Save data to Supabase (upsert by user_id + key)
-export async function syncToCloud(userId: string, key: string, data: unknown): Promise<boolean> {
-  if (!isSupabaseConfigured() || !supabase || !userId) return false
+export async function syncToCloud(userId: string, key: string, data: unknown): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured() || !supabase) return { ok: false, error: 'Supabase not configured' }
+  if (!userId) return { ok: false, error: 'Not signed in' }
   try {
     const { error } = await supabase
       .from(TABLE)
@@ -16,13 +17,16 @@ export async function syncToCloud(userId: string, key: string, data: unknown): P
         { onConflict: 'user_id,key' }
       )
     if (error) {
-      console.warn('[sync] upload failed:', error.message)
-      return false
+      console.warn('[sync] upload failed:', error.message, error.code)
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        return { ok: false, error: 'Table not found — run supabase-migration.sql in your Supabase SQL Editor first' }
+      }
+      return { ok: false, error: error.message }
     }
-    return true
-  } catch (e) {
+    return { ok: true }
+  } catch (e: any) {
     console.warn('[sync] upload error:', e)
-    return false
+    return { ok: false, error: e?.message ?? 'Unknown error' }
   }
 }
 
