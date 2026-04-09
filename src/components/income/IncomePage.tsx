@@ -22,7 +22,7 @@ interface IncomePageProps {
 
 // ── Shared chart style ────────────────────────────────────────────────────────
 
-import { CHART_TOOLTIP, TOOLTIP_CONTENT_STYLE, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
+import { CHART_TOOLTIP, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
 import { loadChartPrefs, getAccountColor } from '@/data/chartPrefs'
 
 // Paychecks per year by frequency
