@@ -35,6 +35,9 @@ const CHART_KEYS = [
 ]
 
 export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Props) {
+  // Section accent color: use custom sectionColors if set, otherwise defaults
+  const sc = (key: string, fallback: string) => prefs.sectionColors?.[key] || fallback
+
   const [editMode, setEditMode] = useState(false)
   const [showFirstSnapshotBanner, setShowFirstSnapshotBanner] = useState(false)
 
@@ -254,16 +257,16 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
               <AreaChart data={netWorthHistory}>
                 <defs>
                   <linearGradient id="nwGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={VIVID.netWorth} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={VIVID.netWorth} stopOpacity={0} />
+                    <stop offset="5%" stopColor={sc('net-worth-chart', VIVID.netWorth)} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={sc('net-worth-chart', VIVID.netWorth)} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="date" tick={AXIS_TICK} axisLine={false} tickLine={false} />
                 <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false}
                   tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
                 <Tooltip {...CHART_TOOLTIP} formatter={(v: any) => [calc.formatCurrency(v), 'Net Worth']} />
-                <Area type={curveType} dataKey="netWorth" stroke={VIVID.netWorth} fill="url(#nwGrad)" strokeWidth={2}
-                  dot={prefs.showDots ? { r: 3, fill: VIVID.netWorth } : false} />
+                <Area type={curveType} dataKey="netWorth" stroke={sc('net-worth-chart', VIVID.netWorth)} fill="url(#nwGrad)" strokeWidth={2}
+                  dot={prefs.showDots ? { r: 3, fill: sc('net-worth-chart', VIVID.netWorth) } : false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -284,8 +287,8 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
               <Tooltip {...CHART_TOOLTIP}
                 formatter={(v: any, name: any) => [calc.formatCurrency(v), name === 'cash' ? 'Cash' : 'Investments']} />
-              <Line type={curveType} dataKey="cash" stroke={VIVID.cash} strokeWidth={2}
-                dot={prefs.showDots ? { r: 3, fill: VIVID.cash } : false} />
+              <Line type={curveType} dataKey="cash" stroke={sc('cash-vs-investments', VIVID.cash)} strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: sc('cash-vs-investments', VIVID.cash) } : false} />
               <Line type={curveType} dataKey="investments" stroke={VIVID.investments} strokeWidth={2}
                 dot={prefs.showDots ? { r: 3, fill: VIVID.investments } : false} />
               <Legend wrapperStyle={{ fontSize: '11px' }} />
@@ -356,16 +359,16 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
             <AreaChart data={debtHistory}>
               <defs>
                 <linearGradient id="debtGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={VIVID.debt} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={VIVID.debt} stopOpacity={0} />
+                  <stop offset="5%" stopColor={sc('debt-trend', VIVID.debt)} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={sc('debt-trend', VIVID.debt)} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="date" tick={AXIS_TICK} axisLine={false} tickLine={false} />
               <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false}
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(1)}K`} reversed={true} />
               <Tooltip {...CHART_TOOLTIP} formatter={(v: any) => [calc.formatCurrency(v), 'Debt']} />
-              <Area type={curveType} dataKey="debt" stroke={VIVID.debt} fill="url(#debtGrad)" strokeWidth={2}
-                dot={prefs.showDots ? { r: 3, fill: VIVID.debt } : false} />
+              <Area type={curveType} dataKey="debt" stroke={sc('debt-trend', VIVID.debt)} fill="url(#debtGrad)" strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: sc('debt-trend', VIVID.debt) } : false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

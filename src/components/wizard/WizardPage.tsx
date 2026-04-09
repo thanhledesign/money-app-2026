@@ -730,7 +730,79 @@ function StepGoals({ goals, setGoals }: { goals: WizardGoal[]; setGoals: (g: Wiz
   )
 }
 
-// ── Step 6: Done ──────────────────────────────────────────────────────────────
+// ── Step 6: Background ────────────────────────────────────────────────────────
+
+const BG_PRESETS = [
+  { id: 'none', name: 'No Background', url: '', thumb: '' },
+  { id: 'aurora', name: 'Northern Lights', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=300&q=60' },
+  { id: 'mountains', name: 'Mountain Lake', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=60' },
+  { id: 'stars', name: 'Starfield', url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=300&q=60' },
+  { id: 'nebula', name: 'Nebula', url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=300&q=60' },
+  { id: 'city', name: 'City Skyline', url: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=300&q=60' },
+  { id: 'tokyo', name: 'Tokyo Nights', url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=300&q=60' },
+  { id: 'ocean', name: 'Deep Ocean', url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=300&q=60' },
+  { id: 'gradient', name: 'Gradient Mesh', url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1920&q=80', thumb: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=300&q=60' },
+]
+
+function StepBackground() {
+  const [selected, setSelected] = useState('none')
+
+  function apply(id: string) {
+    setSelected(id)
+    const preset = BG_PRESETS.find(p => p.id === id)
+    if (!preset) return
+    const config = {
+      type: preset.url ? 'preset' : 'none',
+      url: preset.url,
+      focalX: 50, focalY: 50, zoom: 1, blur: 0,
+      scrimOpacity: 0.75, aspectRatio: 'fill',
+    }
+    localStorage.setItem('money-app-background', JSON.stringify(config))
+    // Apply live
+    const bg = document.getElementById('app-background')
+    const scrim = document.getElementById('app-scrim')
+    if (bg) {
+      if (preset.url) {
+        bg.style.display = 'block'
+        bg.style.backgroundImage = `url(${preset.url})`
+        bg.style.backgroundPosition = '50% 50%'
+        bg.style.backgroundSize = 'cover'
+      } else {
+        bg.style.display = 'none'
+      }
+    }
+    if (scrim) scrim.style.opacity = '0.75'
+  }
+
+  return (
+    <StepShell title="Choose a background" subtitle="Optional — pick a background image for your dashboard. You can change this anytime in Settings.">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {BG_PRESETS.map(preset => (
+          <button
+            key={preset.id}
+            onClick={() => apply(preset.id)}
+            className={`relative rounded-xl overflow-hidden border-2 transition-all aspect-video ${
+              selected === preset.id ? 'border-accent scale-[1.02] shadow-lg' : 'border-border hover:border-accent/40'
+            }`}
+          >
+            {preset.thumb ? (
+              <img src={preset.thumb} alt={preset.name} className="w-full h-full object-cover" loading="lazy" />
+            ) : (
+              <div className="w-full h-full bg-background flex items-center justify-center">
+                <span className="text-2xl">🚫</span>
+              </div>
+            )}
+            <div className="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1">
+              <span className="text-[10px] text-white font-medium">{preset.name}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </StepShell>
+  )
+}
+
+// ── Step 7: Done ──────────────────────────────────────────────────────────────
 
 function StepDone({
   cashAccounts, investmentAccounts, debtAccounts,
@@ -806,7 +878,7 @@ function StepDone({
 
 // ── Main Wizard ───────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 7
+const TOTAL_STEPS = 8
 
 export default function WizardPage({ onComplete, addAccount, updateComp, updateBudgetItems, addGoal }: WizardPageProps) {
   const [step, setStep] = useState(0)
@@ -975,8 +1047,13 @@ export default function WizardPage({ onComplete, addAccount, updateComp, updateB
             <StepGoals goals={goals} setGoals={setGoals} />
           )}
 
-          {/* Step 6: Done */}
+          {/* Step 6: Background */}
           {step === 6 && (
+            <StepBackground />
+          )}
+
+          {/* Step 7: Done */}
+          {step === 7 && (
             <StepDone
               cashAccounts={cashAccounts} investmentAccounts={investmentAccounts} debtAccounts={debtAccounts}
               salary={salary} budgetItems={budgetItems} goals={goals}

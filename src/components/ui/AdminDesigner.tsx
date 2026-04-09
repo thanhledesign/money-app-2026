@@ -140,7 +140,7 @@ export function AdminDesigner() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-24 right-6 z-[9999] w-12 h-12 rounded-full bg-amber/90 text-background flex items-center justify-center shadow-2xl hover:bg-amber transition-colors"
+        className="fixed bottom-6 right-22 z-[9999] w-12 h-12 rounded-full bg-amber/90 text-background flex items-center justify-center shadow-2xl hover:bg-amber transition-colors"
         title="Admin Designer Mode"
       >
         <Palette size={20} />
