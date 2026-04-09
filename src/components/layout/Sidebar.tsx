@@ -109,7 +109,7 @@ export default function Sidebar({
 
   const sidebarContent = (
     <>
-      <div className="p-4 border-b border-border flex items-center justify-between">
+      <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
         <div className="min-w-0">
           <h1 className="text-lg font-semibold text-text-primary tracking-tight truncate">Money 2026</h1>
           <p className="text-xs text-text-muted mt-0.5 truncate">Financial Dashboard</p>
@@ -135,7 +135,7 @@ export default function Sidebar({
         onDuplicate={onDuplicateDashboard}
       />
 
-      <nav className="flex-1 py-2 overflow-y-auto">
+      <nav className="flex-1 min-h-0 py-2 overflow-y-auto">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
@@ -228,7 +228,7 @@ export default function Sidebar({
       {/* Desktop sidebar */}
       <aside
         ref={sidebarRef}
-        className="hidden lg:flex fixed left-0 top-0 sidebar-height border-r border-border/50 flex-col z-50 backdrop-blur-xl"
+        className="hidden lg:flex fixed left-0 top-0 sidebar-height border-r border-border/50 flex-col z-50 backdrop-blur-xl overflow-hidden"
         style={{ width, background: 'linear-gradient(180deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)' }}
         style={{ width, background: 'linear-gradient(180deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)' }}
       >
