@@ -24,6 +24,7 @@ interface Props {
   resetPrefs: () => void
   userId?: string
   dashboardId?: string
+  dashboards?: import('@/data/types').Dashboard[]
   onDataLoaded?: (data: AppData) => void
 }
 
@@ -69,7 +70,7 @@ function accountsToCsv(data: AppData): string {
   return [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
 }
 
-export default function SettingsPage({ data, prefs, setAccountColor, setLabelColor, onUpdatePrefs, resetPrefs, userId, dashboardId, onDataLoaded }: Props) {
+export default function SettingsPage({ data, prefs, setAccountColor, setLabelColor, onUpdatePrefs, resetPrefs, userId, dashboardId, dashboards, onDataLoaded }: Props) {
   const [themeMode, setThemeMode] = useThemeMode()
   const [statusMsg, setStatusMsg] = useState('')
   const [importPreview, setImportPreview] = useState<AppData | null>(null)
@@ -211,7 +212,7 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
       <BackgroundEditor />
 
       {/* Cloud Sync */}
-      <CloudSyncPanel userId={userId} dashboardId={dashboardId ?? 'default'} data={data} onDataLoaded={onDataLoaded ?? (() => {})} />
+      <CloudSyncPanel userId={userId} dashboardId={dashboardId ?? 'default'} dashboards={dashboards ?? []} data={data} onDataLoaded={onDataLoaded ?? (() => {})} />
 
       {/* Chart Preferences */}
       <Card className="mb-6">

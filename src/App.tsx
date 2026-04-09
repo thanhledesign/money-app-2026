@@ -144,7 +144,7 @@ function AppInner({ userId, isLocal, auth }: {
           <SettingsPage data={data} prefs={prefs}
             setAccountColor={setAccountColor} setLabelColor={setLabelColor}
             onUpdatePrefs={updatePrefs} resetPrefs={resetPrefs}
-            userId={userId} dashboardId={db.activeId}
+            userId={userId} dashboardId={db.activeId} dashboards={db.dashboards}
             onDataLoaded={(d) => { import('@/lib/store').then(s => { s.saveData(d) }); window.location.reload() }} />
         } />
       </Route>
