@@ -37,26 +37,27 @@
 ## Pending Features
 
 ### High Priority
-- [ ] **Share feature** — Read-only link to show dashboard to others without login. Needs Supabase storage + `/share/:id` route. No login required for viewers.
-- [ ] **Supabase data sync** — Sync localStorage data to Supabase so it persists across devices. Currently local-only.
-- [ ] **Mobile testing pass** — Multi-dashboard switcher, resizable sidebar, new Settings sections need mobile QA.
+- [x] **Share feature** — ShareButton on dashboard generates read-only links via Supabase
+- [x] **Supabase data sync** — CloudSyncPanel in Settings with Upload/Download/Sync Now buttons
+- [ ] **Mobile testing pass** — Multi-dashboard switcher, resizable sidebar, new Settings sections need mobile QA
+- [ ] **Run supabase-migration.sql** — Must be run in Supabase SQL Editor for cloud sync to work
 
 ### Medium Priority
-- [ ] **Sidebar double-click reset** — Double-click resize handle to reset sidebar to default width
-- [ ] **Combined dashboard polish** — Show which dashboards contribute to each number, source labels
+- [x] **Sidebar double-click reset** — Already implemented (double-click resize handle)
+- [x] **Combined dashboard polish** — Source dashboard names shown in combined banner
 - [ ] **Paid upgrade flow** — Stripe or "contact for access" for >3 dashboards
-- [ ] **Entry page improvements** — Auto-pull previous balances as defaults, show diff as you type
-- [ ] **Sample Dashboard banner** — Visual indicator on every page when viewing sample data
+- [x] **Entry page improvements** — Auto-pull previous balances already working, live diff as you type
+- [x] **Sample Dashboard banner** — Already renders in Layout for all pages
 
 ### UX/UI Improvements
 - [ ] **Dashboard switcher width** — Wider popover or dedicated /dashboards management page
 - [ ] **Inline page title editing** — Click any page title to edit directly (currently buried in Settings)
-- [ ] **Richer empty state** — Quick-start checklist with individual action buttons instead of just wizard link
+- [x] **Richer empty state** — Quick-start checklist with context-aware routing per page
 - [ ] **Charts: month comparison** — Side-by-side month comparison view
 
 ### Nice-to-Haves
 - [ ] Undo/redo for data changes
-- [ ] Dark/light mode toggle (currently dark-only)
+- [x] **Dark/light mode toggle** — Settings > Appearance with Dark/Light/System modes
 - [ ] Notifications/reminders ("You haven't recorded a snapshot in 2 weeks")
 - [ ] Progressive web app (PWA) for mobile install
 
