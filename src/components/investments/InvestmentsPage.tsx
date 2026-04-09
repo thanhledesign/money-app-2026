@@ -452,8 +452,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                     tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`}
                   />
                   <Tooltip
-                    contentStyle={TOOLTIP_CONTENT_STYLE}
-                    labelStyle={CHART_TOOLTIP.labelStyle}
+                    {...CHART_TOOLTIP}
                     formatter={(v: any, id: any) => {
                       const acc = accounts.find(a => a.id === id)
                       return [formatCurrency(v), acc ? acc.name : id]
