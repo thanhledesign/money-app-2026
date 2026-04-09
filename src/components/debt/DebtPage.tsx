@@ -488,8 +488,8 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                   width={90}
                 />
                 <Tooltip
-                  contentStyle={TOOLTIP_CONTENT_STYLE}
-                  labelStyle={CHART_TOOLTIP.labelStyle}
+                  {...CHART_TOOLTIP}
+
                   formatter={(v: any) => [formatCurrency(v), 'Balance']}
                 />
                 <Bar dataKey="balance" radius={[0, 3, 3, 0]}>
@@ -535,8 +535,8 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                   }}
                 />
                 <Tooltip
-                  contentStyle={TOOLTIP_CONTENT_STYLE}
-                  labelStyle={CHART_TOOLTIP.labelStyle}
+                  {...CHART_TOOLTIP}
+
                   formatter={(v: any, name: any) => [formatCurrency(v), name]}
                 />
                 <Legend
@@ -586,8 +586,8 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                   }}
                 />
                 <Tooltip
-                  contentStyle={TOOLTIP_CONTENT_STYLE}
-                  labelStyle={CHART_TOOLTIP.labelStyle}
+                  {...CHART_TOOLTIP}
+
                   formatter={(v: any, id: any) => {
                     const acc = debtAccounts.find(a => a.id === id)
                     return [formatCurrency(v), acc ? acc.name : id]
@@ -674,8 +674,8 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                   width={42}
                 />
                 <Tooltip
-                  contentStyle={TOOLTIP_CONTENT_STYLE}
-                  labelStyle={CHART_TOOLTIP.labelStyle}
+                  {...CHART_TOOLTIP}
+
                   formatter={(v: any) => [v, 'FICO Score']}
                 />
                 <Area

@@ -377,7 +377,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={TOOLTIP_CONTENT_STYLE}
+                  {...CHART_TOOLTIP}
                   formatter={(v: any, name: any) => [formatCurrency(v as number), name]}
                 />
                 <Legend
@@ -414,8 +414,8 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                   tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`}
                 />
                 <Tooltip
-                  contentStyle={TOOLTIP_CONTENT_STYLE}
-                  labelStyle={CHART_TOOLTIP.labelStyle}
+                  {...CHART_TOOLTIP}
+
                   formatter={(v: any, name: any) => [formatCurrency(v as number), name]}
                 />
                 <Legend
@@ -458,8 +458,8 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                   }}
                 />
                 <Tooltip
-                  contentStyle={TOOLTIP_CONTENT_STYLE}
-                  labelStyle={CHART_TOOLTIP.labelStyle}
+                  {...CHART_TOOLTIP}
+
                   formatter={(v: any) => [
                     `${v >= 0 ? '+' : ''}${formatCurrency(v)}`,
                     'Net Change',
@@ -553,8 +553,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`}
               />
               <Tooltip
-                contentStyle={TOOLTIP_CONTENT_STYLE}
-                labelStyle={CHART_TOOLTIP.labelStyle}
+                {...CHART_TOOLTIP}
                 formatter={(v: any) => [formatCurrency(v), 'Net Worth']}
               />
               <Area

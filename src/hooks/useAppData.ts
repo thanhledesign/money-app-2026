@@ -30,14 +30,18 @@ export function useAppData(userId?: string, dashboard?: Dashboard) {
       store.setDashboardId(effectiveDashboardId)
       setData(store.loadData())
 
-      // Hydrate from cloud if authenticated and data is empty/default
+      // Hydrate from cloud if authenticated
       if (userId && dashboard?.mode !== 'combined') {
         loadFromCloud(userId, `d-${effectiveDashboardId}-data`).then(cloudData => {
           if (cloudData && typeof cloudData === 'object') {
             const cd = cloudData as AppData
-            // Use cloud data if it has more snapshots than local (cloud is newer)
             const localData = store.loadData()
-            if (cd.snapshots && cd.snapshots.length > localData.snapshots.length) {
+            // Use cloud data if it has more snapshots OR newer latest snapshot
+            const cloudLatest = cd.snapshots?.length ? cd.snapshots[cd.snapshots.length - 1]?.timestamp : ''
+            const localLatest = localData.snapshots?.length ? localData.snapshots[localData.snapshots.length - 1]?.timestamp : ''
+            const cloudIsNewer = (cd.snapshots?.length ?? 0) > (localData.snapshots?.length ?? 0)
+              || (cloudLatest && cloudLatest > localLatest)
+            if (cd.snapshots && cloudIsNewer) {
               store.saveData(cd)
               setData(cd)
             }

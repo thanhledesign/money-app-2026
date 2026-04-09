@@ -145,7 +145,7 @@ function CompPackagePieChart({ comp }: { comp: CompBreakdown }) {
             ))}
           </Pie>
           <Tooltip
-            contentStyle={TOOLTIP_CONTENT_STYLE}
+            {...CHART_TOOLTIP}
             formatter={(value: any) => [formatCurrency(value as number), '']}
           />
           <Legend
@@ -227,9 +227,8 @@ function GrossPayBarChart({ comp }: { comp: CompBreakdown }) {
             tickLine={false}
           />
           <Tooltip
-            contentStyle={TOOLTIP_CONTENT_STYLE}
+            {...CHART_TOOLTIP}
             formatter={(value: any) => [formatCurrency(value as number), label]}
-            cursor={{ fill: 'rgba(255,255,255,0.04)' }}
           />
           <Bar dataKey="Pay" fill={barColor} radius={[0, 4, 4, 0]} />
         </BarChart>
@@ -341,7 +340,7 @@ function GrossDistPieChart({
             ))}
           </Pie>
           <Tooltip
-            contentStyle={TOOLTIP_CONTENT_STYLE}
+            {...CHART_TOOLTIP}
             formatter={(value: any, name: any) => [
               `${formatCurrency(value as number)} (${formatPercent((value as number) / grossSemiMonthly)})`,
               name,
@@ -400,9 +399,8 @@ function GrossDistBarChart({
             tickLine={false}
           />
           <Tooltip
-            contentStyle={TOOLTIP_CONTENT_STYLE}
+            {...CHART_TOOLTIP}
             formatter={(value: any) => [formatCurrency(value as number), 'Amount']}
-            cursor={{ fill: 'rgba(255,255,255,0.04)' }}
           />
           <Bar dataKey="Amount" radius={[0, 4, 4, 0]}>
             {chartData.map((d, i) => (
@@ -949,13 +947,12 @@ function PaychecksFrequencySection({
                 tickLine={false}
               />
               <Tooltip
-                contentStyle={TOOLTIP_CONTENT_STYLE}
+                {...CHART_TOOLTIP}
                 formatter={(value: any, _name: any, props: any) => [
                   `${formatCurrency(value as number)} (${props.payload.qty} checks)`,
                   'Net',
                 ]}
-                cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-              />
+                  />
               <Bar dataKey="Amount" fill="#22c55e" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

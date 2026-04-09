@@ -361,9 +361,12 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={TOOLTIP_CONTENT_STYLE}
-                      labelStyle={CHART_TOOLTIP.labelStyle}
-                      formatter={(v: any, name: any) => [formatCurrency(v), name]}
+                      {...CHART_TOOLTIP}
+                      formatter={(v: any, name: any) => {
+                        const total = pieData.reduce((s, d) => s + d.value, 0)
+                        const pct = total > 0 ? ((v as number) / total * 100).toFixed(1) : '0'
+                        return [`${formatCurrency(v)} (${pct}%)`, name]
+                      }}
                     />
                     <Legend
                       formatter={(name: string) => (
@@ -394,8 +397,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                       tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`}
                     />
                     <Tooltip
-                      contentStyle={TOOLTIP_CONTENT_STYLE}
-                      labelStyle={CHART_TOOLTIP.labelStyle}
+                      {...CHART_TOOLTIP}
                       formatter={(v: any, id: any) => {
                         const acc = accounts.find(a => a.id === id)
                         return [formatCurrency(v), acc ? acc.name : id]
