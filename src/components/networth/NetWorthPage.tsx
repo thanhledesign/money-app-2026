@@ -43,12 +43,7 @@ interface Props {
   updateAccounts: (a: Account[]) => void
 }
 
-const TOOLTIP_STYLE = {
-  background: '#12121a',
-  border: '1px solid #2a2a3a',
-  borderRadius: '8px',
-  fontSize: '12px',
-}
+import { CHART_TOOLTIP, TOOLTIP_CONTENT_STYLE, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
 
 export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }: Props) {
   const curveType = prefs.curveType === 'smooth' ? 'monotone' : 'linear'
@@ -382,7 +377,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={TOOLTIP_STYLE}
+                  contentStyle={TOOLTIP_CONTENT_STYLE}
                   formatter={(v: any, name: any) => [formatCurrency(v as number), name]}
                 />
                 <Legend
@@ -419,8 +414,8 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                   tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`}
                 />
                 <Tooltip
-                  contentStyle={TOOLTIP_STYLE}
-                  labelStyle={{ color: '#8888a0' }}
+                  contentStyle={TOOLTIP_CONTENT_STYLE}
+                  labelStyle={CHART_TOOLTIP.labelStyle}
                   formatter={(v: any, name: any) => [formatCurrency(v as number), name]}
                 />
                 <Legend
@@ -463,8 +458,8 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                   }}
                 />
                 <Tooltip
-                  contentStyle={TOOLTIP_STYLE}
-                  labelStyle={{ color: '#8888a0' }}
+                  contentStyle={TOOLTIP_CONTENT_STYLE}
+                  labelStyle={CHART_TOOLTIP.labelStyle}
                   formatter={(v: any) => [
                     `${v >= 0 ? '+' : ''}${formatCurrency(v)}`,
                     'Net Change',
@@ -558,8 +553,8 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`}
               />
               <Tooltip
-                contentStyle={TOOLTIP_STYLE}
-                labelStyle={{ color: '#8888a0' }}
+                contentStyle={TOOLTIP_CONTENT_STYLE}
+                labelStyle={CHART_TOOLTIP.labelStyle}
                 formatter={(v: any) => [formatCurrency(v), 'Net Worth']}
               />
               <Area

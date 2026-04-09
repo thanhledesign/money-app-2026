@@ -19,10 +19,7 @@ interface Props {
   onUpdatePrefs: (partial: Partial<ChartPrefs>) => void
 }
 
-const TOOLTIP_STYLE = {
-  contentStyle: { background: '#12121a', border: '1px solid #2a2a3a', borderRadius: '8px', fontSize: '12px' },
-  labelStyle: { color: '#8888a0' },
-}
+import { CHART_TOOLTIP, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
 
 const KPI_KEYS = [
   'kpi-net-worth', 'kpi-cash', 'kpi-investments', 'kpi-debt',
@@ -229,7 +226,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
                     <Cell key={i} fill={entry.color} stroke={entry.color + '60'} strokeWidth={1.5} />
                   ))}
                 </Pie>
-                <Tooltip {...TOOLTIP_STYLE} formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
+                <Tooltip {...CHART_TOOLTIP} formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -243,10 +240,10 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
                     <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
+                <XAxis dataKey="date" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false}
                   tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
-                <Tooltip {...TOOLTIP_STYLE} formatter={(v: any) => [calc.formatCurrency(v), 'Net Worth']} />
+                <Tooltip {...CHART_TOOLTIP} formatter={(v: any) => [calc.formatCurrency(v), 'Net Worth']} />
                 <Area type={curveType} dataKey="netWorth" stroke="#a855f7" fill="url(#nwGrad)" strokeWidth={2}
                   dot={prefs.showDots ? { r: 3, fill: '#a855f7' } : false} />
               </AreaChart>
@@ -261,10 +258,10 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
         <div className="h-56 mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={netWorthHistory}>
-              <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
+              <XAxis dataKey="date" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false}
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
-              <Tooltip {...TOOLTIP_STYLE}
+              <Tooltip {...CHART_TOOLTIP}
                 formatter={(v: any, name: any) => [calc.formatCurrency(v), name === 'cash' ? 'Cash' : 'Investments']} />
               <Line type={curveType} dataKey="cash" stroke="#22c55e" strokeWidth={2}
                 dot={prefs.showDots ? { r: 3, fill: '#22c55e' } : false} />
@@ -289,7 +286,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
                   <Cell key={i} fill={entry.color} stroke={entry.color + '60'} strokeWidth={1.5} />
                 ))}
               </Pie>
-              <Tooltip {...TOOLTIP_STYLE}
+              <Tooltip {...CHART_TOOLTIP}
                 formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
               <Legend wrapperStyle={{ fontSize: '10px', lineHeight: '18px' }} />
             </PieChart>
@@ -303,10 +300,10 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
         <div className="h-72 mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={annualBarData} stackOffset="sign">
-              <XAxis dataKey="month" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
+              <XAxis dataKey="month" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false}
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
-              <Tooltip {...TOOLTIP_STYLE}
+              <Tooltip {...CHART_TOOLTIP}
                 formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
               <Legend wrapperStyle={{ fontSize: '11px' }} />
               <Bar dataKey="Cash" fill="#22c55e" radius={[2, 2, 0, 0]} />
@@ -329,10 +326,10 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
                   <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#55556a', fontSize: 11 }} axisLine={false} tickLine={false}
+              <XAxis dataKey="date" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false}
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(1)}K`} reversed={true} />
-              <Tooltip {...TOOLTIP_STYLE} formatter={(v: any) => [calc.formatCurrency(v), 'Debt']} />
+              <Tooltip {...CHART_TOOLTIP} formatter={(v: any) => [calc.formatCurrency(v), 'Debt']} />
               <Area type={curveType} dataKey="debt" stroke="#ef4444" fill="url(#debtGrad)" strokeWidth={2}
                 dot={prefs.showDots ? { r: 3, fill: '#ef4444' } : false} />
             </AreaChart>

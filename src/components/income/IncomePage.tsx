@@ -22,12 +22,7 @@ interface IncomePageProps {
 
 // ── Shared chart style ────────────────────────────────────────────────────────
 
-const TOOLTIP_STYLE = {
-  background: '#12121a',
-  border: '1px solid #2a2a3a',
-  borderRadius: '8px',
-  fontSize: '12px',
-}
+import { CHART_TOOLTIP, TOOLTIP_CONTENT_STYLE, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
 
 // ── Pay Period Calculations ───────────────────────────────────────────────────
 
@@ -152,7 +147,7 @@ function CompPackagePieChart({ comp }: { comp: CompBreakdown }) {
             ))}
           </Pie>
           <Tooltip
-            contentStyle={TOOLTIP_STYLE}
+            contentStyle={TOOLTIP_CONTENT_STYLE}
             formatter={(value: any) => [formatCurrency(value as number), '']}
           />
           <Legend
@@ -221,7 +216,7 @@ function GrossPayBarChart({ comp }: { comp: CompBreakdown }) {
           <XAxis
             type="number"
             tickFormatter={(v: any) => formatCurrency(v as number)}
-            tick={{ fill: '#6b7280', fontSize: 11 }}
+            tick={AXIS_TICK}
             axisLine={{ stroke: '#2a2a3a' }}
             tickLine={false}
           />
@@ -234,7 +229,7 @@ function GrossPayBarChart({ comp }: { comp: CompBreakdown }) {
             tickLine={false}
           />
           <Tooltip
-            contentStyle={TOOLTIP_STYLE}
+            contentStyle={TOOLTIP_CONTENT_STYLE}
             formatter={(value: any) => [formatCurrency(value as number), label]}
             cursor={{ fill: 'rgba(255,255,255,0.04)' }}
           />
@@ -348,7 +343,7 @@ function GrossDistPieChart({
             ))}
           </Pie>
           <Tooltip
-            contentStyle={TOOLTIP_STYLE}
+            contentStyle={TOOLTIP_CONTENT_STYLE}
             formatter={(value: any, name: any) => [
               `${formatCurrency(value as number)} (${formatPercent((value as number) / grossSemiMonthly)})`,
               name,
@@ -394,7 +389,7 @@ function GrossDistBarChart({
           <XAxis
             type="number"
             tickFormatter={(v: any) => formatCurrency(v as number)}
-            tick={{ fill: '#6b7280', fontSize: 11 }}
+            tick={AXIS_TICK}
             axisLine={{ stroke: '#2a2a3a' }}
             tickLine={false}
           />
@@ -407,7 +402,7 @@ function GrossDistBarChart({
             tickLine={false}
           />
           <Tooltip
-            contentStyle={TOOLTIP_STYLE}
+            contentStyle={TOOLTIP_CONTENT_STYLE}
             formatter={(value: any) => [formatCurrency(value as number), 'Amount']}
             cursor={{ fill: 'rgba(255,255,255,0.04)' }}
           />
@@ -885,13 +880,13 @@ function PaychecksFrequencySection({
 
   const perMonth = data.paychecksPerMonth.slice(0, 12)
   const total = perMonth.reduce((s, n) => s + n, 0)
-  // Semi-monthly = 2 checks per month always. paychecksPerMonth is weekly frequency for display only.
-  const checksPerMonth = 2
-  const monthlyNet = checksPerMonth * netSemiMonthly
+  // Net per paycheck based on frequency: paychecksPerMonth total tells us the schedule
+  const annualNet = netSemiMonthly * 24
+  const netPerCheck = total > 0 ? annualNet / total : 0
 
   const chartData = perMonth.map((qty, i) => ({
     month: MONTH_LABELS[i],
-    Amount: monthlyNet,
+    Amount: qty * netPerCheck,
     qty,
   }))
 
@@ -917,7 +912,7 @@ function PaychecksFrequencySection({
                 <tr key={i} className="border-b border-border-light hover:bg-surface-hover transition-colors">
                   <td className="py-2 px-3 text-text-secondary">{MONTH_LABELS[i]}</td>
                   <td className="py-2 px-3 text-right tabular-nums text-text-primary">{qty}</td>
-                  <td className="py-2 px-3 text-right tabular-nums text-green">{formatCurrency(monthlyNet)}</td>
+                  <td className="py-2 px-3 text-right tabular-nums text-green">{formatCurrency(qty * netPerCheck)}</td>
                 </tr>
               ))}
             </tbody>
@@ -925,7 +920,7 @@ function PaychecksFrequencySection({
               <tr className="border-t-2 border-green/40 bg-green/5 font-semibold">
                 <td className="py-2.5 px-3 text-text-primary uppercase text-xs">TOTAL</td>
                 <td className="py-2.5 px-3 text-right tabular-nums text-text-primary">{total}</td>
-                <td className="py-2.5 px-3 text-right tabular-nums text-green">{formatCurrency(12 * monthlyNet)}</td>
+                <td className="py-2.5 px-3 text-right tabular-nums text-green">{formatCurrency(annualNet)}</td>
               </tr>
               <tr className="border-t border-border-light">
                 <td className="py-2 px-3 text-xs text-text-muted" colSpan={2}>Bonus (annual)</td>
@@ -945,18 +940,18 @@ function PaychecksFrequencySection({
             <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
               <XAxis
                 dataKey="month"
-                tick={{ fill: '#6b7280', fontSize: 11 }}
+                tick={AXIS_TICK}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis
                 tickFormatter={(v: any) => `$${((v as number) / 1000).toFixed(0)}K`}
-                tick={{ fill: '#6b7280', fontSize: 11 }}
+                tick={AXIS_TICK}
                 axisLine={false}
                 tickLine={false}
               />
               <Tooltip
-                contentStyle={TOOLTIP_STYLE}
+                contentStyle={TOOLTIP_CONTENT_STYLE}
                 formatter={(value: any, _name: any, props: any) => [
                   `${formatCurrency(value as number)} (${props.payload.qty} checks)`,
                   'Net',
