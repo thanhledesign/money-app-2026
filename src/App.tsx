@@ -46,7 +46,7 @@ function AppInner({ userId, isLocal, auth }: {
 
   const db = useDashboards(userId)
   const { activeDashboard } = db
-  const { tier } = useTier(userId)
+  const { tier } = useTier(auth.user?.email)
 
   const {
     data, isReadOnly, addSnapshot, deleteSnapshot, addGoal,

@@ -102,18 +102,28 @@ export function getRequiredTier(featureId: string): Tier {
   return FEATURE_GATES[featureId] ?? 'free'
 }
 
-// Get user tier — currently always 'free', but ready for Supabase/Stripe
+// Get user tier
+// BETA MODE: everyone gets 'pro' by default so all features are testable.
+// Admin (thethanhster@gmail.com) always gets 'premium'.
+// When ready to monetize, change BETA_DEFAULT_TIER to 'free'.
 const TIER_STORAGE_KEY = 'money-app-user-tier'
+const BETA_DEFAULT_TIER: Tier = 'pro'
+const ADMIN_EMAILS = ['thethanhster@gmail.com']
 
-export function getUserTier(userId?: string): Tier {
-  // Admin override — thethanhster gets premium
-  if (userId === 'admin' || typeof window !== 'undefined') {
+export function getUserTier(userEmail?: string): Tier {
+  // Admin always gets premium
+  if (userEmail && ADMIN_EMAILS.includes(userEmail)) return 'premium'
+
+  // Check localStorage override (from Settings tier switcher)
+  if (typeof window !== 'undefined') {
     const override = localStorage.getItem(TIER_STORAGE_KEY)
     if (override && TIER_ORDER.includes(override as Tier)) {
       return override as Tier
     }
   }
-  return 'free'
+
+  // Beta default — change to 'free' when launching paid tiers
+  return BETA_DEFAULT_TIER
 }
 
 export function setUserTier(tier: Tier): void {

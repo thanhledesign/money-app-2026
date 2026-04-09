@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react'
 import { getUserTier, setUserTier, canUseFeature, type Tier } from '@/lib/tiers'
 
-export function useTier(userId?: string) {
-  const [tier, setTier] = useState<Tier>(() => getUserTier(userId))
+export function useTier(userEmail?: string) {
+  const [tier, setTier] = useState<Tier>(() => getUserTier(userEmail))
 
   const upgrade = useCallback((newTier: Tier) => {
     setUserTier(newTier)
