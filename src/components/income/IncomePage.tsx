@@ -24,6 +24,22 @@ interface IncomePageProps {
 
 import { CHART_TOOLTIP, TOOLTIP_CONTENT_STYLE, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
 
+// Paychecks per year by frequency
+const CHECKS_PER_YEAR: Record<string, number> = {
+  weekly: 52,
+  biweekly: 26,
+  semimonthly: 24,
+  monthly: 12,
+}
+
+function getGrossPerCheck(annualSalary: number, frequency: string): number {
+  return annualSalary / (CHECKS_PER_YEAR[frequency] || 24)
+}
+
+function getFrequencyLabel(frequency: string): string {
+  return { weekly: 'weekly', biweekly: 'bi-weekly', semimonthly: 'semi-monthly', monthly: 'monthly' }[frequency] || 'semi-monthly'
+}
+
 // ── Pay Period Calculations ───────────────────────────────────────────────────
 
 interface PayRow {
@@ -267,8 +283,9 @@ function buildDistSlices(
   deductions: PaycheckDeduction[],
   allocations: PaycheckAllocation[],
   accounts: AppData['accounts'],
+  frequency: string,
 ): DistSlice[] {
-  const grossSemiMonthly = comp.annualSalary / 24
+  const grossSemiMonthly = getGrossPerCheck(comp.annualSalary, frequency)
 
   const slices: DistSlice[] = []
   let colorIdx = 0
@@ -311,14 +328,16 @@ function GrossDistPieChart({
   deductions,
   allocations,
   accounts,
+  frequency,
 }: {
   comp: CompBreakdown
   deductions: PaycheckDeduction[]
   allocations: PaycheckAllocation[]
   accounts: AppData['accounts']
+  frequency: string
 }) {
-  const slices = buildDistSlices(comp, deductions, allocations, accounts)
-  const grossSemiMonthly = comp.annualSalary / 24
+  const slices = buildDistSlices(comp, deductions, allocations, accounts, frequency)
+  const grossSemiMonthly = getGrossPerCheck(comp.annualSalary, frequency)
 
   return (
     <Card>
@@ -364,13 +383,15 @@ function GrossDistBarChart({
   deductions,
   allocations,
   accounts,
+  frequency,
 }: {
   comp: CompBreakdown
   deductions: PaycheckDeduction[]
   allocations: PaycheckAllocation[]
   accounts: AppData['accounts']
+  frequency: string
 }) {
-  const slices = buildDistSlices(comp, deductions, allocations, accounts)
+  const slices = buildDistSlices(comp, deductions, allocations, accounts, frequency)
   const chartData = slices.map(s => ({ name: s.name, Amount: s.value, color: s.color }))
 
   return (
@@ -559,12 +580,13 @@ function DeductionsSection({
 }: {
   deductions: PaycheckDeduction[]
   comp: CompBreakdown
+  frequency: string
   onChange: (d: PaycheckDeduction[]) => void
 }) {
   const taxes = deductions.filter(d => d.type === 'tax')
   const pretax = deductions.filter(d => d.type === 'pretax')
 
-  const grossSemiMonthly = comp.annualSalary / 24
+  const grossSemiMonthly = getGrossPerCheck(comp.annualSalary, frequency)
 
   const taxTotal = taxes.reduce((s, d) => s + d.amount, 0)
   const pretaxTotal = pretax.reduce((s, d) => s + d.amount, 0)
@@ -667,7 +689,7 @@ function DeductionsSection({
         >
           <div>
             <CardTitle>Taxes &amp; Deductions</CardTitle>
-            <p className="text-xs text-text-muted mt-1">Per paycheck (semi-monthly). Gross: {formatCurrency(grossSemiMonthly)}</p>
+            <p className="text-xs text-text-muted mt-1">Per paycheck ({getFrequencyLabel(frequency)}). Gross: {formatCurrency(grossSemiMonthly)}</p>
           </div>
           <div className="flex items-center gap-2 sm:hidden">
             <span className="text-sm font-semibold text-text-primary tabular-nums">{formatCurrency(totalDeductions)}</span>
@@ -695,9 +717,9 @@ function AllocationSection({
   data: AppData
   onChange: (a: PaycheckAllocation[]) => void
 }) {
-  const grossSemiMonthly = data.comp.annualSalary / 24
+  const grossPerCheck = getGrossPerCheck(data.comp.annualSalary, data.payFrequency)
   const totalDeductions = data.deductions.reduce((s, d) => s + d.amount, 0)
-  const netPaycheck = grossSemiMonthly - totalDeductions
+  const netPaycheck = grossPerCheck - totalDeductions
 
   // Compute the variable account's percentage as 1 - sum(all non-variable)
   const variableId = allocations.find(a => a.adjustability === 'variable')?.accountId ?? null
@@ -874,15 +896,14 @@ function PaychecksFrequencySection({
 }: {
   data: AppData
 }) {
-  const grossSemiMonthly = data.comp.annualSalary / 24
+  const grossPerCheck = getGrossPerCheck(data.comp.annualSalary, data.payFrequency)
   const totalDeductions = data.deductions.reduce((s, d) => s + d.amount, 0)
-  const netSemiMonthly = grossSemiMonthly - totalDeductions
+  const netPerCheck = grossPerCheck - totalDeductions
+  const checksPerYear = CHECKS_PER_YEAR[data.payFrequency] || 24
 
   const perMonth = data.paychecksPerMonth.slice(0, 12)
   const total = perMonth.reduce((s, n) => s + n, 0)
-  // Net per paycheck based on frequency: paychecksPerMonth total tells us the schedule
-  const annualNet = netSemiMonthly * 24
-  const netPerCheck = total > 0 ? annualNet / total : 0
+  const annualNet = netPerCheck * checksPerYear
 
   const chartData = perMonth.map((qty, i) => ({
     month: MONTH_LABELS[i],
@@ -992,6 +1013,7 @@ export function IncomePage({ data, updateComp, updateDeductions, updateAllocatio
       <DeductionsSection
         deductions={data.deductions}
         comp={data.comp}
+        frequency={data.payFrequency}
         onChange={updateDeductions}
       />
 
@@ -1009,12 +1031,14 @@ export function IncomePage({ data, updateComp, updateDeductions, updateAllocatio
           deductions={data.deductions}
           allocations={data.allocations}
           accounts={data.accounts}
+          frequency={data.payFrequency}
         />
         <GrossDistBarChart
           comp={data.comp}
           deductions={data.deductions}
           allocations={data.allocations}
           accounts={data.accounts}
+          frequency={data.payFrequency}
         />
       </div>
 
