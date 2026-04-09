@@ -26,137 +26,56 @@ const DEFAULT_CONFIG: BackgroundConfig = {
   aspectRatio: 'fill',
 }
 
-// CSS-only gradient backgrounds — no external images needed
+// CSS-only gradient backgrounds — 5 distinct, vibrant themes
 export const CSS_BACKGROUNDS: Record<string, { name: string; css: string; category: string }> = {
   corporate: {
     name: 'Midnight Pro',
     category: 'Minimal',
     css: `
-      radial-gradient(ellipse at 15% 5%, rgba(124,111,247,0.08) 0%, transparent 50%),
-      radial-gradient(ellipse at 85% 90%, rgba(52,211,153,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, rgba(30,30,48,1) 0%, rgba(8,8,13,1) 100%)
-    `,
-  },
-  mesh: {
-    name: 'Soft Mesh',
-    category: 'Abstract',
-    css: `
-      radial-gradient(at 20% 20%, rgba(124,111,247,0.12) 0%, transparent 50%),
-      radial-gradient(at 80% 30%, rgba(52,211,153,0.10) 0%, transparent 50%),
-      radial-gradient(at 40% 80%, rgba(248,113,113,0.08) 0%, transparent 50%),
-      radial-gradient(at 90% 80%, rgba(96,165,250,0.08) 0%, transparent 50%),
-      linear-gradient(135deg, #0c0c14 0%, #08080d 100%)
-    `,
-  },
-  aurora_css: {
-    name: 'Aurora Wave',
-    category: 'Abstract',
-    css: `
-      radial-gradient(ellipse at 10% 0%, rgba(52,211,153,0.15) 0%, transparent 40%),
-      radial-gradient(ellipse at 50% 10%, rgba(96,165,250,0.12) 0%, transparent 40%),
-      radial-gradient(ellipse at 90% 0%, rgba(192,132,252,0.10) 0%, transparent 40%),
-      radial-gradient(ellipse at 50% 100%, rgba(8,8,13,1) 0%, transparent 60%),
-      linear-gradient(180deg, #0a0a12 0%, #08080d 100%)
-    `,
-  },
-  ember: {
-    name: 'Warm Ember',
-    category: 'Abstract',
-    css: `
-      radial-gradient(ellipse at 30% 20%, rgba(251,191,36,0.10) 0%, transparent 45%),
-      radial-gradient(ellipse at 70% 70%, rgba(248,113,113,0.08) 0%, transparent 45%),
-      radial-gradient(ellipse at 10% 80%, rgba(192,132,252,0.06) 0%, transparent 40%),
-      linear-gradient(145deg, #100c08 0%, #08080d 100%)
-    `,
-  },
-  deep: {
-    name: 'Deep Space',
-    category: 'Abstract',
-    css: `
-      radial-gradient(ellipse at 25% 15%, rgba(96,165,250,0.10) 0%, transparent 45%),
-      radial-gradient(ellipse at 75% 85%, rgba(124,111,247,0.12) 0%, transparent 50%),
-      radial-gradient(circle at 50% 50%, rgba(20,20,35,0.5) 0%, transparent 70%),
-      linear-gradient(160deg, #06060c 0%, #0a0a14 50%, #08080d 100%)
+      radial-gradient(ellipse at 15% 5%, rgba(124,111,247,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 90%, rgba(52,211,153,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(25,25,42,1) 0%, rgba(8,8,13,1) 100%)
     `,
   },
   neon: {
-    name: 'Neon Pulse',
+    name: 'Neon Split',
     category: 'Vibrant',
     css: `
-      radial-gradient(ellipse at 0% 50%, rgba(236,72,153,0.12) 0%, transparent 40%),
-      radial-gradient(ellipse at 100% 50%, rgba(34,211,238,0.12) 0%, transparent 40%),
-      radial-gradient(ellipse at 50% 0%, rgba(124,111,247,0.08) 0%, transparent 35%),
-      linear-gradient(135deg, #0a0610 0%, #060810 50%, #08080d 100%)
+      radial-gradient(ellipse at 0% 30%, rgba(236,72,153,0.22) 0%, transparent 45%),
+      radial-gradient(ellipse at 100% 70%, rgba(34,211,238,0.22) 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 50%, rgba(124,111,247,0.06) 0%, transparent 50%),
+      linear-gradient(135deg, #0d0418 0%, #040812 50%, #08080d 100%)
     `,
   },
-  sunset: {
-    name: 'Sunset Fade',
+  ember: {
+    name: 'Solar Flare',
     category: 'Warm',
     css: `
-      radial-gradient(ellipse at 0% 0%, rgba(251,146,60,0.12) 0%, transparent 45%),
-      radial-gradient(ellipse at 100% 30%, rgba(236,72,153,0.08) 0%, transparent 40%),
-      radial-gradient(ellipse at 30% 100%, rgba(124,111,247,0.06) 0%, transparent 40%),
-      linear-gradient(160deg, #110c08 0%, #0d080a 50%, #08080d 100%)
+      radial-gradient(ellipse at 20% 10%, rgba(251,146,60,0.25) 0%, transparent 45%),
+      radial-gradient(ellipse at 80% 80%, rgba(239,68,68,0.18) 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 50%, rgba(251,191,36,0.05) 0%, transparent 50%),
+      linear-gradient(150deg, #140a04 0%, #0e0606 50%, #08080d 100%)
     `,
   },
-  forest: {
-    name: 'Forest Mist',
+  aurora_css: {
+    name: 'Northern Glow',
     category: 'Nature',
     css: `
-      radial-gradient(ellipse at 20% 80%, rgba(34,197,94,0.10) 0%, transparent 45%),
-      radial-gradient(ellipse at 80% 20%, rgba(20,184,166,0.08) 0%, transparent 40%),
-      radial-gradient(ellipse at 50% 50%, rgba(52,211,153,0.04) 0%, transparent 50%),
-      linear-gradient(145deg, #060d08 0%, #08080d 100%)
-    `,
-  },
-  ocean: {
-    name: 'Ocean Depth',
-    category: 'Nature',
-    css: `
-      radial-gradient(ellipse at 30% 90%, rgba(6,182,212,0.12) 0%, transparent 45%),
-      radial-gradient(ellipse at 70% 10%, rgba(59,130,246,0.10) 0%, transparent 40%),
-      radial-gradient(ellipse at 50% 50%, rgba(14,165,233,0.04) 0%, transparent 50%),
-      linear-gradient(180deg, #060810 0%, #040810 50%, #08080d 100%)
+      radial-gradient(ellipse at 10% 0%, rgba(52,211,153,0.25) 0%, transparent 40%),
+      radial-gradient(ellipse at 55% 5%, rgba(96,165,250,0.20) 0%, transparent 40%),
+      radial-gradient(ellipse at 90% 0%, rgba(192,132,252,0.18) 0%, transparent 35%),
+      radial-gradient(ellipse at 50% 100%, rgba(8,8,13,0.9) 0%, transparent 60%),
+      linear-gradient(180deg, #060c10 0%, #08080d 100%)
     `,
   },
   royal: {
-    name: 'Royal Velvet',
+    name: 'Electric Violet',
     category: 'Luxe',
     css: `
-      radial-gradient(ellipse at 40% 10%, rgba(168,85,247,0.14) 0%, transparent 40%),
-      radial-gradient(ellipse at 80% 80%, rgba(124,58,237,0.08) 0%, transparent 40%),
-      radial-gradient(ellipse at 10% 70%, rgba(192,132,252,0.06) 0%, transparent 35%),
-      linear-gradient(150deg, #0c0812 0%, #08060e 50%, #08080d 100%)
-    `,
-  },
-  rose: {
-    name: 'Rose Gold',
-    category: 'Luxe',
-    css: `
-      radial-gradient(ellipse at 60% 20%, rgba(251,113,133,0.10) 0%, transparent 40%),
-      radial-gradient(ellipse at 20% 70%, rgba(244,114,182,0.08) 0%, transparent 40%),
-      radial-gradient(ellipse at 80% 80%, rgba(251,191,36,0.06) 0%, transparent 35%),
-      linear-gradient(135deg, #100a0c 0%, #0c0808 50%, #08080d 100%)
-    `,
-  },
-  ice: {
-    name: 'Frozen Glass',
-    category: 'Cool',
-    css: `
-      radial-gradient(ellipse at 50% 0%, rgba(186,230,253,0.10) 0%, transparent 40%),
-      radial-gradient(ellipse at 20% 60%, rgba(147,197,253,0.06) 0%, transparent 35%),
-      radial-gradient(ellipse at 80% 90%, rgba(165,180,252,0.06) 0%, transparent 35%),
-      linear-gradient(170deg, #0a0c12 0%, #08090e 50%, #08080d 100%)
-    `,
-  },
-  matrix: {
-    name: 'Matrix',
-    category: 'Vibrant',
-    css: `
-      radial-gradient(ellipse at 50% 30%, rgba(34,197,94,0.12) 0%, transparent 40%),
-      radial-gradient(ellipse at 20% 80%, rgba(16,185,129,0.06) 0%, transparent 35%),
-      radial-gradient(ellipse at 80% 70%, rgba(52,211,153,0.04) 0%, transparent 30%),
-      linear-gradient(180deg, #040804 0%, #060a06 50%, #08080d 100%)
+      radial-gradient(ellipse at 30% 10%, rgba(168,85,247,0.28) 0%, transparent 40%),
+      radial-gradient(ellipse at 70% 90%, rgba(59,130,246,0.18) 0%, transparent 40%),
+      radial-gradient(ellipse at 90% 30%, rgba(236,72,153,0.10) 0%, transparent 35%),
+      linear-gradient(150deg, #0e0618 0%, #060410 50%, #08080d 100%)
     `,
   },
 }

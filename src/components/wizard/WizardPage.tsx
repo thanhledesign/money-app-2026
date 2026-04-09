@@ -733,11 +733,11 @@ function StepGoals({ goals, setGoals }: { goals: WizardGoal[]; setGoals: (g: Wiz
 // ── Step 6: Background ────────────────────────────────────────────────────────
 
 const CSS_BG_MAP: Record<string, { name: string; css: string }> = {
-  corporate: { name: 'Midnight Pro', css: 'radial-gradient(ellipse at 15% 5%, rgba(124,111,247,0.08) 0%, transparent 50%),radial-gradient(ellipse at 85% 90%, rgba(52,211,153,0.06) 0%, transparent 50%),radial-gradient(ellipse at 50% 50%, rgba(30,30,48,1) 0%, rgba(8,8,13,1) 100%)' },
-  mesh: { name: 'Soft Mesh', css: 'radial-gradient(at 20% 20%, rgba(124,111,247,0.12) 0%, transparent 50%),radial-gradient(at 80% 30%, rgba(52,211,153,0.10) 0%, transparent 50%),radial-gradient(at 40% 80%, rgba(248,113,113,0.08) 0%, transparent 50%),linear-gradient(135deg, #0c0c14 0%, #08080d 100%)' },
-  aurora_css: { name: 'Aurora Wave', css: 'radial-gradient(ellipse at 10% 0%, rgba(52,211,153,0.15) 0%, transparent 40%),radial-gradient(ellipse at 50% 10%, rgba(96,165,250,0.12) 0%, transparent 40%),radial-gradient(ellipse at 90% 0%, rgba(192,132,252,0.10) 0%, transparent 40%),linear-gradient(180deg, #0a0a12 0%, #08080d 100%)' },
-  ember: { name: 'Warm Ember', css: 'radial-gradient(ellipse at 30% 20%, rgba(251,191,36,0.10) 0%, transparent 45%),radial-gradient(ellipse at 70% 70%, rgba(248,113,113,0.08) 0%, transparent 45%),linear-gradient(145deg, #100c08 0%, #08080d 100%)' },
-  deep: { name: 'Deep Space', css: 'radial-gradient(ellipse at 25% 15%, rgba(96,165,250,0.10) 0%, transparent 45%),radial-gradient(ellipse at 75% 85%, rgba(124,111,247,0.12) 0%, transparent 50%),linear-gradient(160deg, #06060c 0%, #0a0a14 50%, #08080d 100%)' },
+  corporate: { name: 'Midnight Pro', css: 'radial-gradient(ellipse at 15% 5%, rgba(124,111,247,0.12) 0%, transparent 50%),radial-gradient(ellipse at 85% 90%, rgba(52,211,153,0.08) 0%, transparent 50%),radial-gradient(ellipse at 50% 50%, rgba(25,25,42,1) 0%, rgba(8,8,13,1) 100%)' },
+  neon: { name: 'Neon Split', css: 'radial-gradient(ellipse at 0% 30%, rgba(236,72,153,0.22) 0%, transparent 45%),radial-gradient(ellipse at 100% 70%, rgba(34,211,238,0.22) 0%, transparent 45%),linear-gradient(135deg, #0d0418 0%, #040812 50%, #08080d 100%)' },
+  ember: { name: 'Solar Flare', css: 'radial-gradient(ellipse at 20% 10%, rgba(251,146,60,0.25) 0%, transparent 45%),radial-gradient(ellipse at 80% 80%, rgba(239,68,68,0.18) 0%, transparent 45%),linear-gradient(150deg, #140a04 0%, #0e0606 50%, #08080d 100%)' },
+  aurora_css: { name: 'Northern Glow', css: 'radial-gradient(ellipse at 10% 0%, rgba(52,211,153,0.25) 0%, transparent 40%),radial-gradient(ellipse at 55% 5%, rgba(96,165,250,0.20) 0%, transparent 40%),radial-gradient(ellipse at 90% 0%, rgba(192,132,252,0.18) 0%, transparent 35%),linear-gradient(180deg, #060c10 0%, #08080d 100%)' },
+  royal: { name: 'Electric Violet', css: 'radial-gradient(ellipse at 30% 10%, rgba(168,85,247,0.28) 0%, transparent 40%),radial-gradient(ellipse at 70% 90%, rgba(59,130,246,0.18) 0%, transparent 40%),linear-gradient(150deg, #0e0618 0%, #060410 50%, #08080d 100%)' },
 }
 
 const BG_PRESETS = [

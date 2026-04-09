@@ -16,12 +16,12 @@ export function Card({ children, className = '', style }: CardProps) {
 
   return (
     <div
-      className={`glass-glow backdrop-blur-sm border rounded-xl p-5 ${className}`}
+      className={`glass-glow backdrop-blur-lg border rounded-xl p-5 ${className}`}
       style={{
         ...style,
-        background: 'linear-gradient(135deg, color-mix(in oklab, var(--color-surface) 70%, transparent) 0%, color-mix(in oklab, var(--color-surface) 55%, transparent) 100%)',
-        borderColor: 'color-mix(in oklab, var(--color-border) 40%, transparent)',
-        boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.03), 0 1px 3px rgba(0,0,0,0.15)',
+        background: 'linear-gradient(135deg, color-mix(in oklab, var(--color-surface) 45%, transparent) 0%, color-mix(in oklab, var(--color-surface) 30%, transparent) 100%)',
+        borderColor: 'color-mix(in oklab, var(--color-border) 30%, transparent)',
+        boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.05), 0 2px 8px rgba(0,0,0,0.12)',
       }}
       onMouseMove={handleMouseMove}
     >
@@ -63,12 +63,12 @@ export function GlassCard({ children, className = '', accent = '#6366f1' }: Glas
 
   return (
     <div
-      className={`glass-glow relative overflow-hidden rounded-xl border p-5 backdrop-blur-md ${className}`}
+      className={`glass-glow relative overflow-hidden rounded-xl border p-5 backdrop-blur-lg ${className}`}
       style={{
-        borderColor: accent + '30',
-        background: `linear-gradient(145deg, ${accent}12 0%, ${accent}06 40%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)`,
-        boxShadow: `inset 0 1px 0 0 ${accent}15, 0 2px 8px rgba(0,0,0,0.25)`,
-        '--glow-color': accent + '12',
+        borderColor: accent + '25',
+        background: `linear-gradient(145deg, ${accent}10 0%, ${accent}05 40%, color-mix(in oklab, var(--color-surface) 35%, transparent) 100%)`,
+        boxShadow: `inset 0 1px 0 0 ${accent}12, 0 2px 8px rgba(0,0,0,0.15)`,
+        '--glow-color': accent + '10',
       } as React.CSSProperties}
       onMouseMove={handleMouseMove}
     >
