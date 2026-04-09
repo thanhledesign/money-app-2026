@@ -32,6 +32,7 @@ import {
   formatPercent,
 } from '@/lib/calculations'
 import { ScrollableTable } from '@/components/ui/ScrollableTable'
+import { MobileMonthPicker, useMobileMonth } from '@/components/ui/MobileMonthPicker'
 
 interface Props {
   data: AppData
@@ -166,6 +167,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
 
   const latestMonthKey = latest ? getMonthKey(latest.timestamp) : ''
   const currentMonthKey = getCurrentMonthKey()
+  const [mobileMonth, setMobileMonth] = useMobileMonth(monthKeys, currentMonthKey)
 
   return (
     <PageTheme page="debt">
@@ -204,6 +206,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
       {/* ── Section 1: Monthly Balance Table ── */}
       <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #f59e0b)' }}>
         <CardTitle style={{ color: 'var(--page-accent, #f59e0b)' }}>Monthly Balance History</CardTitle>
+        <MobileMonthPicker monthKeys={monthKeys} labelMonth={(mk) => { const idx = monthKeys.indexOf(mk); return idx >= 0 ? monthLabels[idx] : mk }} currentMonthKey={currentMonthKey} selectedMonth={mobileMonth} onSelect={setMobileMonth} />
         <ScrollableTable className="mt-4">
           <table className="w-full text-sm">
             <thead>
@@ -214,13 +217,16 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                 {monthLabels.map((label, i) => (
                   <th
                     key={monthKeys[i]}
-                    className={`py-2.5 px-3 text-right font-medium text-xs uppercase tracking-wider whitespace-nowrap ${
+                    className={`py-2.5 px-3 text-right font-medium text-xs uppercase tracking-wider whitespace-nowrap hidden sm:table-cell ${
                       monthKeys[i] === currentMonthKey ? 'text-text-primary' : 'text-text-muted opacity-60'
                     }`}
                   >
                     {label}
                   </th>
                 ))}
+                <th className="py-2.5 px-3 text-right font-medium text-xs uppercase tracking-wider whitespace-nowrap sm:hidden text-text-primary">
+                  {(() => { const idx = monthKeys.indexOf(mobileMonth); return idx >= 0 ? monthLabels[idx] : mobileMonth })()}
+                </th>
                 <th className="py-2.5 px-3 text-right font-medium text-xs uppercase tracking-wider whitespace-nowrap text-text-muted">
                   Delta
                 </th>
@@ -249,7 +255,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                       return (
                         <td
                           key={mk}
-                          className={`py-2.5 px-3 text-right tabular-nums ${
+                          className={`py-2.5 px-3 text-right tabular-nums hidden sm:table-cell ${
                             isPast ? 'opacity-60' : ''
                           } ${
                             val === null
@@ -265,6 +271,18 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                         </td>
                       )
                     })}
+                    {/* Mobile: selected month only */}
+                    {(() => {
+                      const snap = monthlyMap.get(mobileMonth)
+                      const val = snap ? (snap.balances[acc.id] ?? null) : null
+                      return (
+                        <td className={`py-2.5 px-3 text-right tabular-nums sm:hidden ${
+                          val === null ? 'text-text-muted' : val < 0 ? 'text-red' : val > 0 ? 'text-green' : 'text-text-secondary'
+                        }`}>
+                          {val !== null ? formatCurrency(val) : '—'}
+                        </td>
+                      )
+                    })()}
                     <td
                       className={`py-2.5 px-3 text-right tabular-nums font-medium ${
                         delta > 0 ? 'text-green' : delta < 0 ? 'text-red' : 'text-text-muted'
@@ -286,7 +304,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                   return (
                     <td
                       key={monthKeys[i]}
-                      className={`py-2.5 px-3 text-right tabular-nums ${
+                      className={`py-2.5 px-3 text-right tabular-nums hidden sm:table-cell ${
                         isPast ? 'opacity-60' : ''
                       } ${
                         total === null
@@ -302,6 +320,18 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
                     </td>
                   )
                 })}
+                {/* Mobile total for selected month */}
+                {(() => {
+                  const mIdx = monthKeys.indexOf(mobileMonth)
+                  const mTotal = mIdx >= 0 ? monthTotals[mIdx] : null
+                  return (
+                    <td className={`py-2.5 px-3 text-right tabular-nums font-semibold sm:hidden ${
+                      mTotal === null ? 'text-text-muted' : mTotal < 0 ? 'text-red' : mTotal > 0 ? 'text-green' : 'text-text-secondary'
+                    }`}>
+                      {mTotal !== null ? formatCurrency(mTotal) : '—'}
+                    </td>
+                  )
+                })()}
                 {(() => {
                   const lastTotal = monthTotals[monthTotals.length - 1] ?? null
                   const prevTotal = prevMonthKey ? monthTotals[monthKeys.indexOf(prevMonthKey)] ?? null : null

@@ -24,6 +24,7 @@ import {
   formatPercent,
 } from '@/lib/calculations'
 import { ScrollableTable } from '@/components/ui/ScrollableTable'
+import { MobileMonthPicker, useMobileMonth } from '@/components/ui/MobileMonthPicker'
 
 interface Props {
   data: AppData
@@ -85,6 +86,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
     latestMonthKey !== null && !monthKeys.includes(latestMonthKey)
 
   const currentMonthKey = getCurrentMonthKey()
+  const [mobileMonth, setMobileMonth] = useMobileMonth(monthKeys, currentMonthKey)
 
   // ── Snapshot pie data (current balances per account) ──
   const pieData = useMemo(() => {
@@ -190,6 +192,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
           {/* ── Section 1: Monthly Balance Table ── */}
           <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #06b6d4)' }}>
             <CardTitle style={{ color: 'var(--page-accent, #06b6d4)' }}>Monthly Balances</CardTitle>
+            <MobileMonthPicker monthKeys={monthKeys} labelMonth={labelMonth} currentMonthKey={currentMonthKey} selectedMonth={mobileMonth} onSelect={setMobileMonth} />
             <ScrollableTable className="mt-4">
               <table className="w-full text-sm border-collapse">
                 <thead>
@@ -200,15 +203,18 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                     {monthKeys.map(mk => (
                       <th
                         key={mk}
-                        className={`text-right py-2 px-3 font-medium whitespace-nowrap tabular-nums ${
+                        className={`text-right py-2 px-3 font-medium whitespace-nowrap tabular-nums hidden sm:table-cell ${
                           mk === currentMonthKey ? 'text-text-primary' : 'text-text-muted opacity-60'
                         }`}
                       >
                         {labelMonth(mk)}
                       </th>
                     ))}
+                    <th className="text-right py-2 px-3 font-medium whitespace-nowrap tabular-nums sm:hidden text-text-primary">
+                      {labelMonth(mobileMonth)}
+                    </th>
                     {currentIsNewColumn && (
-                      <th className="text-right py-2 px-3 font-medium text-text-secondary whitespace-nowrap tabular-nums">
+                      <th className="text-right py-2 px-3 font-medium text-text-secondary whitespace-nowrap tabular-nums hidden sm:table-cell">
                         Current
                       </th>
                     )}
@@ -239,7 +245,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                           return (
                             <td
                               key={mk}
-                              className={`text-right py-2 px-3 tabular-nums whitespace-nowrap ${
+                              className={`text-right py-2 px-3 tabular-nums whitespace-nowrap hidden sm:table-cell ${
                                 isPast ? 'opacity-60' : ''
                               } ${bal >= 0 ? 'text-text-primary' : 'text-red'}`}
                             >
@@ -247,9 +253,14 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                             </td>
                           )
                         })}
+                        <td className={`text-right py-2 px-3 tabular-nums whitespace-nowrap sm:hidden ${
+                          balanceFor(acc.id, mobileMonth) >= 0 ? 'text-text-primary' : 'text-red'
+                        }`}>
+                          {formatCurrency(balanceFor(acc.id, mobileMonth))}
+                        </td>
                         {currentIsNewColumn && (
                           <td
-                            className={`text-right py-2 px-3 tabular-nums whitespace-nowrap font-medium ${
+                            className={`text-right py-2 px-3 tabular-nums whitespace-nowrap font-medium hidden sm:table-cell ${
                               currentBal >= 0 ? 'text-green' : 'text-red'
                             }`}
                           >
@@ -278,7 +289,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                       return (
                         <td
                           key={mk}
-                          className={`text-right py-2 px-3 tabular-nums font-semibold whitespace-nowrap ${
+                          className={`text-right py-2 px-3 tabular-nums font-semibold whitespace-nowrap hidden sm:table-cell ${
                             isPast ? 'opacity-60' : ''
                           } ${total >= 0 ? 'text-text-primary' : 'text-red'}`}
                         >
@@ -286,9 +297,14 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                         </td>
                       )
                     })}
+                    <td className={`text-right py-2 px-3 tabular-nums font-semibold whitespace-nowrap sm:hidden ${
+                      monthTotal(mobileMonth) >= 0 ? 'text-text-primary' : 'text-red'
+                    }`}>
+                      {formatCurrency(monthTotal(mobileMonth))}
+                    </td>
                     {currentIsNewColumn && (
                       <td
-                        className={`text-right py-2 px-3 tabular-nums font-semibold whitespace-nowrap ${
+                        className={`text-right py-2 px-3 tabular-nums font-semibold whitespace-nowrap hidden sm:table-cell ${
                           currentTotal >= 0 ? 'text-green' : 'text-red'
                         }`}
                       >
