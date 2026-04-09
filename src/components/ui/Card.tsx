@@ -32,6 +32,31 @@ interface KPICardProps {
   emoji?: string
 }
 
+interface GlassCardProps {
+  children: ReactNode
+  className?: string
+  accent?: string
+}
+
+export function GlassCard({ children, className = '', accent = '#6366f1' }: GlassCardProps) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-xl border p-5 backdrop-blur-sm ${className}`}
+      style={{
+        borderColor: accent + '40',
+        background: `linear-gradient(135deg, ${accent}08 0%, ${accent}03 50%, transparent 100%)`,
+      }}
+    >
+      {/* Subtle glow in corner */}
+      <div
+        className="absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 pointer-events-none"
+        style={{ background: accent }}
+      />
+      <div className="relative z-10">{children}</div>
+    </div>
+  )
+}
+
 export function KPICard({ label, value, subValue, trend, trendValue, emoji }: KPICardProps) {
   return (
     <Card>

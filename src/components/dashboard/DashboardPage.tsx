@@ -8,6 +8,7 @@ import type { AppData } from '@/data/types'
 import type { ChartPrefs, SectionWidth } from '@/data/chartPrefs'
 import { KPICard, Card, CardTitle } from '@/components/ui/Card'
 import { SectionMenu } from './SectionMenu'
+import { ShareButton } from '@/components/ui/ShareButton'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { HealthScoreTooltip } from '@/components/ui/HealthScoreTooltip'
 import { UVPBadge } from '@/components/ui/UVPBadge'
@@ -18,6 +19,7 @@ interface Props {
   data: AppData
   prefs: ChartPrefs
   onUpdatePrefs: (partial: Partial<ChartPrefs>) => void
+  userId?: string
 }
 
 import { CHART_TOOLTIP, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
@@ -32,7 +34,7 @@ const CHART_KEYS = [
   'comp-pie', 'annual-bar', 'debt-trend', 'latest-changes',
 ]
 
-export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
+export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Props) {
   const [editMode, setEditMode] = useState(false)
   const [showFirstSnapshotBanner, setShowFirstSnapshotBanner] = useState(false)
 
@@ -532,7 +534,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
         }
       />
 
-      <div className="mb-4">
+      <div className="mb-4 flex items-center gap-2">
         <button
           onClick={() => setEditMode(!editMode)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-colors ${
@@ -544,6 +546,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
           {editMode ? <X size={14} /> : <Pencil size={14} />}
           {editMode ? 'Done' : 'Edit Layout'}
         </button>
+        <ShareButton data={data} userId={userId} dashboardName={dashTitle} />
       </div>
 
       {editMode && (

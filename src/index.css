@@ -42,6 +42,11 @@ html.light {
 html.light ::-webkit-scrollbar-thumb { background: #d0d0d8; }
 html.light ::-webkit-scrollbar-thumb:hover { background: #b0b0bc; }
 
+/* Light mode chart axis and legend overrides */
+html.light .recharts-cartesian-axis-tick text { fill: #6b6b80 !important; }
+html.light .recharts-legend-item-text { color: #6b6b80 !important; }
+html.light .recharts-sector { stroke-opacity: 0.3; }
+
 body {
   margin: 0;
   background-color: var(--color-background);

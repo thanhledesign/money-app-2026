@@ -7,7 +7,7 @@ import {
 import type { AppData } from '@/data/types'
 import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
-import { Card, CardTitle, KPICard } from '@/components/ui/Card'
+import { Card, CardTitle, KPICard, GlassCard } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageTheme } from '@/components/ui/PageTheme'
@@ -190,8 +190,8 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
       {accounts.length > 0 && (
         <>
           {/* ── Section 1: Monthly Balance Table ── */}
-          <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #06b6d4)' }}>
-            <CardTitle style={{ color: 'var(--page-accent, #06b6d4)' }}>Monthly Balances</CardTitle>
+          <GlassCard className="mb-6" accent="#06b6d4">
+            <CardTitle style={{ color: '#06b6d4' }}>Monthly Balances</CardTitle>
             <MobileMonthPicker monthKeys={monthKeys} labelMonth={labelMonth} currentMonthKey={currentMonthKey} selectedMonth={mobileMonth} onSelect={setMobileMonth} />
             <ScrollableTable className="mt-4">
               <table className="w-full text-sm border-collapse">
@@ -332,7 +332,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
                 </tfoot>
               </table>
             </ScrollableTable>
-          </Card>
+          </GlassCard>
 
           {/* ── Section 2: Two-column grid — Snapshot + Individual ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

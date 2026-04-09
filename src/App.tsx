@@ -121,7 +121,7 @@ function AppInner({ userId, isLocal, auth }: {
           onDuplicateDashboard={db.duplicateDashboard}
         />
       }>
-        <Route index element={<DashboardPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} />} />
+        <Route index element={<DashboardPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} userId={userId} />} />
         <Route path="enter" element={<EntryPage data={data} addSnapshot={addSnapshot} deleteSnapshot={deleteSnapshot} addAccount={addAccount} updateAccounts={updateAccounts} />} />
         <Route path="accounts" element={<AccountsPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} addAccount={addAccount} updateAccounts={updateAccounts} />} />
         <Route path="investments" element={<InvestmentsPage data={data} prefs={prefs} onUpdatePrefs={updatePrefs} addAccount={addAccount} updateAccounts={updateAccounts} />} />
@@ -139,7 +139,9 @@ function AppInner({ userId, isLocal, auth }: {
         <Route path="settings" element={
           <SettingsPage data={data} prefs={prefs}
             setAccountColor={setAccountColor} setLabelColor={setLabelColor}
-            onUpdatePrefs={updatePrefs} resetPrefs={resetPrefs} />
+            onUpdatePrefs={updatePrefs} resetPrefs={resetPrefs}
+            userId={userId} dashboardId={db.activeId}
+            onDataLoaded={(d) => { import('@/lib/store').then(s => { s.saveData(d) }); window.location.reload() }} />
         } />
       </Route>
     </Routes>

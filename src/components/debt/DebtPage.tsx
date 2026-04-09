@@ -17,7 +17,7 @@ import {
 import type { AppData } from '@/data/types'
 import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
-import { Card, CardTitle } from '@/components/ui/Card'
+import { Card, CardTitle, GlassCard } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageTheme } from '@/components/ui/PageTheme'
@@ -204,8 +204,8 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
 
       {latest && <>
       {/* ── Section 1: Monthly Balance Table ── */}
-      <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #f59e0b)' }}>
-        <CardTitle style={{ color: 'var(--page-accent, #f59e0b)' }}>Monthly Balance History</CardTitle>
+      <GlassCard className="mb-6" accent="#f59e0b">
+        <CardTitle style={{ color: '#f59e0b' }}>Monthly Balance History</CardTitle>
         <MobileMonthPicker monthKeys={monthKeys} labelMonth={(mk) => { const idx = monthKeys.indexOf(mk); return idx >= 0 ? monthLabels[idx] : mk }} currentMonthKey={currentMonthKey} selectedMonth={mobileMonth} onSelect={setMobileMonth} />
         <ScrollableTable className="mt-4">
           <table className="w-full text-sm">
@@ -358,7 +358,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
             </tbody>
           </table>
         </ScrollableTable>
-      </Card>
+      </GlassCard>
 
       {/* ── Section 2: Credit Card Status ── */}
       <Card className="mb-6">

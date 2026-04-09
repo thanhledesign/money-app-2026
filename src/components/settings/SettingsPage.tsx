@@ -12,6 +12,7 @@ import { ThemeEditor } from '@/components/ui/ThemeEditor'
 import { useState } from 'react'
 import { useThemeMode, type ThemeMode } from '@/hooks/useThemeMode'
 import { Sun, Moon, Monitor } from 'lucide-react'
+import { CloudSyncPanel } from '@/components/ui/CloudSyncPanel'
 
 interface Props {
   data: AppData
@@ -20,6 +21,9 @@ interface Props {
   setLabelColor: (label: string, color: string) => void
   onUpdatePrefs: (partial: Partial<ChartPrefs>) => void
   resetPrefs: () => void
+  userId?: string
+  dashboardId?: string
+  onDataLoaded?: (data: AppData) => void
 }
 
 function downloadFile(content: string, filename: string, type: string) {
@@ -64,7 +68,7 @@ function accountsToCsv(data: AppData): string {
   return [header, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
 }
 
-export default function SettingsPage({ data, prefs, setAccountColor, setLabelColor, onUpdatePrefs, resetPrefs }: Props) {
+export default function SettingsPage({ data, prefs, setAccountColor, setLabelColor, onUpdatePrefs, resetPrefs, userId, dashboardId, onDataLoaded }: Props) {
   const [themeMode, setThemeMode] = useThemeMode()
   const [statusMsg, setStatusMsg] = useState('')
   const [importPreview, setImportPreview] = useState<AppData | null>(null)
@@ -201,6 +205,9 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
           </div>
         </div>
       </Card>
+
+      {/* Cloud Sync */}
+      <CloudSyncPanel userId={userId} dashboardId={dashboardId ?? 'default'} data={data} onDataLoaded={onDataLoaded ?? (() => {})} />
 
       {/* Chart Preferences */}
       <Card className="mb-6">

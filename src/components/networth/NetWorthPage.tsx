@@ -16,7 +16,7 @@ import {
 import type { AppData } from '@/data/types'
 import type { Account } from '@/data/types'
 import type { ChartPrefs } from '@/data/chartPrefs'
-import { Card, CardTitle } from '@/components/ui/Card'
+import { Card, CardTitle, GlassCard } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageTheme } from '@/components/ui/PageTheme'
@@ -196,8 +196,8 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
       />
 
       {/* ── Section 1: All-accounts monthly table ── */}
-      <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #a855f7)' }}>
-        <CardTitle style={{ color: 'var(--page-accent, #a855f7)' }}>All Accounts — Monthly Balances</CardTitle>
+      <GlassCard className="mb-6" accent="#a855f7">
+        <CardTitle style={{ color: '#a855f7' }}>All Accounts — Monthly Balances</CardTitle>
         <ScrollableTable className="mt-4">
           <table className="w-full text-sm">
             <thead>
@@ -343,7 +343,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
             </tbody>
           </table>
         </ScrollableTable>
-      </Card>
+      </GlassCard>
 
       {/* ── Section 2: Two-column chart grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

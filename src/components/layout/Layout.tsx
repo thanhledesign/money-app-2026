@@ -82,8 +82,13 @@ export default function Layout({
         )}
         {/* Combined dashboard read-only banner */}
         {activeDashboard?.mode === 'combined' && (
-          <div className="mb-4 px-4 py-2 bg-purple/10 border border-purple/30 rounded-lg text-xs text-purple">
-            Combined view — showing merged data from {activeDashboard.mergeIds?.length ?? 0} dashboards (read-only)
+          <div className="mb-4 px-4 py-2.5 bg-purple/10 border border-purple/30 rounded-lg text-xs text-purple">
+            <span className="font-medium">Combined view</span> — merged data from{' '}
+            {(activeDashboard.mergeIds ?? []).map(id => {
+              const d = dashboards.find(db => db.id === id)
+              return d?.name ?? id
+            }).join(', ') || 'no sources'}
+            {' '}(read-only)
           </div>
         )}
         <Outlet />
