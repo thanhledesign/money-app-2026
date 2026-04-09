@@ -197,8 +197,20 @@ export function NumberInput({
       </button>
 
       {open && !isMobile && (
-        <div className="absolute right-0 top-full mt-1 w-56 z-50">
-          {padContent}
+        <div className="fixed inset-0 z-[9999]" onClick={commitAndClose}>
+          <div
+            className="absolute w-56"
+            style={{
+              top: (wrapRef.current?.getBoundingClientRect().bottom ?? 0) + 4,
+              left: Math.min(
+                wrapRef.current?.getBoundingClientRect().right ?? 0,
+                window.innerWidth - 230
+              ) - 224,
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {padContent}
+          </div>
         </div>
       )}
 

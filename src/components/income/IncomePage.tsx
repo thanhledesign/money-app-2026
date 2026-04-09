@@ -23,6 +23,7 @@ interface IncomePageProps {
 // ── Shared chart style ────────────────────────────────────────────────────────
 
 import { CHART_TOOLTIP, TOOLTIP_CONTENT_STYLE, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
+import { loadChartPrefs, getAccountColor } from '@/data/chartPrefs'
 
 // Paychecks per year by frequency
 const CHECKS_PER_YEAR: Record<string, number> = {
@@ -306,7 +307,8 @@ function buildDistSlices(
   const totalDeductions = deductions.reduce((s, d) => s + d.amount, 0)
   const netPaycheck = grossSemiMonthly - totalDeductions
 
-  // Allocation accounts
+  // Allocation accounts — use saved account colors
+  const prefs = loadChartPrefs()
   for (const alloc of allocations) {
     const account = accounts.find(a => a.id === alloc.accountId)
     const amount = netPaycheck * alloc.percentage
@@ -314,9 +316,8 @@ function buildDistSlices(
       slices.push({
         name: account?.name ?? alloc.accountId,
         value: amount,
-        color: DIST_COLORS[Math.min(colorIdx, DIST_COLORS.length - 1)],
+        color: getAccountColor(prefs, alloc.accountId),
       })
-      colorIdx++
     }
   }
 

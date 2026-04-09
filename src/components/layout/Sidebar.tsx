@@ -209,7 +209,7 @@ export default function Sidebar({
 
       {/* Desktop sidebar */}
       <aside
-        className="hidden lg:flex fixed left-0 top-0 h-screen border-r border-border/50 flex-col z-50 backdrop-blur-xl"
+        className="hidden lg:flex fixed left-0 top-0 h-dvh border-r border-border/50 flex-col z-50 backdrop-blur-xl overflow-y-auto"
         style={{ width, background: 'linear-gradient(180deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)' }}
       >
         {sidebarContent}

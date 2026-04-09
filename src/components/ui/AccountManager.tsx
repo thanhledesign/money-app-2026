@@ -18,7 +18,7 @@ const TYPE_OPTIONS: Record<Account['category'], Account['type'][]> = {
 
 export function AccountManager({ accounts, category, onAdd, onRemove, onToggleActive }: Props) {
   const filtered = accounts.filter(a => a.category === category)
-  const [showForm, setShowForm] = useState(filtered.length === 0)
+  const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [institution, setInstitution] = useState('')
   const [type, setType] = useState<Account['type']>(TYPE_OPTIONS[category][0])
@@ -48,10 +48,16 @@ export function AccountManager({ accounts, category, onAdd, onRemove, onToggleAc
       <div className="flex items-center gap-2 mb-2">
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-1 px-2 py-1 text-xs rounded-md border border-border text-text-muted hover:text-text-secondary hover:border-[var(--page-accent,#6366f1)] transition-colors"
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-colors ${
+            showForm
+              ? 'border-accent bg-accent/10 text-accent'
+              : filtered.length === 0
+              ? 'border-accent/40 text-accent hover:bg-accent/10'
+              : 'border-border text-text-muted hover:text-text-secondary hover:border-accent/30'
+          }`}
         >
           {showForm ? <X size={12} /> : <Plus size={12} />}
-          {showForm ? 'Cancel' : 'Manage Accounts'}
+          {showForm ? 'Close' : filtered.length === 0 ? 'Add Your First Account' : 'Manage Accounts'}
         </button>
       </div>
 
