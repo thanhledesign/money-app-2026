@@ -153,7 +153,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
   const prevMonthKey = monthKeys.length >= 2 ? monthKeys[monthKeys.length - 2] : null
 
   if (!latest) {
-    return <EmptyState icon="💎" title="No net worth data" message="Run the setup wizard to add your accounts and record your first snapshot." />
+    return <EmptyState icon="💎" title="No net worth data" message="Run the setup wizard to add your accounts and record your first snapshot." accountsRoute="/net-worth" />
   }
 
   const categoryLabel: Record<string, string> = {

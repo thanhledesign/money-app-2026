@@ -137,10 +137,8 @@ function CompPackagePieChart({ comp }: { comp: CompBreakdown }) {
             outerRadius={95}
             paddingAngle={3}
             dataKey="value"
-            label={({ name, value }: any) =>
-              `${name}: ${formatCurrency(value)}`
-            }
-            labelLine={true}
+            label={false}
+            labelLine={false}
           >
             {slices.map((s, i) => (
               <Cell key={i} fill={s.color} stroke={s.color + '60'} strokeWidth={1.5} />
@@ -466,7 +464,7 @@ function CompSection({
 
       {/* Pay period table */}
       <ScrollableTable>
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" style={{ minWidth: '480px' }}>
           <thead>
             <tr className="border-b border-border">
               <th className="py-2.5 px-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Period</th>
@@ -520,17 +518,17 @@ function DeductionRow({
   const pct = grossSemiMonthly > 0 ? item.amount / grossSemiMonthly : 0
   return (
     <tr className="border-b border-border-light hover:bg-surface-hover transition-colors">
-      <td className="py-2 px-2 text-text-secondary">{item.name}</td>
+      <td className="py-2 px-2 text-text-secondary text-xs sm:text-sm">{item.name}</td>
       <td className="py-2 px-2 text-right tabular-nums">
         <NumberInput
           value={item.amount}
           onChange={onAmountChange}
           label={item.name}
           isCurrency={true}
-          className="w-28"
+          className="w-20 sm:w-28"
         />
       </td>
-      <td className="py-2 px-2 text-right tabular-nums">
+      <td className="py-2 px-2 text-right tabular-nums hidden sm:table-cell">
         <NumberInput
           value={pct * 100}
           onChange={v => onPercentChange(v / 100)}
@@ -613,7 +611,7 @@ function DeductionsSection({
             <tr className="border-b border-border">
               <th className="py-2 px-2 text-left text-xs text-text-muted">Item</th>
               <th className="py-2 px-2 text-right text-xs text-text-muted">Amount</th>
-              <th className="py-2 px-2 text-right text-xs text-text-muted">%</th>
+              <th className="py-2 px-2 text-right text-xs text-text-muted hidden sm:table-cell">%</th>
               <th className="py-2 px-2 w-6" />
             </tr>
           </thead>
@@ -761,10 +759,10 @@ function AllocationSection({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              <th className="py-2.5 px-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Account</th>
-              <th className="py-2.5 px-3 text-center text-xs font-medium text-text-muted uppercase tracking-wider">Adjustability</th>
-              <th className="py-2.5 px-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">%</th>
-              <th className="py-2.5 px-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Amount</th>
+              <th className="py-2.5 px-2 sm:px-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Account</th>
+              <th className="py-2.5 px-3 text-center text-xs font-medium text-text-muted uppercase tracking-wider hidden sm:table-cell">Adjustability</th>
+              <th className="py-2.5 px-1 sm:px-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">%</th>
+              <th className="py-2.5 px-1 sm:px-3 text-right text-xs font-medium text-text-muted uppercase tracking-wider">Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -833,8 +831,8 @@ function AllocationRow({
 }) {
   return (
     <tr className="border-b border-border-light hover:bg-surface-hover transition-colors">
-      <td className="py-2.5 px-3 text-text-primary">{accountName}</td>
-      <td className="py-2.5 px-3 text-center">
+      <td className="py-2.5 px-2 sm:px-3 text-text-primary text-xs sm:text-sm truncate max-w-[120px] sm:max-w-none">{accountName}</td>
+      <td className="py-2.5 px-1 sm:px-3 text-center hidden sm:table-cell">
         <select
           value={adjustability}
           onChange={e => onAdjustabilityChange(e.target.value as PaycheckAllocation['adjustability'])}
@@ -845,7 +843,7 @@ function AllocationRow({
           <option value="fixed">fixed</option>
         </select>
       </td>
-      <td className="py-2.5 px-3 text-right tabular-nums">
+      <td className="py-2.5 px-1 sm:px-3 text-right tabular-nums">
         {isVariable ? (
           <span className="text-blue text-xs font-medium tabular-nums">{formatPercent(percentage)}</span>
         ) : (
@@ -856,11 +854,11 @@ function AllocationRow({
             isPercent={true}
             min={0}
             max={100}
-            className="w-28"
+            className="w-20 sm:w-28"
           />
         )}
       </td>
-      <td className="py-2.5 px-3 text-right tabular-nums text-text-primary">{formatCurrency(amount)}</td>
+      <td className="py-2.5 px-1 sm:px-3 text-right tabular-nums text-text-primary text-xs sm:text-sm">{formatCurrency(amount)}</td>
     </tr>
   )
 }

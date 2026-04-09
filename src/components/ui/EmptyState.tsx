@@ -5,12 +5,14 @@ interface Props {
   icon?: string
   title?: string
   message?: string
+  accountsRoute?: string
 }
 
 export function EmptyState({
   icon = '📋',
   title = 'No data yet',
   message = 'Get started by adding your accounts and recording your first snapshot.',
+  accountsRoute = '/accounts',
 }: Props) {
   const navigate = useNavigate()
 
@@ -28,7 +30,7 @@ export function EmptyState({
       {/* Quick-start checklist */}
       <div className="w-full max-w-sm space-y-2 mb-8">
         <button
-          onClick={() => navigate('/accounts')}
+          onClick={() => navigate(accountsRoute)}
           className="w-full flex items-center gap-3 px-4 py-3 bg-surface border border-border rounded-lg hover:border-accent/40 hover:bg-surface-hover transition-colors text-left group"
         >
           <span className="text-lg">1</span>

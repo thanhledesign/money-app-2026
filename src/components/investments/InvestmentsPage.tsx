@@ -179,7 +179,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
       </div>
 
       {accounts.length === 0 && !latest && (
-        <EmptyState icon="📈" title="No investments" message="Run the setup wizard to add your 401K, IRAs, and brokerage accounts." />
+        <EmptyState icon="📈" title="No investments" message="Run the setup wizard to add your 401K, IRAs, and brokerage accounts." accountsRoute="/investments" />
       )}
       {accounts.length === 0 && latest && (
         <p className="text-text-muted text-center py-20">No active investment accounts found.</p>

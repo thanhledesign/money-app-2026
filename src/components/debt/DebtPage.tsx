@@ -152,10 +152,6 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
     [data.snapshots]
   )
 
-  if (!latest) {
-    return <EmptyState icon="💀" title="No debt data" message="Run the setup wizard to add your credit cards and loans." />
-  }
-
   const utilizationBarColor = (pct: number) => {
     if (pct < 0.3) return 'bg-green'
     if (pct < 0.5) return 'bg-amber'
@@ -168,7 +164,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
     return 'text-red'
   }
 
-  const latestMonthKey = getMonthKey(latest.timestamp)
+  const latestMonthKey = latest ? getMonthKey(latest.timestamp) : ''
   const currentMonthKey = getCurrentMonthKey()
 
   return (
@@ -179,7 +175,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
         title="Debt"
         titleKey="debt"
         subtitle="Credit cards, loans, and debt status"
-        rightContent={
+        rightContent={latest ?
           <div className="text-right">
             <div className="text-xs text-text-muted mb-1">Total Debt</div>
             <div className={`text-3xl font-bold tabular-nums ${totalDebt < 0 ? 'text-red' : 'text-green'}`}>
@@ -189,7 +185,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
               of {formatCurrency(totalLimit)} total limit
             </div>
           </div>
-        }
+        : undefined}
       />
 
       <AccountManager
@@ -200,6 +196,11 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
         onToggleActive={(id) => updateAccounts(data.accounts.map(a => a.id === id ? { ...a, isActive: !a.isActive } : a))}
       />
 
+      {!latest && (
+        <EmptyState icon="💀" title="No debt data" message="Add your credit cards and loans above, then record a snapshot to see your debt dashboard." accountsRoute="/debt" />
+      )}
+
+      {latest && <>
       {/* ── Section 1: Monthly Balance Table ── */}
       <Card className="mb-6" style={{ borderColor: 'var(--page-accent, #f59e0b)' }}>
         <CardTitle style={{ color: 'var(--page-accent, #f59e0b)' }}>Monthly Balance History</CardTitle>
@@ -674,6 +675,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
           </div>
         </Card>
       )}
+      </>}
     </div>
     </PageTheme>
   )
