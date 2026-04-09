@@ -32,7 +32,7 @@ export function useAppData(userId?: string, dashboard?: Dashboard) {
 
       // Hydrate from cloud if authenticated
       if (userId && dashboard?.mode !== 'combined') {
-        loadFromCloud(userId, `d-${effectiveDashboardId}-data`).then(cloudData => {
+        loadFromCloud(userId, `dashboards/${effectiveDashboardId}/data`).then(cloudData => {
           if (cloudData && typeof cloudData === 'object') {
             const cd = cloudData as AppData
             const localData = store.loadData()

@@ -6,16 +6,31 @@ import {
   createDashboardEntry, deleteDashboardEntry, renameDashboardEntry,
   duplicateDashboardEntry,
 } from '@/lib/store'
+import { loadFromCloud } from '@/lib/sync'
 
 export function useDashboards(userId?: string) {
   setStoragePrefix(userId)
 
   const [index, setIndex] = useState<DashboardIndex>(() => loadDashboardIndex())
 
-  // Reload when userId changes
+  // Reload when userId changes + hydrate dashboard index from cloud
   useEffect(() => {
     setStoragePrefix(userId)
     setIndex(loadDashboardIndex())
+
+    if (userId) {
+      loadFromCloud(userId, 'settings/dashboards').then(cloudIdx => {
+        if (cloudIdx && typeof cloudIdx === 'object') {
+          const ci = cloudIdx as DashboardIndex
+          const local = loadDashboardIndex()
+          // Use cloud if it has more dashboards than local
+          if (ci.dashboards?.length > local.dashboards.length) {
+            saveDashboardIndex(ci)
+            setIndex(ci)
+          }
+        }
+      })
+    }
   }, [userId])
 
   const dashboards = index.dashboards

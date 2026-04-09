@@ -116,7 +116,7 @@ export function loadDashboardIndex(): DashboardIndex {
 
 export function saveDashboardIndex(index: DashboardIndex): void {
   localStorage.setItem(getUserKey('dashboards'), JSON.stringify(index))
-  if (_userId) debouncedSync(_userId, 'dashboards', index)
+  if (_userId) debouncedSync(_userId, 'settings/dashboards', index)
 }
 
 export function createDashboardEntry(dashboard: Dashboard): DashboardIndex {
@@ -290,7 +290,7 @@ export function loadData(): AppData {
 export function saveData(data: AppData): void {
   const key = getStorageKey('data')
   localStorage.setItem(key, JSON.stringify(data))
-  if (_userId) debouncedSync(_userId, `d-${_dashboardId}-data`, data)
+  if (_userId) debouncedSync(_userId, `dashboards/${_dashboardId}/data`, data)
 }
 
 export function addSnapshot(snapshot: Snapshot): AppData {
