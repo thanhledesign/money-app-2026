@@ -118,7 +118,7 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
       </button>
 
       {open && (
-        <div className="absolute left-2 top-full mt-1 bg-surface border border-border rounded-lg shadow-2xl z-50 py-1 max-h-96 overflow-y-auto min-w-[260px]" style={{ right: '-20px' }}>
+        <div className="absolute left-0 top-full mt-1 bg-surface/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl z-50 py-1.5 max-h-96 overflow-y-auto min-w-[300px]" style={{ right: '-20px' }}>
           {dashboards.map(d => (
             <div key={d.id}>
               {editingId === d.id ? (

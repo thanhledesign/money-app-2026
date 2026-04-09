@@ -38,28 +38,37 @@
 
 ### High Priority
 - [x] **Share feature** — ShareButton on dashboard generates read-only links via Supabase
-- [x] **Supabase data sync** — CloudSyncPanel in Settings with Upload/Download/Sync Now buttons
-- [ ] **Mobile testing pass** — Multi-dashboard switcher, resizable sidebar, new Settings sections need mobile QA
-- [ ] **Run supabase-migration.sql** — Must be run in Supabase SQL Editor for cloud sync to work
+- [x] **Supabase data sync** — CloudSyncPanel syncs 8 categories (dashboards, settings, themes, backgrounds, etc.)
+- [x] **Supabase migration** — user_data table created, cloud sync working
+- [x] **Tier system** — Free/Pro/Premium with UpgradeGate, FeatureBadge, Settings tier switcher
 
 ### Medium Priority
-- [x] **Sidebar double-click reset** — Already implemented (double-click resize handle)
-- [x] **Combined dashboard polish** — Source dashboard names shown in combined banner
-- [ ] **Paid upgrade flow** — Stripe or "contact for access" for >3 dashboards
-- [x] **Entry page improvements** — Auto-pull previous balances already working, live diff as you type
-- [x] **Sample Dashboard banner** — Already renders in Layout for all pages
+- [x] **Sidebar double-click reset** — Already implemented
+- [x] **Combined dashboard polish** — Source dashboard names in banner
+- [ ] **Stripe integration** — Wire getUserTier to Supabase user metadata
+- [x] **Entry page improvements** — Auto-pull balances, live diff
+- [x] **Sample Dashboard banner** — In Layout for all pages
 
 ### UX/UI Improvements
-- [ ] **Dashboard switcher width** — Wider popover or dedicated /dashboards management page
-- [ ] **Inline page title editing** — Click any page title to edit directly (currently buried in Settings)
-- [x] **Richer empty state** — Quick-start checklist with context-aware routing per page
+- [x] **Dashboard switcher width** — Widened to 300px, glass styling
+- [x] **Inline page title editing** — Click any page title to rename (already works)
+- [x] **Richer empty state** — Context-aware routing per page
 - [ ] **Charts: month comparison** — Side-by-side month comparison view
 
 ### Nice-to-Haves
 - [ ] Undo/redo for data changes
-- [x] **Dark/light mode toggle** — Settings > Appearance with Dark/Light/System modes
-- [ ] Notifications/reminders ("You haven't recorded a snapshot in 2 weeks")
-- [ ] Progressive web app (PWA) for mobile install
+- [x] **Dark/light mode toggle** — Settings > Appearance
+- [ ] Notifications/reminders
+- [x] **PWA** — manifest.json, apple-mobile-web-app meta tags
+
+### Design & Premium Features
+- [x] **Glass design system** — Frosted cards, mouse glow, GlassCard component
+- [x] **13 CSS background themes** — Abstract gradients, no external images needed
+- [x] **Background image editor** — 12 Unsplash presets, upload, crop, focal point, scrim
+- [x] **Pastel chart palette** — COLORS (pastel fills) + VIVID (line strokes)
+- [x] **Snapshot FAB** — Accent camera button on all pages
+- [x] **Transaction Tracker** — Pro feature with full expense/income logging
+- [x] **Pay frequency support** — Weekly/biweekly/semimonthly/monthly in Income
 
 ## Technical Notes
 - Branch: `v2-enhancements` (merged to `master` for Vercel deploys)
