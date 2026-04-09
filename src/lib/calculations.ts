@@ -56,6 +56,26 @@ export function getDisneyConcentration(snapshot: Snapshot, data: AppData): numbe
   return maxConc
 }
 
+export function getTopConcentration(snapshot: Snapshot, data: AppData): { institution: string; percentage: number } {
+  const investmentTotal = getTotalInvestments(snapshot, data)
+  if (investmentTotal <= 0) return { institution: '', percentage: 0 }
+  const investAccounts = data.accounts.filter(a => a.category === 'investment' && a.isActive)
+  const byInstitution = new Map<string, number>()
+  for (const acc of investAccounts) {
+    const bal = snapshot.balances[acc.id] ?? 0
+    if (bal > 0) {
+      byInstitution.set(acc.institution, (byInstitution.get(acc.institution) ?? 0) + bal)
+    }
+  }
+  let maxInstitution = ''
+  let maxConc = 0
+  for (const [inst, total] of byInstitution.entries()) {
+    const conc = total / investmentTotal
+    if (conc > maxConc) { maxConc = conc; maxInstitution = inst }
+  }
+  return { institution: maxInstitution, percentage: maxConc }
+}
+
 export function getCreditUtilization(snapshot: Snapshot, data: AppData): number {
   const debtAccounts = getAccountsByCategory(data, 'debt')
   const totalDebt = Math.abs(getCategoryTotal(snapshot, debtAccounts))

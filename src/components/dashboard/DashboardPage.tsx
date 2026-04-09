@@ -57,13 +57,14 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
     const debt = calc.getTotalDebt(latest, data)
     const netWorth = calc.getNetWorth(latest, data)
     const disneyConc = calc.getDisneyConcentration(latest, data)
+    const topConc = calc.getTopConcentration(latest, data)
     const utilization = calc.getCreditUtilization(latest, data)
     const runway = calc.getRunwayMonths(data)
     const savingsRate = calc.getSavingsRate(data)
     const healthScore = calc.getHealthScore(data)
     let nwDelta = 0
     if (prev) nwDelta = netWorth - calc.getNetWorth(prev, data)
-    return { cash, investments, debt, netWorth, nwDelta, disneyConc, utilization, runway, savingsRate, healthScore }
+    return { cash, investments, debt, netWorth, nwDelta, disneyConc, topConc, utilization, runway, savingsRate, healthScore }
   }, [latest, prev, data])
 
   const netWorthHistory = useMemo(() => {
@@ -173,7 +174,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
           {metrics.disneyConc > 0.70 && (
             <div className="bg-amber/10 border border-amber/30 rounded-xl p-4 mb-6">
               <p className="text-amber text-sm font-medium">
-                Single-employer equity at {calc.formatPercent(metrics.disneyConc)} of investments. Concentration above 70% increases risk.
+                {metrics.topConc.institution} equity at {calc.formatPercent(metrics.disneyConc)} of investments. Single-employer concentration above 70% increases risk.
               </p>
             </div>
           )}
@@ -210,13 +211,10 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
-                  cy="50%"
+                  cy="45%"
                   outerRadius={60}
                   innerRadius={28}
                   paddingAngle={2}
-                  label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={{ stroke: '#55556a' }}
-                  fontSize={10}
                 >
                   {[
                     { name: 'Cash', value: calc.getTotalCash(latest, data), color: '#22c55e' },
@@ -227,6 +225,10 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
                   ))}
                 </Pie>
                 <Tooltip {...CHART_TOOLTIP} formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
+                <Legend
+                  verticalAlign="bottom"
+                  formatter={(name: string) => <span style={LEGEND_TEXT_STYLE}>{name}</span>}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -447,7 +449,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
   }
 
   // Non-KPI sections in order
-  const nonKPIOrder = visibleOrder.filter(k => !KPI_KEYS.includes(k))
+  const nonKPIOrder = visibleOrder.filter(k => !KPI_KEYS.includes(k) && k !== 'warnings')
 
   return (
     <div>
@@ -580,6 +582,9 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
         </div>
       )}
 
+      {/* Warnings always at top, above KPIs */}
+      {!editMode && !hiddenSections.includes('warnings') && sectionMap['warnings']}
+
       {/* KPI Grid */}
       {!editMode && renderKPIGrid()}
 
@@ -614,7 +619,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
           )
         })
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 [&>*]:flex [&>*]:flex-col [&>*>*]:flex-1">
           {nonKPIOrder.map(key => {
             const section = sectionMap[key]
             if (!section) return null

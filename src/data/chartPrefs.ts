@@ -66,7 +66,12 @@ function getDefaults(): ChartPrefs {
     dashboardOrder: [...DEFAULT_DASHBOARD_ORDER],
     savedLayouts: {},
     hiddenSections: [],
-    sectionWidths: {},
+    sectionWidths: {
+      'comp-pie': 'half',
+      'debt-trend': 'half',
+      'cash-vs-investments': 'half',
+      'latest-changes': 'half',
+    },
   }
 }
 
