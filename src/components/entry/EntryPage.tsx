@@ -181,7 +181,8 @@ export default function EntryPage({ data, addSnapshot, deleteSnapshot, addAccoun
             </button>
             <button
               type="submit"
-              className="sm:hidden fixed bottom-0 left-0 right-0 py-4 bg-accent text-white font-semibold text-sm hover:bg-accent-hover transition-colors z-40"
+              className="sm:hidden fixed left-0 right-0 py-4 bg-accent text-white font-semibold text-sm hover:bg-accent-hover transition-colors z-40"
+              style={{ bottom: 'env(safe-area-inset-bottom, 0px)', paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
             >
               Submit Snapshot
             </button>
