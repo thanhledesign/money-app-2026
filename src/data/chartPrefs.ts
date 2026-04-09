@@ -9,6 +9,8 @@ export interface ChartPrefs {
   savedLayouts: Record<string, { order: string[]; hidden: string[] }>
   hiddenSections: string[]
   sectionWidths: Record<string, SectionWidth>
+  sectionColors: Record<string, string>
+  activeLayoutName: string | null
 }
 
 const PREFS_KEY = 'money-app-chart-prefs'
@@ -72,6 +74,8 @@ function getDefaults(): ChartPrefs {
       'cash-vs-investments': 'half',
       'latest-changes': 'half',
     },
+    sectionColors: {},
+    activeLayoutName: null,
   }
 }
 
@@ -94,6 +98,8 @@ export function loadChartPrefs(): ChartPrefs {
       savedLayouts: stored.savedLayouts ?? defaults.savedLayouts,
       hiddenSections: stored.hiddenSections ?? defaults.hiddenSections,
       sectionWidths: stored.sectionWidths ?? defaults.sectionWidths,
+      sectionColors: stored.sectionColors ?? defaults.sectionColors,
+      activeLayoutName: stored.activeLayoutName ?? defaults.activeLayoutName,
     }
   } catch {
     return getDefaults()

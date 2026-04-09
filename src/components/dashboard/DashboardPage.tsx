@@ -3,10 +3,11 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   Area, AreaChart, PieChart, Pie, Cell, BarChart, Bar, Legend,
 } from 'recharts'
-import { GripVertical, Pencil, X, Columns2, Square } from 'lucide-react'
+import { GripVertical, Pencil, X, Columns2, Square, Save, Copy } from 'lucide-react'
 import type { AppData } from '@/data/types'
-import type { ChartPrefs } from '@/data/chartPrefs'
+import type { ChartPrefs, SectionWidth } from '@/data/chartPrefs'
 import { KPICard, Card, CardTitle } from '@/components/ui/Card'
+import { SectionMenu } from './SectionMenu'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { HealthScoreTooltip } from '@/components/ui/HealthScoreTooltip'
 import { UVPBadge } from '@/components/ui/UVPBadge'
@@ -195,8 +196,11 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
       )
     })(),
     'net-worth-chart': (
-      <Card className="mb-6" key="net-worth-chart">
-        <CardTitle>Net Worth Overview</CardTitle>
+      <Card className="mb-6" key="net-worth-chart" style={prefs.sectionColors?.['net-worth-chart'] ? { borderTopColor: prefs.sectionColors['net-worth-chart'], borderTopWidth: '2px' } : undefined}>
+        <div className="flex items-center justify-between">
+          <CardTitle>Net Worth Overview</CardTitle>
+          <SectionMenu sectionKey="net-worth-chart" currentWidth={prefs.sectionWidths?.['net-worth-chart'] ?? 'full'} currentColor={prefs.sectionColors?.['net-worth-chart']} onWidthChange={(w) => handleSectionWidthChange('net-worth-chart', w)} onColorChange={(c) => handleSectionColorChange('net-worth-chart', c)} onReset={() => handleSectionReset('net-worth-chart')} />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
           {/* Pie: current net worth breakdown */}
           <div className="h-64">
@@ -255,8 +259,11 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
       </Card>
     ),
     'cash-vs-investments': (
-      <Card className="mb-6" key="cash-vs-investments">
-        <CardTitle>Cash vs Investments</CardTitle>
+      <Card className="mb-6" key="cash-vs-investments" style={prefs.sectionColors?.['cash-vs-investments'] ? { borderTopColor: prefs.sectionColors['cash-vs-investments'], borderTopWidth: '2px' } : undefined}>
+        <div className="flex items-center justify-between">
+          <CardTitle>Cash vs Investments</CardTitle>
+          <SectionMenu sectionKey="cash-vs-investments" currentWidth={prefs.sectionWidths?.['cash-vs-investments'] ?? 'half'} currentColor={prefs.sectionColors?.['cash-vs-investments']} onWidthChange={(w) => handleSectionWidthChange('cash-vs-investments', w)} onColorChange={(c) => handleSectionColorChange('cash-vs-investments', c)} onReset={() => handleSectionReset('cash-vs-investments')} />
+        </div>
         <div className="h-56 mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={netWorthHistory}>
@@ -276,8 +283,11 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
       </Card>
     ),
     'comp-pie': (
-      <Card className="mb-6" key="comp-pie">
-        <CardTitle>Paycheck Distribution</CardTitle>
+      <Card className="mb-6" key="comp-pie" style={prefs.sectionColors?.['comp-pie'] ? { borderTopColor: prefs.sectionColors['comp-pie'], borderTopWidth: '2px' } : undefined}>
+        <div className="flex items-center justify-between">
+          <CardTitle>Paycheck Distribution</CardTitle>
+          <SectionMenu sectionKey="comp-pie" currentWidth={prefs.sectionWidths?.['comp-pie'] ?? 'half'} currentColor={prefs.sectionColors?.['comp-pie']} onWidthChange={(w) => handleSectionWidthChange('comp-pie', w)} onColorChange={(c) => handleSectionColorChange('comp-pie', c)} onReset={() => handleSectionReset('comp-pie')} />
+        </div>
         <div className="h-80 mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -297,8 +307,11 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
       </Card>
     ),
     'annual-bar': (
-      <Card className="mb-6" key="annual-bar">
-        <CardTitle>Monthly Summary by Category</CardTitle>
+      <Card className="mb-6" key="annual-bar" style={prefs.sectionColors?.['annual-bar'] ? { borderTopColor: prefs.sectionColors['annual-bar'], borderTopWidth: '2px' } : undefined}>
+        <div className="flex items-center justify-between">
+          <CardTitle>Monthly Summary by Category</CardTitle>
+          <SectionMenu sectionKey="annual-bar" currentWidth={prefs.sectionWidths?.['annual-bar'] ?? 'full'} currentColor={prefs.sectionColors?.['annual-bar']} onWidthChange={(w) => handleSectionWidthChange('annual-bar', w)} onColorChange={(c) => handleSectionColorChange('annual-bar', c)} onReset={() => handleSectionReset('annual-bar')} />
+        </div>
         <div className="h-72 mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={annualBarData} stackOffset="sign">
@@ -317,8 +330,11 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
       </Card>
     ),
     'debt-trend': debtHistory.some(d => d.debt > 0) ? (
-      <Card className="mb-6" key="debt-trend">
-        <CardTitle>Debt Trend</CardTitle>
+      <Card className="mb-6" key="debt-trend" style={prefs.sectionColors?.['debt-trend'] ? { borderTopColor: prefs.sectionColors['debt-trend'], borderTopWidth: '2px' } : undefined}>
+        <div className="flex items-center justify-between">
+          <CardTitle>Debt Trend</CardTitle>
+          <SectionMenu sectionKey="debt-trend" currentWidth={prefs.sectionWidths?.['debt-trend'] ?? 'half'} currentColor={prefs.sectionColors?.['debt-trend']} onWidthChange={(w) => handleSectionWidthChange('debt-trend', w)} onColorChange={(c) => handleSectionColorChange('debt-trend', c)} onReset={() => handleSectionReset('debt-trend')} />
+        </div>
         <div className="h-48 mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={debtHistory}>
@@ -340,8 +356,11 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
       </Card>
     ) : null,
     'latest-changes': prev ? (
-      <Card className="mb-6" key="latest-changes">
-        <CardTitle>Latest Changes</CardTitle>
+      <Card className="mb-6" key="latest-changes" style={prefs.sectionColors?.['latest-changes'] ? { borderTopColor: prefs.sectionColors['latest-changes'], borderTopWidth: '2px' } : undefined}>
+        <div className="flex items-center justify-between">
+          <CardTitle>Latest Changes</CardTitle>
+          <SectionMenu sectionKey="latest-changes" currentWidth={prefs.sectionWidths?.['latest-changes'] ?? 'half'} currentColor={prefs.sectionColors?.['latest-changes']} onWidthChange={(w) => handleSectionWidthChange('latest-changes', w)} onColorChange={(c) => handleSectionColorChange('latest-changes', c)} onReset={() => handleSectionReset('latest-changes')} />
+        </div>
         <p className="text-xs text-text-muted mb-3">{calc.formatDate(prev.timestamp)} → {calc.formatDate(latest.timestamp)}</p>
         <div className="space-y-1.5">
           {calc.getSnapshotDiff(latest, prev, data).slice(0, 10).map(ch => (
@@ -400,24 +419,52 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
   }
 
   function handleSaveLayout() {
+    // "Save" overwrites current active layout (no prompt)
+    if (prefs.activeLayoutName) {
+      const newLayouts = {
+        ...prefs.savedLayouts,
+        [prefs.activeLayoutName]: { order: finalOrder, hidden: prefs.hiddenSections ?? [] },
+      }
+      onUpdatePrefs({ savedLayouts: newLayouts })
+      return
+    }
+    // No active layout — behave like Save As
+    handleSaveAsLayout()
+  }
+
+  function handleSaveAsLayout() {
     const name = window.prompt('Enter a name for this layout:')
     if (!name) return
     const newLayouts = {
       ...prefs.savedLayouts,
       [name]: { order: finalOrder, hidden: prefs.hiddenSections ?? [] },
     }
-    onUpdatePrefs({ savedLayouts: newLayouts })
+    onUpdatePrefs({ savedLayouts: newLayouts, activeLayoutName: name })
   }
 
   function handleLoadLayout(name: string) {
     if (!name) return
     const layout = prefs.savedLayouts[name]
     if (!layout) return
-    onUpdatePrefs({ dashboardOrder: layout.order, hiddenSections: layout.hidden })
+    onUpdatePrefs({ dashboardOrder: layout.order, hiddenSections: layout.hidden, activeLayoutName: name })
   }
 
   function handleResetLayout() {
-    onUpdatePrefs({ dashboardOrder: [], hiddenSections: [] })
+    onUpdatePrefs({ dashboardOrder: [], hiddenSections: [], activeLayoutName: null })
+  }
+
+  function handleSectionWidthChange(key: string, width: SectionWidth) {
+    onUpdatePrefs({ sectionWidths: { ...prefs.sectionWidths, [key]: width } })
+  }
+
+  function handleSectionColorChange(key: string, color: string) {
+    onUpdatePrefs({ sectionColors: { ...prefs.sectionColors, [key]: color } })
+  }
+
+  function handleSectionReset(key: string) {
+    const { [key]: _w, ...restWidths } = prefs.sectionWidths ?? {}
+    const { [key]: _c, ...restColors } = prefs.sectionColors ?? {}
+    onUpdatePrefs({ sectionWidths: restWidths, sectionColors: restColors })
   }
 
   function handleToggleSection(key: string) {
@@ -487,7 +534,14 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
 
       {editMode && (
         <div className="sticky top-0 z-40 mb-6 p-4 rounded-xl border border-accent/30 bg-surface shadow-lg space-y-4">
-          <p className="text-xs font-semibold text-accent uppercase tracking-wide">Layout Editor</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold text-accent uppercase tracking-wide">Layout Editor</p>
+              {prefs.activeLayoutName && (
+                <span className="text-xs text-text-muted">— {prefs.activeLayoutName}</span>
+              )}
+            </div>
+          </div>
 
           {/* KPI Card toggles */}
           <div>
@@ -507,56 +561,37 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
             </div>
           </div>
 
-          {/* Chart section toggles + width */}
+          {/* Chart section toggles */}
           <div>
             <p className="text-xs text-text-muted mb-2">Chart Sections</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              {CHART_KEYS.map(key => {
-                const w = prefs.sectionWidths?.[key] ?? 'full'
-                return (
-                  <div key={key} className="flex items-center gap-2">
-                    <label className="flex items-center gap-2 cursor-pointer text-sm text-text-secondary flex-1 min-w-0">
-                      <input
-                        type="checkbox"
-                        checked={!hiddenSections.includes(key)}
-                        onChange={() => handleToggleSection(key)}
-                        className="accent-accent shrink-0"
-                      />
-                      <span className="truncate">{SECTION_LABELS[key] ?? key}</span>
-                    </label>
-                    {!hiddenSections.includes(key) && (
-                      <div className="flex gap-0.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => onUpdatePrefs({ sectionWidths: { ...prefs.sectionWidths, [key]: 'full' } })}
-                          title="Full width"
-                          className={`p-1 rounded transition-colors ${w === 'full' ? 'bg-accent/20 text-accent' : 'text-text-muted hover:text-text-secondary'}`}
-                        >
-                          <Square size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onUpdatePrefs({ sectionWidths: { ...prefs.sectionWidths, [key]: 'half' } })}
-                          title="Half width"
-                          className={`p-1 rounded transition-colors ${w === 'half' ? 'bg-accent/20 text-accent' : 'text-text-muted hover:text-text-secondary'}`}
-                        >
-                          <Columns2 size={14} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              {CHART_KEYS.map(key => (
+                <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-text-secondary">
+                  <input
+                    type="checkbox"
+                    checked={!hiddenSections.includes(key)}
+                    onChange={() => handleToggleSection(key)}
+                    className="accent-accent"
+                  />
+                  {SECTION_LABELS[key] ?? key}
+                </label>
+              ))}
             </div>
           </div>
 
-          {/* Save / Load / Reset */}
-          <div className="flex flex-wrap items-center gap-3">
+          {/* Save / Save As / Load / Reset */}
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleSaveLayout}
-              className="px-3 py-1.5 rounded-lg text-xs bg-accent text-white hover:bg-accent-hover transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs bg-accent text-white hover:bg-accent-hover transition-colors"
             >
-              Save Layout
+              <Save size={12} /> Save
+            </button>
+            <button
+              onClick={handleSaveAsLayout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-accent text-accent hover:bg-accent/10 transition-colors"
+            >
+              <Copy size={12} /> Save As
             </button>
 
             {Object.keys(prefs.savedLayouts ?? {}).length > 0 && (
@@ -565,7 +600,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
                 onChange={e => { handleLoadLayout(e.target.value); e.target.value = '' }}
                 className="px-2 py-1.5 rounded-lg text-xs bg-background border border-border text-text-secondary"
               >
-                <option value="" disabled>Load saved layout…</option>
+                <option value="" disabled>Load layout…</option>
                 {Object.keys(prefs.savedLayouts).map(name => (
                   <option key={name} value={name}>{name}</option>
                 ))}
@@ -576,7 +611,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
               onClick={handleResetLayout}
               className="px-3 py-1.5 rounded-lg text-xs border border-border text-text-muted hover:text-text-secondary transition-colors"
             >
-              Reset to Default
+              Reset
             </button>
           </div>
         </div>
@@ -588,36 +623,85 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
       {/* KPI Grid */}
       {!editMode && renderKPIGrid()}
 
-      {/* Edit mode: show all sections individually for drag reorder */}
+      {/* Edit mode: WYSIWYG grid with drag overlays */}
       {editMode ? (
-        finalOrder.map((key, idx) => {
-          const section = sectionMap[key]
-          if (!section) return null
-          const isKPI = KPI_KEYS.includes(key)
-          return (
-            <div
-              key={key}
-              draggable
-              onDragStart={() => handleDragStart(idx)}
-              onDragOver={(e) => handleDragOver(e, idx)}
-              onDragEnd={handleDragEnd}
-              className={`relative group cursor-grab active:cursor-grabbing mb-3 ${
-                dragIdx === idx ? 'opacity-50' : ''
-              } ${hiddenSections.includes(key) ? 'opacity-30' : ''}`}
-            >
-              <div className="absolute -left-8 top-4 opacity-0 group-hover:opacity-100 transition-opacity text-text-muted">
-                <GripVertical size={16} />
-              </div>
-              <div className={`ring-1 ring-accent/20 ring-dashed rounded-xl ${isKPI ? 'inline-block' : ''}`}>
-                {isKPI ? (
-                  <div className="p-1">
-                    {section}
+        <>
+          {/* KPI grid in edit mode */}
+          {visibleKPIs.length > 0 && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+              {visibleKPIs.map((key, idx) => {
+                const globalIdx = finalOrder.indexOf(key)
+                return (
+                  <div
+                    key={key}
+                    draggable
+                    onDragStart={() => handleDragStart(globalIdx)}
+                    onDragOver={(e) => handleDragOver(e, globalIdx)}
+                    onDragEnd={handleDragEnd}
+                    className={`relative group cursor-grab active:cursor-grabbing ${
+                      dragIdx === globalIdx ? 'opacity-50' : ''
+                    }`}
+                  >
+                    <div className="absolute inset-0 z-10 rounded-xl border-2 border-dashed border-accent/30 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    <div className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity text-accent">
+                      <GripVertical size={14} />
+                    </div>
+                    {sectionMap[key]}
                   </div>
-                ) : section}
-              </div>
+                )
+              })}
             </div>
-          )
-        })
+          )}
+
+          {/* Chart sections in 2-col grid with overlays */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 [&>*]:flex [&>*]:flex-col [&>*>*]:flex-1">
+            {nonKPIOrder.map(key => {
+              const section = sectionMap[key]
+              if (!section) return null
+              const w = prefs.sectionWidths?.[key] ?? 'full'
+              const globalIdx = finalOrder.indexOf(key)
+              return (
+                <div
+                  key={key}
+                  draggable
+                  onDragStart={() => handleDragStart(globalIdx)}
+                  onDragOver={(e) => handleDragOver(e, globalIdx)}
+                  onDragEnd={handleDragEnd}
+                  className={`relative group cursor-grab active:cursor-grabbing ${
+                    w === 'half' ? 'lg:col-span-1' : 'lg:col-span-2'
+                  } ${dragIdx === globalIdx ? 'opacity-50' : ''}`}
+                >
+                  {/* Translucent overlay */}
+                  <div className="absolute inset-0 z-10 rounded-xl border-2 border-dashed border-accent/30 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  {/* Overlay controls: drag handle + width toggle */}
+                  <div className="absolute top-3 left-3 z-20 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-accent"><GripVertical size={16} /></span>
+                    <span className="text-[10px] text-accent font-medium bg-accent/20 px-1.5 py-0.5 rounded">
+                      {SECTION_LABELS[key] ?? key}
+                    </span>
+                  </div>
+                  <div className="absolute top-3 right-3 z-20 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleSectionWidthChange(key, 'full') }}
+                      title="Full width"
+                      className={`p-1 rounded transition-colors ${w === 'full' ? 'bg-accent/30 text-accent' : 'bg-black/40 text-text-muted hover:text-white'}`}
+                    >
+                      <Square size={14} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleSectionWidthChange(key, 'half') }}
+                      title="Half width"
+                      className={`p-1 rounded transition-colors ${w === 'half' ? 'bg-accent/30 text-accent' : 'bg-black/40 text-text-muted hover:text-white'}`}
+                    >
+                      <Columns2 size={14} />
+                    </button>
+                  </div>
+                  {section}
+                </div>
+              )
+            })}
+          </div>
+        </>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 [&>*]:flex [&>*]:flex-col [&>*>*]:flex-1">
           {nonKPIOrder.map(key => {
