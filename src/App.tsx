@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Routes, Route, useSearchParams } from 'react-router-dom'
+import { Routes, Route, useSearchParams, useLocation } from 'react-router-dom'
 import { useAppData } from '@/hooks/useAppData'
 import { useChartPrefs } from '@/hooks/useChartPrefs'
 import { useAuth } from '@/hooks/useAuth'
@@ -24,6 +24,14 @@ import { AdminDesigner } from '@/components/ui/AdminDesigner'
 import { isAdmin } from '@/lib/roles'
 import ToolsPage from '@/components/tools/ToolsPage'
 import { getStorageKey } from '@/lib/store'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
 
 function AppInner({ userId, isLocal, auth }: {
   userId: string | undefined
@@ -91,6 +99,7 @@ function AppInner({ userId, isLocal, auth }: {
 
   return (
     <>
+    <ScrollToTop />
     {isAdmin(auth.user?.email) && <AdminDesigner />}
     <Routes>
       <Route element={

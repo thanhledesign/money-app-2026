@@ -525,9 +525,9 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
         titleKey="dashboard"
         subtitle={`Last updated: ${lastUpdated}`}
         rightContent={
-          <div className="flex items-center gap-4">
-            <UVPBadge label="Unique" description="Financial Health Score — a composite of 7 metrics no other app tracks together. Hover for details." />
+          <div className="flex flex-col items-end gap-1">
             <HealthScoreTooltip data={data} score={metrics.healthScore} />
+            <UVPBadge label="Unique" description="Composite of 7 metrics no other app tracks together. Tap the score for details." />
           </div>
         }
       />

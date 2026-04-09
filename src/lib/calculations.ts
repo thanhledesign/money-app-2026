@@ -5,7 +5,17 @@ export function getLatestSnapshot(data: AppData): Snapshot | null {
 }
 
 export function getPreviousSnapshot(data: AppData): Snapshot | null {
-  return data.snapshots.length > 1 ? data.snapshots[data.snapshots.length - 2] : null
+  const latest = getLatestSnapshot(data)
+  if (!latest || data.snapshots.length < 2) return null
+  const latestMonth = getMonthKey(latest.timestamp)
+  // Find the latest snapshot from a DIFFERENT (earlier) month
+  for (let i = data.snapshots.length - 2; i >= 0; i--) {
+    if (getMonthKey(data.snapshots[i].timestamp) !== latestMonth) {
+      return data.snapshots[i]
+    }
+  }
+  // Fallback: if all snapshots are in the same month, return second-to-last
+  return data.snapshots[data.snapshots.length - 2]
 }
 
 export function getAccountsByCategory(data: AppData, category: Account['category']): Account[] {

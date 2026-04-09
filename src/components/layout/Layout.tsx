@@ -70,7 +70,7 @@ export default function Layout({
         onDuplicateDashboard={onDuplicateDashboard}
       />
       <main
-        className="flex-1 pt-16 lg:pt-0 p-4 lg:p-6 max-w-[1200px] w-full"
+        className="flex-1 pt-16 lg:pt-6 p-4 lg:p-6 max-w-[1200px] w-full"
         style={{ marginLeft: undefined }}
       >
         <div className="hidden lg:block" style={{ marginLeft: sidebarWidth }} />
