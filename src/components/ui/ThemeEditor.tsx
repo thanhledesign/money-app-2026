@@ -208,7 +208,7 @@ export function ThemeEditor() {
     }
   }, [])
 
-  const { titles: pageTitles, setTitle: setPageTitle, getTitle: getPageTitleValue } = usePageTitles()
+  const { titles: pageTitles, setTitle: setPageTitle, getTitle: getPageTitleValue, resetTitles: resetPageTitles } = usePageTitles()
 
   const varGroups = [
     { label: 'Background', keys: ['background', 'surface', 'surface-hover'] },
@@ -339,6 +339,14 @@ export function ThemeEditor() {
             </div>
           ))}
         </div>
+        {Object.keys(pageTitles).length > 0 && (
+          <button
+            onClick={resetPageTitles}
+            className="mt-4 px-3 py-1.5 border border-border text-text-muted rounded-lg text-xs hover:text-text-secondary hover:border-border-light transition-colors"
+          >
+            Reset to Defaults
+          </button>
+        )}
       </Card>
 
       {/* Custom CSS Editor */}

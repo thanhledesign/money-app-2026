@@ -643,7 +643,7 @@ function DeductionsSection({
               <td className="py-2.5 px-2 text-xs font-semibold text-text-secondary uppercase">Total</td>
               <td className="py-2.5 px-2 text-right tabular-nums text-sm font-semibold text-text-primary">{formatCurrency(total)}</td>
               <td className="py-2.5 px-2 text-right tabular-nums text-xs text-text-muted">
-                {grossSemiMonthly > 0 ? formatPercent(total / grossSemiMonthly) : '—'}
+                {grossSemiMonthly > 0 ? formatPercent(total / grossSemiMonthly, 2) : '—'}
               </td>
               <td />
             </tr>

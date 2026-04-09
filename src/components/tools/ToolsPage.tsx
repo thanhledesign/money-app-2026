@@ -38,14 +38,11 @@ function DebtPayoffTool() {
   )
   const [result, setResult] = useState<DebtResult | null>(null)
   const resultRef = useRef<HTMLDivElement>(null)
-  const [autoCalc, setAutoCalc] = useState(false)
-
   const set = (k: keyof DebtInputs) => (v: number) =>
     setInputs(prev => ({ ...prev, [k]: v }))
 
-  // Auto-calculate when inputs change (after first manual calculate)
+  // Live auto-calculate
   useEffect(() => {
-    if (!autoCalc) return
     const { balance, apr, payment } = inputs
     const monthlyRate = apr / 12
     if (payment <= balance * monthlyRate || balance <= 0) return
@@ -55,10 +52,9 @@ function DebtPayoffTool() {
     const payoffDate = new Date()
     payoffDate.setMonth(payoffDate.getMonth() + months)
     setResult({ months, totalInterest, payoffDate: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) })
-  }, [inputs, autoCalc])
+  }, [inputs])
 
   function calculate() {
-    setAutoCalc(true)
     const { balance, apr, payment } = inputs
     const monthlyRate = apr / 12
     if (payment <= balance * monthlyRate) {
@@ -93,8 +89,8 @@ function DebtPayoffTool() {
         </div>
         <div>
           <label className="block text-xs text-text-muted mb-1">APR</label>
-          <NumberInput value={inputs.apr} onChange={set('apr')} label="APR" isCurrency={false} isPercent={true} min={0} max={1} />
-          <input type="range" min={0} max={0.35} step={0.005} value={inputs.apr} onChange={e => set('apr')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
+          <NumberInput value={inputs.apr * 100} onChange={v => set('apr')(v / 100)} label="APR %" isCurrency={false} isPercent={true} min={0} max={100} />
+          <input type="range" min={0} max={35} step={0.5} value={inputs.apr * 100} onChange={e => set('apr')(Number(e.target.value) / 100)} className="w-full mt-1.5 accent-accent h-1" />
         </div>
         <div>
           <label className="block text-xs text-text-muted mb-1">Monthly Payment</label>
@@ -161,6 +157,15 @@ function EmergencyFundTool() {
   const set = (k: keyof EmergencyInputs) => (v: number) =>
     setInputs(prev => ({ ...prev, [k]: v }))
 
+  // Live auto-calculate
+  useEffect(() => {
+    const targetAmount = inputs.monthlyExpenses * inputs.targetMonths
+    if (targetAmount <= 0) return
+    const shortfall = Math.max(0, targetAmount - inputs.currentSaved)
+    const progressPct = Math.min(100, (inputs.currentSaved / targetAmount) * 100)
+    setResult({ targetAmount, shortfall, progressPct })
+  }, [inputs])
+
   function calculate() {
     const targetAmount = inputs.monthlyExpenses * inputs.targetMonths
     const shortfall = Math.max(0, targetAmount - inputs.currentSaved)
@@ -181,8 +186,8 @@ function EmergencyFundTool() {
         </div>
         <div>
           <label className="block text-xs text-text-muted mb-1">Target Months</label>
-          <NumberInput value={inputs.targetMonths} onChange={set('targetMonths')} label="Target Months" isCurrency={false} min={1} max={24} />
-          <input type="range" min={1} max={24} step={1} value={inputs.targetMonths} onChange={e => set('targetMonths')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
+          <NumberInput value={inputs.targetMonths} onChange={set('targetMonths')} label="Target Months" isCurrency={false} min={1} max={90} />
+          <input type="range" min={1} max={90} step={1} value={inputs.targetMonths} onChange={e => set('targetMonths')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
         </div>
         <div>
           <label className="block text-xs text-text-muted mb-1">Currently Saved</label>
@@ -240,12 +245,12 @@ function EmergencyFundTool() {
 
 // ─── Paycheck Estimator ───────────────────────────────────────────────────────
 
-interface PaycheckInputs { grossSalary: number; taxRate: number }
-interface PaycheckResult { netAnnual: number; netMonthly: number; netSemiMonthly: number; netBiweekly: number }
+interface PaycheckInputs { grossSalary: number; taxRate: number; bonus: number; pretaxDeductions: number }
+interface PaycheckResult { grossSemiMonthly: number; taxes: number; pretax: number; netSemiMonthly: number; netAnnual: number; netMonthly: number; netBiweekly: number }
 
 function PaycheckEstimatorTool() {
   const [inputs, setInputs] = useState<PaycheckInputs>(() =>
-    loadDraft('paycheck-estimator', { grossSalary: 100000, taxRate: 0.28 })
+    loadDraft('paycheck-estimator', { grossSalary: 100000, taxRate: 0.28, bonus: 0, pretaxDeductions: 0 })
   )
   const [result, setResult] = useState<PaycheckResult | null>(null)
   const resultRef = useRef<HTMLDivElement>(null)
@@ -253,72 +258,118 @@ function PaycheckEstimatorTool() {
   const set = (k: keyof PaycheckInputs) => (v: number) =>
     setInputs(prev => ({ ...prev, [k]: v }))
 
-  function calculate() {
-    const netAnnual = inputs.grossSalary * (1 - inputs.taxRate)
+  // Live auto-calculate
+  useEffect(() => {
+    const grossSemiMonthly = inputs.grossSalary / 24
+    const taxes = grossSemiMonthly * inputs.taxRate
+    const pretax = inputs.pretaxDeductions
+    const netSemiMonthly = grossSemiMonthly - taxes - pretax
+    const netAnnual = netSemiMonthly * 24
     setResult({
+      grossSemiMonthly,
+      taxes,
+      pretax,
+      netSemiMonthly,
       netAnnual,
       netMonthly: netAnnual / 12,
-      netSemiMonthly: netAnnual / 24,
       netBiweekly: netAnnual / 26,
     })
-    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
-  }
+  }, [inputs])
 
   const fmt = (v: number) => `$${v.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 
   return (
     <Card className="mb-6">
       <CardTitle>💰 Paycheck X-Ray</CardTitle>
-      <p className="text-xs text-text-muted mt-1 mb-4">Estimate take-home pay by period based on gross salary and effective tax rate.</p>
+      <p className="text-xs text-text-muted mt-1 mb-4">Gross-to-net breakdown. Mirrors the Income page with estimated values.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-xs text-text-muted mb-1">Gross Annual Salary</label>
           <NumberInput value={inputs.grossSalary} onChange={set('grossSalary')} label="Gross Salary" />
+          <input type="range" min={30000} max={300000} step={5000} value={inputs.grossSalary} onChange={e => set('grossSalary')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
         </div>
         <div>
-          <label className="block text-xs text-text-muted mb-1">Effective Tax Rate (e.g. 0.28 = 28%)</label>
-          <NumberInput value={inputs.taxRate} onChange={set('taxRate')} label="Tax Rate" isCurrency={false} isPercent={true} min={0} max={1} />
+          <label className="block text-xs text-text-muted mb-1">Effective Tax Rate</label>
+          <NumberInput value={inputs.taxRate * 100} onChange={v => set('taxRate')(v / 100)} label="Tax Rate %" isCurrency={false} isPercent={true} min={0} max={100} />
+          <input type="range" min={0} max={50} step={0.5} value={inputs.taxRate * 100} onChange={e => set('taxRate')(Number(e.target.value) / 100)} className="w-full mt-1.5 accent-accent h-1" />
+        </div>
+        <div>
+          <label className="block text-xs text-text-muted mb-1">Annual Bonus</label>
+          <NumberInput value={inputs.bonus} onChange={set('bonus')} label="Bonus" />
+          <input type="range" min={0} max={100000} step={1000} value={inputs.bonus} onChange={e => set('bonus')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
+        </div>
+        <div>
+          <label className="block text-xs text-text-muted mb-1">Pre-Tax Deductions (per paycheck)</label>
+          <NumberInput value={inputs.pretaxDeductions} onChange={set('pretaxDeductions')} label="Pre-Tax" />
+          <input type="range" min={0} max={3000} step={50} value={inputs.pretaxDeductions} onChange={e => set('pretaxDeductions')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
         </div>
       </div>
       <div className="flex gap-2 mb-4">
-        <button onClick={calculate} className="px-4 py-1.5 bg-accent text-white rounded-lg text-xs hover:bg-accent-hover transition-colors">
-          Calculate
-        </button>
         <button onClick={() => saveDraft('paycheck-estimator', inputs)} className="px-3 py-1.5 border border-border text-text-muted rounded-lg text-xs hover:text-text-secondary transition-colors">
           Save Draft
         </button>
-        {result && (
-          <button
-            onClick={() => downloadCSV('paycheck-estimator.csv', [
-              ['Gross Salary', 'Tax Rate', 'Net Annual', 'Net Monthly', 'Net Semi-Monthly', 'Net Bi-Weekly'],
-              [String(inputs.grossSalary), String(inputs.taxRate),
-               result.netAnnual.toFixed(2), result.netMonthly.toFixed(2),
-               result.netSemiMonthly.toFixed(2), result.netBiweekly.toFixed(2)],
-            ])}
-            className="px-3 py-1.5 border border-border text-text-muted rounded-lg text-xs hover:text-text-secondary transition-colors"
-          >
-            Export CSV
-          </button>
-        )}
       </div>
       {result && (
-        <div ref={resultRef} className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-background rounded-xl border border-border">
-          <div>
-            <p className="text-xs text-text-muted">Annual</p>
-            <p className="text-sm font-semibold text-green mt-0.5">{fmt(result.netAnnual)}</p>
+        <div ref={resultRef} className="space-y-4">
+          {/* Gross to Net waterfall */}
+          <div className="p-4 bg-background rounded-xl border border-border">
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Per Semi-Monthly Paycheck</p>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-text-secondary">Gross Pay</span>
+                <span className="text-text-primary font-medium tabular-nums">{fmt(result.grossSemiMonthly)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-text-secondary">Taxes ({(inputs.taxRate * 100).toFixed(1)}%)</span>
+                <span className="text-red font-medium tabular-nums">-{fmt(result.taxes)}</span>
+              </div>
+              {result.pretax > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-secondary">Pre-Tax Deductions</span>
+                  <span className="text-amber font-medium tabular-nums">-{fmt(result.pretax)}</span>
+                </div>
+              )}
+              <div className="border-t border-border pt-2 flex justify-between text-sm font-semibold">
+                <span className="text-text-primary">Net Take-Home</span>
+                <span className="text-green tabular-nums">{fmt(result.netSemiMonthly)}</span>
+              </div>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-text-muted">Monthly</p>
-            <p className="text-sm font-semibold text-text-primary mt-0.5">{fmt(result.netMonthly)}</p>
+
+          {/* Period breakdown */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-background rounded-xl border border-border">
+            <div>
+              <p className="text-xs text-text-muted">Annual Net</p>
+              <p className="text-sm font-semibold text-green mt-0.5">{fmt(result.netAnnual)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-text-muted">Monthly</p>
+              <p className="text-sm font-semibold text-text-primary mt-0.5">{fmt(result.netMonthly)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-text-muted">Semi-Monthly</p>
+              <p className="text-sm font-semibold text-text-primary mt-0.5">{fmt(result.netSemiMonthly)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-text-muted">Bi-Weekly</p>
+              <p className="text-sm font-semibold text-text-primary mt-0.5">{fmt(result.netBiweekly)}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-text-muted">Semi-Monthly</p>
-            <p className="text-sm font-semibold text-text-primary mt-0.5">{fmt(result.netSemiMonthly)}</p>
-          </div>
-          <div>
-            <p className="text-xs text-text-muted">Bi-Weekly</p>
-            <p className="text-sm font-semibold text-text-primary mt-0.5">{fmt(result.netBiweekly)}</p>
-          </div>
+
+          {/* Total comp with bonus */}
+          {inputs.bonus > 0 && (
+            <div className="p-4 bg-background rounded-xl border border-border">
+              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Total Comp</p>
+              <div className="flex justify-between text-sm">
+                <span className="text-text-secondary">Salary + Bonus</span>
+                <span className="text-text-primary font-medium tabular-nums">{fmt(inputs.grossSalary + inputs.bonus)}</span>
+              </div>
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-text-secondary">After-Tax Bonus</span>
+                <span className="text-amber font-medium tabular-nums">{fmt(inputs.bonus * (1 - inputs.taxRate))}</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </Card>
@@ -357,6 +408,15 @@ function BudgetPlannerTool() {
       return { ...prev, categories: cats }
     })
   }
+
+  // Live auto-calculate
+  useEffect(() => {
+    if (inputs.income <= 0) return
+    const totalExpenses = inputs.categories.reduce((s, c) => s + c.amount, 0)
+    const savings = inputs.income - totalExpenses
+    const savingsRate = inputs.income > 0 ? savings / inputs.income : 0
+    setResult({ totalExpenses, savings, savingsRate })
+  }, [inputs])
 
   function calculate() {
     const totalExpenses = inputs.categories.reduce((s, c) => s + c.amount, 0)

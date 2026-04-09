@@ -23,13 +23,15 @@ export function getChartTooltip() {
 // Static versions for backwards compat — most pages will still use these
 export const CHART_TOOLTIP = {
   contentStyle: {
-    background: '#12121a',
-    border: '1px solid #2a2a3a',
+    background: 'var(--color-surface, #12121a)',
+    border: '1px solid var(--color-border, #2a2a3a)',
     borderRadius: '8px',
     fontSize: '12px',
+    color: 'var(--color-text-primary, #e4e4eb)',
   },
-  labelStyle: { color: '#8888a0' },
-  cursor: { fill: 'rgba(255,255,255,0.04)' },
+  itemStyle: { color: 'var(--color-text-primary, #e4e4eb)' },
+  labelStyle: { color: 'var(--color-text-muted, #8888a0)' },
+  cursor: { fill: 'rgba(128,128,128,0.08)' },
 }
 
 // Flat version for pages using contentStyle={TOOLTIP_CONTENT_STYLE}

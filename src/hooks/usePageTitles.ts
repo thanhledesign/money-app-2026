@@ -48,5 +48,10 @@ export function usePageTitles() {
     return titles[key] || DEFAULT_PAGE_TITLES[key] || key
   }, [titles])
 
-  return { titles, setTitle, getTitle }
+  const resetTitles = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY)
+    setTitles({})
+  }, [])
+
+  return { titles, setTitle, getTitle, resetTitles }
 }

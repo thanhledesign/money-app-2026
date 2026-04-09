@@ -228,7 +228,17 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
                     <Cell key={i} fill={entry.color} stroke={entry.color + '60'} strokeWidth={1.5} />
                   ))}
                 </Pie>
-                <Tooltip {...CHART_TOOLTIP} formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
+                <Tooltip {...CHART_TOOLTIP} formatter={(v: any, name: any, props: any) => {
+                  const total = props?.payload ? [props.payload].flat().reduce((s: number, e: any) => s + (e.value || 0), 0) || metrics.netWorth : metrics.netWorth
+                  const items = [
+                    { name: 'Cash', value: calc.getTotalCash(latest, data) },
+                    { name: 'Investments', value: calc.getTotalInvestments(latest, data) },
+                    { name: 'Debt', value: Math.abs(calc.getTotalDebt(latest, data)) },
+                  ].filter(d => d.value > 0)
+                  const grandTotal = items.reduce((s, d) => s + d.value, 0)
+                  const pct = grandTotal > 0 ? ((v as number) / grandTotal * 100).toFixed(1) : '0'
+                  return [`${calc.formatCurrency(v)} (${pct}%)`, name]
+                }} />
                 <Legend
                   verticalAlign="bottom"
                   formatter={(name: string) => <span style={LEGEND_TEXT_STYLE}>{name}</span>}
@@ -237,7 +247,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
             </ResponsiveContainer>
           </div>
           {/* Area: net worth over time — takes 2 cols */}
-          <div className="lg:col-span-2 h-48">
+          <div className="lg:col-span-2 h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={netWorthHistory}>
                 <defs>
@@ -264,7 +274,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
           <CardTitle>Cash vs Investments</CardTitle>
           <SectionMenu sectionKey="cash-vs-investments" currentWidth={prefs.sectionWidths?.['cash-vs-investments'] ?? 'half'} currentColor={prefs.sectionColors?.['cash-vs-investments']} onWidthChange={(w) => handleSectionWidthChange('cash-vs-investments', w)} onColorChange={(c) => handleSectionColorChange('cash-vs-investments', c)} onReset={() => handleSectionReset('cash-vs-investments')} />
         </div>
-        <div className="h-56 mt-4">
+        <div className="h-72 mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={netWorthHistory}>
               <XAxis dataKey="date" tick={AXIS_TICK} axisLine={false} tickLine={false} />
@@ -299,7 +309,11 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
                 ))}
               </Pie>
               <Tooltip {...CHART_TOOLTIP}
-                formatter={(v: any, name: any) => [calc.formatCurrency(v), name]} />
+                formatter={(v: any, name: any) => {
+                  const total = pieData.reduce((s, d) => s + d.value, 0)
+                  const pct = total > 0 ? ((v as number) / total * 100).toFixed(1) : '0'
+                  return [`${calc.formatCurrency(v)} (${pct}%)`, name]
+                }} />
               <Legend wrapperStyle={{ fontSize: '10px', lineHeight: '18px' }} />
             </PieChart>
           </ResponsiveContainer>
@@ -335,7 +349,7 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs }: Props) {
           <CardTitle>Debt Trend</CardTitle>
           <SectionMenu sectionKey="debt-trend" currentWidth={prefs.sectionWidths?.['debt-trend'] ?? 'half'} currentColor={prefs.sectionColors?.['debt-trend']} onWidthChange={(w) => handleSectionWidthChange('debt-trend', w)} onColorChange={(c) => handleSectionColorChange('debt-trend', c)} onReset={() => handleSectionReset('debt-trend')} />
         </div>
-        <div className="h-48 mt-4">
+        <div className="h-72 mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={debtHistory}>
               <defs>

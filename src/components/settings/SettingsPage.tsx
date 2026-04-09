@@ -298,7 +298,9 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
       </Card>
 
       {/* Theme Editor */}
-      <ThemeEditor />
+      <div className="mb-6">
+        <ThemeEditor />
+      </div>
 
       {/* ── Export Data ── */}
       <Card className="mb-6">

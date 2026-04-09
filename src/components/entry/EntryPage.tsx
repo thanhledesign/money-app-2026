@@ -116,12 +116,12 @@ export default function EntryPage({ data, addSnapshot, deleteSnapshot, addAccoun
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* 2-col grid on desktop: form left, history right */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] gap-6">
-          <div className="space-y-5">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] gap-10">
+          <div className="space-y-6">
             {/* Paycheck & Credit Score */}
             <Card>
               <CardTitle className="mb-4">📊 General</CardTitle>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
                 <FieldRow
                   label="Paycheck Amount"
                   value={values.paycheckAmount}
@@ -147,7 +147,7 @@ export default function EntryPage({ data, addSnapshot, deleteSnapshot, addAccoun
                 <Card key={key}>
                   <CardTitle className="mb-4">{emoji} {label}</CardTitle>
                   {accounts.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 mb-4">
                       {accounts.map(acc => (
                         <FieldRow
                           key={acc.id}
