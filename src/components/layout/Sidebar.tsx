@@ -162,7 +162,7 @@ export default function Sidebar({
         ))}
       </nav>
 
-      <div className="p-3 border-t border-border space-y-2">
+      <div className="p-3 border-t border-border space-y-2 mt-auto shrink-0">
         <NavLink
           to="/settings"
           onClick={closeMobile}
@@ -209,7 +209,8 @@ export default function Sidebar({
 
       {/* Desktop sidebar */}
       <aside
-        className="hidden lg:flex fixed left-0 top-0 h-dvh border-r border-border/50 flex-col z-50 backdrop-blur-xl overflow-y-auto"
+        className="hidden lg:flex fixed left-0 top-0 sidebar-height border-r border-border/50 flex-col z-50 backdrop-blur-xl"
+        style={{ width, background: 'linear-gradient(180deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)' }}
         style={{ width, background: 'linear-gradient(180deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)' }}
       >
         {sidebarContent}
