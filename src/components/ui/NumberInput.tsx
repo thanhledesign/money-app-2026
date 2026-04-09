@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { formatCurrency } from '@/lib/calculations'
 
 interface NumberInputProps {
@@ -196,7 +197,7 @@ export function NumberInput({
         {displayValue}
       </button>
 
-      {open && !isMobile && (
+      {open && !isMobile && createPortal(
         <div className="fixed inset-0 z-[9999]" onClick={commitAndClose}>
           <div
             className="absolute w-56"
@@ -211,16 +212,18 @@ export function NumberInput({
           >
             {padContent}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {open && isMobile && (
+      {open && isMobile && createPortal(
         <div className="fixed inset-0 z-[10000] flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/50" onClick={commitAndClose} />
           <div className="relative w-full max-w-md mx-auto">
             {padContent}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

@@ -79,6 +79,8 @@ html.light body {
 /* Mouse glow effect on glass cards */
 .glass-glow {
   position: relative;
+}
+.glass-glow {
   overflow: hidden;
 }
 .glass-glow::before {
