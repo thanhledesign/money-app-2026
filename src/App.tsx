@@ -27,6 +27,7 @@ import TransactionsPage from '@/components/pro/TransactionsPage'
 import { getStorageKey, saveData as storeSaveData } from '@/lib/store'
 import { useTier } from '@/hooks/useTier'
 import { UpgradeGate } from '@/components/ui/UpgradeGate'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 function ScrollToTop() {
   const { pathname } = useLocation()

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { Camera } from 'lucide-react'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import type { Dashboard } from '@/data/types'
 import Sidebar from './Sidebar'
 
@@ -92,7 +93,7 @@ export default function Layout({
             {' '}(read-only)
           </div>
         )}
-        <Outlet />
+        <ErrorBoundary><Outlet /></ErrorBoundary>
       </main>
       <SnapshotFab />
       <style>{`@media (min-width: 1024px) { main { margin-left: ${sidebarWidth}px !important; } }`}</style>

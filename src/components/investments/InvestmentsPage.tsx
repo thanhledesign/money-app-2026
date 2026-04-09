@@ -35,7 +35,7 @@ interface Props {
   updateAccounts: (a: Account[]) => void
 }
 
-import { CHART_TOOLTIP, TOOLTIP_CONTENT_STYLE, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
+import { CHART_TOOLTIP, AXIS_TICK, LEGEND_TEXT_STYLE } from '@/components/ui/chartConstants'
 
 export default function InvestmentsPage({ data, prefs, addAccount, updateAccounts }: Props) {
   const curveType = prefs.curveType === 'smooth' ? 'monotone' : 'linear'
