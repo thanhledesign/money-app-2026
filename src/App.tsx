@@ -99,6 +99,10 @@ function AppInner({ userId, isLocal, auth }: {
 
   return (
     <>
+    {/* Background image layer */}
+    <div id="app-background" className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat" style={{ display: 'none', transform: 'scale(1.02)' }} />
+    <div id="app-scrim" className="fixed inset-0 z-0 bg-background" style={{ opacity: 0.75 }} />
+    <div className="relative z-10">
     <ScrollToTop />
     {isAdmin(auth.user?.email) && <AdminDesigner />}
     <Routes>
@@ -145,6 +149,7 @@ function AppInner({ userId, isLocal, auth }: {
         } />
       </Route>
     </Routes>
+    </div>
     </>
   )
 }

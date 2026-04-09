@@ -13,6 +13,7 @@ import { useState } from 'react'
 import { useThemeMode, type ThemeMode } from '@/hooks/useThemeMode'
 import { Sun, Moon, Monitor } from 'lucide-react'
 import { CloudSyncPanel } from '@/components/ui/CloudSyncPanel'
+import { BackgroundEditor } from '@/components/ui/BackgroundEditor'
 
 interface Props {
   data: AppData
@@ -205,6 +206,9 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
           </div>
         </div>
       </Card>
+
+      {/* Background Image */}
+      <BackgroundEditor />
 
       {/* Cloud Sync */}
       <CloudSyncPanel userId={userId} dashboardId={dashboardId ?? 'default'} data={data} onDataLoaded={onDataLoaded ?? (() => {})} />
