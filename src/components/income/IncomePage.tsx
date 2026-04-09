@@ -577,6 +577,7 @@ function DeductionRow({
 function DeductionsSection({
   deductions,
   comp,
+  frequency,
   onChange,
 }: {
   deductions: PaycheckDeduction[]

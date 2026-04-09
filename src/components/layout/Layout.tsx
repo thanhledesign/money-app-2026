@@ -110,8 +110,9 @@ function SnapshotFab() {
   return (
     <button
       onClick={() => navigate('/enter')}
-      className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-accent text-white shadow-lg shadow-accent/25 hover:bg-accent-hover hover:shadow-accent/40 hover:scale-105 transition-all flex items-center justify-center group"
+      className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-accent text-white shadow-lg shadow-accent/25 hover:bg-accent-hover hover:shadow-accent/40 hover:scale-105 transition-all flex items-center justify-center group focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
       title="Take Snapshot"
+      aria-label="Take Snapshot"
     >
       <Camera size={22} className="group-hover:scale-110 transition-transform" />
     </button>

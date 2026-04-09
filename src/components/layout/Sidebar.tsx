@@ -133,6 +133,7 @@ export default function Sidebar({
               type="button"
               onClick={closeMobile}
               className="lg:hidden p-1 text-text-muted hover:text-text-primary"
+              aria-label="Close menu"
             >
               <X size={20} />
             </button>
@@ -219,7 +220,7 @@ export default function Sidebar({
     <>
       {/* Mobile header bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-surface/90 backdrop-blur-lg border-b border-border/50 flex items-center px-4 z-50">
-        <button type="button" onClick={() => setMobileOpen(true)} className="p-1 text-text-secondary">
+        <button type="button" onClick={() => setMobileOpen(true)} className="p-1 text-text-secondary" aria-label="Open menu">
           <Menu size={24} />
         </button>
         <h1 className="ml-3 text-sm font-semibold text-text-primary">Money 2026</h1>
