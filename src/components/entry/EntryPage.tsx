@@ -262,6 +262,7 @@ export default function EntryPage({ data, addSnapshot, deleteSnapshot, addAccoun
             )}
           </div>
         </div>
+      </form>
     </div>
     </PageTheme>
   )

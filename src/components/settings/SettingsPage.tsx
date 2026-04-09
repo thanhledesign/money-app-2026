@@ -10,6 +10,8 @@ import {
 import { getStorageKey } from '@/lib/store'
 import { ThemeEditor } from '@/components/ui/ThemeEditor'
 import { useState } from 'react'
+import { useThemeMode, type ThemeMode } from '@/hooks/useThemeMode'
+import { Sun, Moon, Monitor } from 'lucide-react'
 
 interface Props {
   data: AppData
@@ -63,6 +65,7 @@ function accountsToCsv(data: AppData): string {
 }
 
 export default function SettingsPage({ data, prefs, setAccountColor, setLabelColor, onUpdatePrefs, resetPrefs }: Props) {
+  const [themeMode, setThemeMode] = useThemeMode()
   const [statusMsg, setStatusMsg] = useState('')
   const [importPreview, setImportPreview] = useState<AppData | null>(null)
   const [nukeConfirm, setNukeConfirm] = useState('')
@@ -164,6 +167,40 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
   return (
     <div>
       <PageHeader icon="⚙️" title="Settings" titleKey="settings" subtitle="Customize your dashboard, colors, and preferences" />
+
+      {/* Appearance */}
+      <Card className="mb-6">
+        <CardTitle>Appearance</CardTitle>
+        <div className="mt-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-text-primary">Theme</p>
+              <p className="text-xs text-text-muted">Switch between dark, light, or system preference</p>
+            </div>
+            <div className="flex gap-1 bg-background rounded-lg p-0.5 border border-border">
+              {([
+                { mode: 'dark' as ThemeMode, icon: <Moon size={14} />, label: 'Dark' },
+                { mode: 'light' as ThemeMode, icon: <Sun size={14} />, label: 'Light' },
+                { mode: 'system' as ThemeMode, icon: <Monitor size={14} />, label: 'System' },
+              ]).map(({ mode, icon, label }) => (
+                <button
+                  key={mode}
+                  onClick={() => setThemeMode(mode)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs transition-colors ${
+                    themeMode === mode
+                      ? 'bg-accent/15 text-accent font-medium'
+                      : 'text-text-muted hover:text-text-secondary'
+                  }`}
+                  title={label}
+                >
+                  {icon}
+                  <span className="hidden sm:inline">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* Chart Preferences */}
       <Card className="mb-6">

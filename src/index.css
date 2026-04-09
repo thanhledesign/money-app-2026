@@ -25,6 +25,23 @@ html {
   color-scheme: dark;
 }
 
+html.light {
+  color-scheme: light;
+  --color-background: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f0f1f3;
+  --color-border: #e0e0e6;
+  --color-border-light: #eaeaf0;
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #6b6b80;
+  --color-text-muted: #9999aa;
+  --color-accent: #6366f1;
+  --color-accent-hover: #4f46e5;
+}
+
+html.light ::-webkit-scrollbar-thumb { background: #d0d0d8; }
+html.light ::-webkit-scrollbar-thumb:hover { background: #b0b0bc; }
+
 body {
   margin: 0;
   background-color: var(--color-background);
