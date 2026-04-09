@@ -160,23 +160,25 @@ function AddGoalForm({ onAdd }: { onAdd: (g: Goal) => void }) {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs text-text-muted uppercase tracking-wider">Color</label>
-            <div className="flex items-center gap-2 flex-wrap">
-              {['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#a855f7', '#ec4899', '#f97316'].map(c => (
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#a855f7', '#ec4899', '#f97316', '#14b8a6', '#84cc16'].map(c => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
-                  className={`w-7 h-7 rounded-full border-2 transition-transform ${color === c ? 'border-white scale-110' : 'border-transparent'}`}
+                  className={`w-8 h-8 sm:w-7 sm:h-7 rounded-full border-2 transition-transform hover:scale-110 ${color === c ? 'border-white scale-110' : 'border-transparent'}`}
                   style={{ background: c }}
                 />
               ))}
-              <input
-                type="color"
-                value={color}
-                onChange={e => setColor(e.target.value)}
-                className="w-7 h-7 rounded-lg cursor-pointer border border-border"
-                title="Custom color"
-              />
+              <label className="w-8 h-8 sm:w-7 sm:h-7 rounded-full cursor-pointer border-2 border-dashed border-border flex items-center justify-center overflow-hidden" title="Custom color">
+                <input
+                  type="color"
+                  value={color}
+                  onChange={e => setColor(e.target.value)}
+                  className="opacity-0 absolute w-0 h-0"
+                />
+                <span className="text-xs text-text-muted">+</span>
+              </label>
             </div>
           </div>
         </div>
@@ -282,19 +284,19 @@ function GoalStats({ goals }: { goals: Goal[] }) {
   const small = goals.filter(g => g.ranking === '1').length
 
   return (
-    <div className="grid grid-cols-3 gap-3 sm:gap-4">
-      <Card className="text-center min-h-[100px] flex flex-col items-center justify-center">
-        <p className="text-xl sm:text-2xl mb-1">🏆🏆🏆</p>
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+      <Card className="text-center min-h-[80px] flex flex-col items-center justify-center">
+        <p className="text-lg sm:text-2xl mb-1">🏆🏆🏆</p>
         <p className="text-lg sm:text-xl font-semibold text-amber tabular-nums">{major}</p>
         <p className="text-[10px] sm:text-xs text-text-muted mt-0.5">Milestones</p>
       </Card>
-      <Card className="text-center min-h-[100px] flex flex-col items-center justify-center">
-        <p className="text-xl sm:text-2xl mb-1">🏆🏆</p>
+      <Card className="text-center min-h-[80px] flex flex-col items-center justify-center">
+        <p className="text-lg sm:text-2xl mb-1">🏆🏆</p>
         <p className="text-lg sm:text-xl font-semibold text-accent tabular-nums">{big}</p>
         <p className="text-[10px] sm:text-xs text-text-muted mt-0.5">Big Wins</p>
       </Card>
-      <Card className="text-center min-h-[100px] flex flex-col items-center justify-center">
-        <p className="text-xl sm:text-2xl mb-1">🏆</p>
+      <Card className="text-center min-h-[80px] flex flex-col items-center justify-center col-span-2 sm:col-span-1">
+        <p className="text-lg sm:text-2xl mb-1">🏆</p>
         <p className="text-lg sm:text-xl font-semibold text-green tabular-nums">{small}</p>
         <p className="text-[10px] sm:text-xs text-text-muted mt-0.5">Wins</p>
       </Card>

@@ -994,13 +994,22 @@ export default function WizardPage({ onComplete, addAccount, updateComp, updateB
               >
                 Back
               </button>
-              <button
-                type="button"
-                onClick={step === TOTAL_STEPS - 2 ? () => setStep(TOTAL_STEPS - 1) : next}
-                className="px-6 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl text-sm transition-colors"
-              >
-                {step === TOTAL_STEPS - 2 ? 'Finish' : 'Next'}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={step === TOTAL_STEPS - 2 ? () => setStep(TOTAL_STEPS - 1) : next}
+                  className="text-xs text-text-muted hover:text-text-secondary transition-colors"
+                >
+                  Skip
+                </button>
+                <button
+                  type="button"
+                  onClick={step === TOTAL_STEPS - 2 ? () => setStep(TOTAL_STEPS - 1) : next}
+                  className="px-6 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-xl text-sm transition-colors"
+                >
+                  {step === TOTAL_STEPS - 2 ? 'Finish' : 'Next'}
+                </button>
+              </div>
             </div>
           )}
         </div>
