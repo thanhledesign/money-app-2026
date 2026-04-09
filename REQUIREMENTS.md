@@ -56,14 +56,15 @@
 - [ ] **Charts: month comparison** — Side-by-side month comparison view
 
 ### Nice-to-Haves
-- [ ] Undo/redo for data changes
+- [x] **Undo/redo** — Ctrl+Z/Ctrl+Shift+Z, auto-hide bar, 30-state history
 - [x] **Dark/light mode toggle** — Settings > Appearance
-- [ ] Notifications/reminders
-- [x] **PWA** — manifest.json, apple-mobile-web-app meta tags
+- [ ] Notifications/reminders ("You haven't recorded a snapshot in X days")
+- [x] **PWA** — manifest.json, apple-mobile-web-app meta tags, SVG icons
 
 ### Design & Premium Features
 - [x] **Glass design system** — Frosted cards, mouse glow, GlassCard component
-- [x] **13 CSS background themes** — Abstract gradients, no external images needed
+- [x] **5 CSS background themes** — Vivid abstract gradients, no external images
+- [x] **10 color themes** — Grey bases with highlight hues (Settings > Theme)
 - [x] **Background image editor** — 12 Unsplash presets, upload, crop, focal point, scrim
 - [x] **Pastel chart palette** — COLORS (pastel fills) + VIVID (line strokes)
 - [x] **Snapshot FAB** — Accent camera button on all pages
