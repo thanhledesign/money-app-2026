@@ -168,10 +168,11 @@ function GrossPayBarChart({ comp }: { comp: CompBreakdown }) {
   const [view, setView] = useState<'gross' | 'net'>('gross')
   const rows = computePayRows(comp)
   // Exclude the TOTAL row from the bar chart; show everything else
-  const chartData = rows
+  const filteredRows = rows
     .filter(r => r.label !== 'TOTAL' && r.label !== 'LTI (Pre-Tax)')
     .concat(rows.filter(r => r.label === 'LTI (Pre-Tax)').map(r => ({ ...r, label: 'LTI' })))
-    .map(r => ({ name: r.label, Pay: view === 'gross' ? r.gross : r.net }))
+  const chartData = filteredRows.map(r => ({ name: r.label, Pay: view === 'gross' ? r.gross : r.net }))
+  const grossMax = Math.max(...filteredRows.map(r => r.gross))
 
   const barColor = view === 'gross' ? '#22c55e' : '#3b82f6'
   const label = view === 'gross' ? 'Gross' : 'Net'
@@ -213,6 +214,7 @@ function GrossPayBarChart({ comp }: { comp: CompBreakdown }) {
         >
           <XAxis
             type="number"
+            domain={[0, Math.ceil(grossMax * 1.05)]}
             tickFormatter={(v: any) => formatCurrency(v as number)}
             tick={AXIS_TICK}
             axisLine={{ stroke: '#2a2a3a' }}
