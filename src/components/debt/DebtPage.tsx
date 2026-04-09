@@ -30,6 +30,7 @@ import {
   getLatestSnapshot,
   formatCurrency,
   formatPercent,
+  formatMonthLabel,
 } from '@/lib/calculations'
 import { ScrollableTable } from '@/components/ui/ScrollableTable'
 import { MobileMonthPicker, useMobileMonth } from '@/components/ui/MobileMonthPicker'
@@ -57,13 +58,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
   const { monthKeys, monthLabels, monthlyMap } = useMemo(() => {
     const map = getMonthlySnapshots(data)
     const keys = Array.from(map.keys()).sort()
-    const labels = keys.map(k => {
-      const [year, month] = k.split('-')
-      return new Date(Number(year), Number(month) - 1).toLocaleDateString('en-US', {
-        month: 'short',
-        year: '2-digit',
-      })
-    })
+    const labels = keys.map(k => formatMonthLabel(k))
     return { monthKeys: keys, monthLabels: labels, monthlyMap: map }
   }, [data])
 
@@ -147,7 +142,7 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
       data.snapshots
         .filter(s => s.creditScore !== null)
         .map(s => ({
-          date: new Date(s.timestamp).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+          date: new Date(s.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           score: s.creditScore as number,
         })),
     [data.snapshots]

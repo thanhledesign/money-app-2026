@@ -234,3 +234,10 @@ export function formatDateShort(timestamp: string): string {
     month: 'short', day: 'numeric',
   })
 }
+
+export function formatMonthLabel(monthKey: string): string {
+  const [year, month] = monthKey.split('-')
+  const d = new Date(Number(year), Number(month) - 1, 1)
+  const m = d.toLocaleDateString('en-US', { month: 'short' })
+  return `${m} '${year.slice(2)}`
+}

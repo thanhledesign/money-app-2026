@@ -22,6 +22,7 @@ import {
   formatCurrency,
   formatDateShort,
   formatPercent,
+  formatMonthLabel,
 } from '@/lib/calculations'
 import { ScrollableTable } from '@/components/ui/ScrollableTable'
 import { MobileMonthPicker, useMobileMonth } from '@/components/ui/MobileMonthPicker'
@@ -59,11 +60,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
   }, [data])
 
   // Friendly label for a month key like "2026-03" → "Mar '26"
-  function labelMonth(key: string): string {
-    const [year, month] = key.split('-')
-    const d = new Date(Number(year), Number(month) - 1, 1)
-    return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
-  }
+  const labelMonth = formatMonthLabel
 
   // Balance for an account in a given monthly snapshot (0 if not recorded)
   function balanceFor(accountId: string, monthKey: string): number {

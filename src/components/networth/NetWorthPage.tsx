@@ -32,6 +32,7 @@ import {
   getTotalInvestments,
   getTotalDebt,
   formatCurrency,
+  formatMonthLabel,
 } from '@/lib/calculations'
 import { ScrollableTable } from '@/components/ui/ScrollableTable'
 
@@ -55,13 +56,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
   const { monthKeys, monthLabels, monthlyMap } = useMemo(() => {
     const map = getMonthlySnapshots(data)
     const keys = Array.from(map.keys()).sort()
-    const labels = keys.map(k => {
-      const [year, month] = k.split('-')
-      return new Date(Number(year), Number(month) - 1).toLocaleDateString('en-US', {
-        month: 'short',
-        year: '2-digit',
-      })
-    })
+    const labels = keys.map(k => formatMonthLabel(k))
     return { monthKeys: keys, monthLabels: labels, monthlyMap: map }
   }, [data])
 
@@ -97,7 +92,7 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
       data.snapshots.map(s => ({
         date: new Date(s.timestamp).toLocaleDateString('en-US', {
           month: 'short',
-          year: '2-digit',
+          day: 'numeric',
         }),
         netWorth: getNetWorth(s, data),
       })),
