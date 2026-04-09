@@ -38,11 +38,27 @@ function DebtPayoffTool() {
   )
   const [result, setResult] = useState<DebtResult | null>(null)
   const resultRef = useRef<HTMLDivElement>(null)
+  const [autoCalc, setAutoCalc] = useState(false)
 
   const set = (k: keyof DebtInputs) => (v: number) =>
     setInputs(prev => ({ ...prev, [k]: v }))
 
+  // Auto-calculate when inputs change (after first manual calculate)
+  useEffect(() => {
+    if (!autoCalc) return
+    const { balance, apr, payment } = inputs
+    const monthlyRate = apr / 12
+    if (payment <= balance * monthlyRate || balance <= 0) return
+    const months = Math.ceil(-Math.log(1 - (balance * monthlyRate) / payment) / Math.log(1 + monthlyRate))
+    const totalPaid = payment * months
+    const totalInterest = totalPaid - balance
+    const payoffDate = new Date()
+    payoffDate.setMonth(payoffDate.getMonth() + months)
+    setResult({ months, totalInterest, payoffDate: payoffDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) })
+  }, [inputs, autoCalc])
+
   function calculate() {
+    setAutoCalc(true)
     const { balance, apr, payment } = inputs
     const monthlyRate = apr / 12
     if (payment <= balance * monthlyRate) {
@@ -73,14 +89,17 @@ function DebtPayoffTool() {
         <div>
           <label className="block text-xs text-text-muted mb-1">Balance</label>
           <NumberInput value={inputs.balance} onChange={set('balance')} label="Balance" />
+          <input type="range" min={0} max={50000} step={500} value={inputs.balance} onChange={e => set('balance')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
         </div>
         <div>
-          <label className="block text-xs text-text-muted mb-1">APR (e.g. 0.20 = 20%)</label>
+          <label className="block text-xs text-text-muted mb-1">APR</label>
           <NumberInput value={inputs.apr} onChange={set('apr')} label="APR" isCurrency={false} isPercent={true} min={0} max={1} />
+          <input type="range" min={0} max={0.35} step={0.005} value={inputs.apr} onChange={e => set('apr')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
         </div>
         <div>
           <label className="block text-xs text-text-muted mb-1">Monthly Payment</label>
           <NumberInput value={inputs.payment} onChange={set('payment')} label="Monthly Payment" />
+          <input type="range" min={50} max={2000} step={25} value={inputs.payment} onChange={e => set('payment')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
         </div>
       </div>
       <div className="flex gap-2 mb-4">
@@ -158,14 +177,17 @@ function EmergencyFundTool() {
         <div>
           <label className="block text-xs text-text-muted mb-1">Monthly Expenses</label>
           <NumberInput value={inputs.monthlyExpenses} onChange={set('monthlyExpenses')} label="Monthly Expenses" />
+          <input type="range" min={500} max={15000} step={100} value={inputs.monthlyExpenses} onChange={e => set('monthlyExpenses')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
         </div>
         <div>
           <label className="block text-xs text-text-muted mb-1">Target Months</label>
           <NumberInput value={inputs.targetMonths} onChange={set('targetMonths')} label="Target Months" isCurrency={false} min={1} max={24} />
+          <input type="range" min={1} max={24} step={1} value={inputs.targetMonths} onChange={e => set('targetMonths')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
         </div>
         <div>
           <label className="block text-xs text-text-muted mb-1">Currently Saved</label>
           <NumberInput value={inputs.currentSaved} onChange={set('currentSaved')} label="Currently Saved" />
+          <input type="range" min={0} max={100000} step={500} value={inputs.currentSaved} onChange={e => set('currentSaved')(Number(e.target.value))} className="w-full mt-1.5 accent-accent h-1" />
         </div>
       </div>
       <div className="flex gap-2 mb-4">
@@ -412,9 +434,20 @@ function BudgetPlannerTool() {
   )
 }
 
+// ─── Tool definitions ────────────────────────────────────────────────────────
+
+const TOOLS = [
+  { id: 'debt', emoji: '🥊', name: 'Debt Fighter', description: 'Calculate your debt payoff timeline' },
+  { id: 'emergency', emoji: '🛡️', name: 'Safety Net Builder', description: 'Size your emergency fund' },
+  { id: 'paycheck', emoji: '💰', name: 'Paycheck X-Ray', description: 'Estimate take-home pay' },
+  { id: 'budget', emoji: '📋', name: 'Budget Planner', description: 'Plan monthly spending' },
+]
+
 // ─── Main ToolsPage ───────────────────────────────────────────────────────────
 
 export default function ToolsPage() {
+  const [activeTool, setActiveTool] = useState<string | null>(null)
+
   return (
     <div>
       <PageHeader
@@ -423,10 +456,38 @@ export default function ToolsPage() {
         titleKey="tools"
         subtitle="Financial calculators and planners"
       />
-      <DebtPayoffTool />
-      <EmergencyFundTool />
-      <PaycheckEstimatorTool />
-      <BudgetPlannerTool />
+
+      {!activeTool ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {TOOLS.map(tool => (
+            <button
+              key={tool.id}
+              onClick={() => setActiveTool(tool.id)}
+              className="flex items-start gap-4 p-5 bg-surface border border-border rounded-xl text-left hover:border-accent/40 hover:bg-surface-hover transition-colors group"
+            >
+              <span className="text-3xl">{tool.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors">{tool.name}</p>
+                <p className="text-xs text-text-muted mt-1">{tool.description}</p>
+              </div>
+              <span className="text-text-muted group-hover:text-accent transition-colors mt-1">&rarr;</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <>
+          <button
+            onClick={() => setActiveTool(null)}
+            className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary transition-colors mb-4"
+          >
+            &larr; All Tools
+          </button>
+          {activeTool === 'debt' && <DebtPayoffTool />}
+          {activeTool === 'emergency' && <EmergencyFundTool />}
+          {activeTool === 'paycheck' && <PaycheckEstimatorTool />}
+          {activeTool === 'budget' && <BudgetPlannerTool />}
+        </>
+      )}
     </div>
   )
 }
