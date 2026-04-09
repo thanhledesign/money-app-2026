@@ -22,7 +22,7 @@ interface Props {
   userId?: string
 }
 
-import { CHART_TOOLTIP, AXIS_TICK, LEGEND_TEXT_STYLE, COLORS } from '@/components/ui/chartConstants'
+import { CHART_TOOLTIP, AXIS_TICK, LEGEND_TEXT_STYLE, COLORS, VIVID } from '@/components/ui/chartConstants'
 
 const KPI_KEYS = [
   'kpi-net-worth', 'kpi-cash', 'kpi-investments', 'kpi-debt',
@@ -254,16 +254,16 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
               <AreaChart data={netWorthHistory}>
                 <defs>
                   <linearGradient id="nwGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.netWorth} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={COLORS.netWorth} stopOpacity={0} />
+                    <stop offset="5%" stopColor={VIVID.netWorth} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={VIVID.netWorth} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="date" tick={AXIS_TICK} axisLine={false} tickLine={false} />
                 <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false}
                   tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
                 <Tooltip {...CHART_TOOLTIP} formatter={(v: any) => [calc.formatCurrency(v), 'Net Worth']} />
-                <Area type={curveType} dataKey="netWorth" stroke={COLORS.netWorth} fill="url(#nwGrad)" strokeWidth={2}
-                  dot={prefs.showDots ? { r: 3, fill: COLORS.netWorth } : false} />
+                <Area type={curveType} dataKey="netWorth" stroke={VIVID.netWorth} fill="url(#nwGrad)" strokeWidth={2}
+                  dot={prefs.showDots ? { r: 3, fill: VIVID.netWorth } : false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -284,10 +284,10 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}K`} />
               <Tooltip {...CHART_TOOLTIP}
                 formatter={(v: any, name: any) => [calc.formatCurrency(v), name === 'cash' ? 'Cash' : 'Investments']} />
-              <Line type={curveType} dataKey="cash" stroke={COLORS.cash} strokeWidth={2}
-                dot={prefs.showDots ? { r: 3, fill: COLORS.cash } : false} />
-              <Line type={curveType} dataKey="investments" stroke={COLORS.investments} strokeWidth={2}
-                dot={prefs.showDots ? { r: 3, fill: COLORS.investments } : false} />
+              <Line type={curveType} dataKey="cash" stroke={VIVID.cash} strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: VIVID.cash } : false} />
+              <Line type={curveType} dataKey="investments" stroke={VIVID.investments} strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: VIVID.investments } : false} />
               <Legend wrapperStyle={{ fontSize: '11px' }} />
             </LineChart>
           </ResponsiveContainer>
@@ -356,16 +356,16 @@ export default function DashboardPage({ data, prefs, onUpdatePrefs, userId }: Pr
             <AreaChart data={debtHistory}>
               <defs>
                 <linearGradient id="debtGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.debt} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={COLORS.debt} stopOpacity={0} />
+                  <stop offset="5%" stopColor={VIVID.debt} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={VIVID.debt} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="date" tick={AXIS_TICK} axisLine={false} tickLine={false} />
               <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false}
                 tickFormatter={(v: number) => `$${(v / 1000).toFixed(1)}K`} reversed={true} />
               <Tooltip {...CHART_TOOLTIP} formatter={(v: any) => [calc.formatCurrency(v), 'Debt']} />
-              <Area type={curveType} dataKey="debt" stroke={COLORS.debt} fill="url(#debtGrad)" strokeWidth={2}
-                dot={prefs.showDots ? { r: 3, fill: COLORS.debt } : false} />
+              <Area type={curveType} dataKey="debt" stroke={VIVID.debt} fill="url(#debtGrad)" strokeWidth={2}
+                dot={prefs.showDots ? { r: 3, fill: VIVID.debt } : false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

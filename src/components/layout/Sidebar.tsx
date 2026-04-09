@@ -57,6 +57,24 @@ export default function Sidebar({
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const sidebarRef = useRef<HTMLElement>(null)
+
+  // Fix sidebar height on iOS Safari where CSS vh/dvh doesn't work reliably
+  useEffect(() => {
+    const updateHeight = () => {
+      if (sidebarRef.current) {
+        const h = window.visualViewport?.height ?? window.innerHeight
+        sidebarRef.current.style.height = `${h}px`
+      }
+    }
+    updateHeight()
+    window.addEventListener('resize', updateHeight)
+    window.visualViewport?.addEventListener('resize', updateHeight)
+    return () => {
+      window.removeEventListener('resize', updateHeight)
+      window.visualViewport?.removeEventListener('resize', updateHeight)
+    }
+  }, [])
   const startXRef = useRef(0)
   const startWidthRef = useRef(0)
   const location = useLocation()
@@ -209,6 +227,7 @@ export default function Sidebar({
 
       {/* Desktop sidebar */}
       <aside
+        ref={sidebarRef}
         className="hidden lg:flex fixed left-0 top-0 sidebar-height border-r border-border/50 flex-col z-50 backdrop-blur-xl"
         style={{ width, background: 'linear-gradient(180deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)' }}
         style={{ width, background: 'linear-gradient(180deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)' }}

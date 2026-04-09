@@ -41,7 +41,7 @@ export const AXIS_TICK = { fill: '#55556a', fontSize: 11 }
 
 export const LEGEND_TEXT_STYLE: React.CSSProperties = { color: '#8888a0', fontSize: 11 }
 
-// Pastel chart palette — softer, modern, streaming-platform aesthetic
+// Pastel palette — for pie charts, bar fills, area fills
 export const COLORS = {
   cash: '#6ee7b7',       // soft mint green
   investments: '#93c5fd', // soft sky blue
@@ -54,4 +54,13 @@ export const COLORS = {
   medical: '#67e8f9',    // soft cyan
   dental: '#a5f3fc',     // lighter cyan
   k401: '#93c5fd',       // soft blue
+} as const
+
+// Vivid palette — for line strokes, dots, area strokes where contrast matters
+export const VIVID = {
+  cash: '#22c55e',
+  investments: '#3b82f6',
+  debt: '#ef4444',
+  netWorth: '#a855f7',
+  amber: '#f59e0b',
 } as const
