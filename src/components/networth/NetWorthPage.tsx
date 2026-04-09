@@ -178,8 +178,8 @@ export default function NetWorthPage({ data, prefs, addAccount, updateAccounts }
         subtitle="Complete financial status"
         rightContent={
           <div className="text-right">
-            <div className="text-xs text-text-muted mb-1">Current Net Worth</div>
-            <div className={`text-3xl font-bold tabular-nums ${currentNetWorth >= 0 ? 'text-purple' : 'text-red'}`}>
+            <div className="text-xs text-text-muted mb-0.5">Current Net Worth</div>
+            <div className={`text-2xl font-bold tabular-nums ${currentNetWorth >= 0 ? 'text-purple' : 'text-red'}`}>
               {formatCurrency(currentNetWorth)}
             </div>
           </div>

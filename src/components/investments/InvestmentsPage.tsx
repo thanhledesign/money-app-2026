@@ -137,7 +137,7 @@ export default function InvestmentsPage({ data, prefs, addAccount, updateAccount
         title="Investments"
         titleKey="investments"
         subtitle="401K, brokerages, IRAs and investment balances"
-        rightContent={latest && <div className="text-right"><p className="text-xs text-text-muted">Total Investments</p><p className="text-lg font-semibold text-cyan tabular-nums">{formatCurrency(getTotalInvestments(latest, data))}</p></div>}
+        rightContent={latest && <div className="text-right"><p className="text-xs text-text-muted mb-0.5">Total Investments</p><p className="text-2xl font-bold text-cyan tabular-nums">{formatCurrency(getTotalInvestments(latest, data))}</p></div>}
       />
 
       <AccountManager

@@ -131,7 +131,7 @@ export default function AccountsPage({ data, prefs, addAccount, updateAccounts }
         title="Cash Accounts"
         titleKey="accounts"
         subtitle="Checking, savings, high-yield savings balances"
-        rightContent={latest && <div className="text-right"><p className="text-xs text-text-muted">Total Cash</p><p className="text-lg font-semibold text-green tabular-nums">{formatCurrency(getTotalCash(latest, data))}</p></div>}
+        rightContent={latest && <div className="text-right"><p className="text-xs text-text-muted mb-0.5">Total Cash</p><p className="text-2xl font-bold text-green tabular-nums">{formatCurrency(getTotalCash(latest, data))}</p></div>}
       />
 
       <AccountManager

@@ -179,11 +179,11 @@ export default function DebtPage({ data, prefs, addAccount, updateAccounts }: Pr
         subtitle="Credit cards, loans, and debt status"
         rightContent={latest ?
           <div className="text-right">
-            <div className="text-xs text-text-muted mb-1">Total Debt</div>
-            <div className={`text-3xl font-bold tabular-nums ${totalDebt < 0 ? 'text-red' : 'text-green'}`}>
+            <div className="text-xs text-text-muted mb-0.5">Total Debt</div>
+            <div className={`text-2xl font-bold tabular-nums ${totalDebt < 0 ? 'text-red' : 'text-green'}`}>
               {formatCurrency(totalDebt)}
             </div>
-            <div className="text-xs text-text-muted mt-1">
+            <div className="text-xs text-text-muted mt-0.5">
               of {formatCurrency(totalLimit)} total limit
             </div>
           </div>

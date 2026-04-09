@@ -369,7 +369,7 @@ export function BudgetPage({ data, updateBudgetItems }: BudgetPageProps) {
         title="Budget"
         titleKey="budget"
         subtitle="Track spending, savings, and investment allocation"
-        rightContent={<div className="text-right"><p className="text-xs text-text-muted">Monthly Cost of Living</p><p className="text-lg font-semibold text-amber tabular-nums">{formatCurrency(burnRate)}</p></div>}
+        rightContent={<div className="text-right"><p className="text-xs text-text-muted mb-0.5">Monthly Cost of Living</p><p className="text-2xl font-bold text-amber tabular-nums">{formatCurrency(burnRate)}</p></div>}
       />
 
       {/* ── Actionable Insights ── */}
