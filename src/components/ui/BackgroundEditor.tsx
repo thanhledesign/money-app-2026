@@ -120,7 +120,7 @@ export function BackgroundEditor() {
         >
           <ImageIcon size={13} />
           {showPresets ? 'Hide Photos' : 'Photo Backgrounds'}
-          {!canUseFeature(getUserTier(), 'photo-backgrounds') && <Lock size={10} className="ml-1 opacity-60" />}
+          <span className="px-1 py-0.5 text-[7px] font-bold uppercase bg-accent/15 text-accent/70 rounded">Pro</span>
         </button>
         <button
           onClick={() => canUseFeature(getUserTier(), 'custom-upload-bg') ? fileRef.current?.click() : alert('Custom uploads require a Pro subscription.')}

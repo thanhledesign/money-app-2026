@@ -10,7 +10,7 @@ import { UserMenu } from '@/components/auth/UserMenu'
 import { DashboardSwitcher } from '@/components/dashboard/DashboardSwitcher'
 import { CreateDashboardModal } from '@/components/dashboard/CreateDashboardModal'
 import { FeatureBadge } from '@/components/ui/UpgradeGate'
-import { getUserTier } from '@/lib/tiers'
+import { getUserTier, canUseFeature } from '@/lib/tiers'
 
 const navItems = [
   { to: '/enter', icon: Camera, label: 'Add Snapshot' },
@@ -185,9 +185,9 @@ export default function Sidebar({
         ))}
 
         <div className="px-4 pt-4 pb-1">
-          <p className="text-[10px] text-text-muted uppercase tracking-wider flex items-center gap-1">
+          <p className="text-[10px] text-text-muted uppercase tracking-wider flex items-center gap-1.5">
             Pro Features
-            <span className="px-1.5 py-0.5 text-[8px] bg-amber/10 text-amber rounded-full border border-amber/20">Free Preview</span>
+            <span className="px-1.5 py-0.5 text-[8px] bg-accent/15 text-accent rounded-full border border-accent/25">Beta — Free</span>
           </p>
         </div>
         {proItems.map(({ to, icon: Icon, label, featureId }) => {
@@ -208,6 +208,11 @@ export default function Sidebar({
               <Icon size={18} className="flex-shrink-0" />
               <span className="truncate">{label}</span>
               <FeatureBadge featureId={featureId} userTier={userTier} />
+              {canUseFeature(userTier, featureId) && (
+                <span className="px-1 py-0.5 text-[7px] font-bold uppercase rounded bg-accent/10 text-accent/70 border border-accent/15">
+                  {featureId === 'business' || featureId === 'properties' ? 'Premium' : 'Pro'}
+                </span>
+              )}
             </NavLink>
           )
         })}

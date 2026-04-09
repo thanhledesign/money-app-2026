@@ -117,6 +117,10 @@ export default function TransactionsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="mb-4 px-4 py-2 bg-accent/10 border border-accent/25 rounded-lg text-xs text-accent flex items-center gap-2">
+        <span className="px-1.5 py-0.5 text-[8px] font-bold uppercase bg-accent/20 rounded">Pro</span>
+        This is a Pro feature, currently free during beta. It will require a Pro subscription after launch.
+      </div>
       <PageHeader
         icon="📒"
         title="Transactions"
