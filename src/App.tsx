@@ -24,7 +24,7 @@ import { AdminDesigner } from '@/components/ui/AdminDesigner'
 import { isAdmin } from '@/lib/roles'
 import ToolsPage from '@/components/tools/ToolsPage'
 import TransactionsPage from '@/components/pro/TransactionsPage'
-import { getStorageKey } from '@/lib/store'
+import { getStorageKey, saveData as storeSaveData } from '@/lib/store'
 import { useTier } from '@/hooks/useTier'
 import { UpgradeGate } from '@/components/ui/UpgradeGate'
 
@@ -156,7 +156,7 @@ function AppInner({ userId, isLocal, auth }: {
             setAccountColor={setAccountColor} setLabelColor={setLabelColor}
             onUpdatePrefs={updatePrefs} resetPrefs={resetPrefs}
             userId={userId} dashboardId={db.activeId} dashboards={db.dashboards}
-            onDataLoaded={(d) => { import('@/lib/store').then(s => { s.saveData(d) }); window.location.reload() }} />
+            onDataLoaded={(d) => { storeSaveData(d); window.location.reload() }} />
         } />
       </Route>
     </Routes>

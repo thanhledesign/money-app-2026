@@ -14,6 +14,7 @@ import { useThemeMode, type ThemeMode } from '@/hooks/useThemeMode'
 import { Sun, Moon, Monitor } from 'lucide-react'
 import { CloudSyncPanel } from '@/components/ui/CloudSyncPanel'
 import { BackgroundEditor } from '@/components/ui/BackgroundEditor'
+import { getUserTier, setUserTier as setTier, TIER_CONFIGS, type Tier } from '@/lib/tiers'
 
 interface Props {
   data: AppData
@@ -473,17 +474,16 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
       <Card className="mb-6">
         <CardTitle>Subscription</CardTitle>
         <p className="text-xs text-text-muted mt-1 mb-3">
-          Current tier: <span className="font-semibold text-accent">{(() => { const { getUserTier, TIER_CONFIGS } = require('@/lib/tiers'); const t = getUserTier(); return TIER_CONFIGS[t].name })()}</span>
+          Current tier: <span className="font-semibold text-accent">{TIER_CONFIGS[getUserTier()].name}</span>
         </p>
         <div className="flex gap-2">
           {(['free', 'pro', 'premium'] as const).map(t => {
-            const { getUserTier, setUserTier, TIER_CONFIGS } = require('@/lib/tiers')
             const current = getUserTier()
             const config = TIER_CONFIGS[t]
             return (
               <button
                 key={t}
-                onClick={() => { setUserTier(t); window.location.reload() }}
+                onClick={() => { setTier(t); window.location.reload() }}
                 className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
                   current === t
                     ? 'border-accent bg-accent/10 text-accent font-medium'
