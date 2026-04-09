@@ -118,12 +118,12 @@ export function useAppData(userId?: string, dashboard?: Dashboard) {
     setData(store.resetData())
   }, [isReadOnly])
 
-  const { undo, redo, canUndo, canRedo } = useUndoRedo(data, setData)
+  const { undo, redo, canUndo, canRedo, showBar: showUndoBar } = useUndoRedo(data, setData)
 
   return {
     data, isReadOnly, refresh, addSnapshot, updateSnapshot, deleteSnapshot,
     addAccount, updateAccounts, updateBudgetItems, addGoal,
     updateComp, updateDeductions, updateAllocations, resetData,
-    undo, redo, canUndo, canRedo,
+    undo, redo, canUndo, canRedo, showUndoBar,
   }
 }

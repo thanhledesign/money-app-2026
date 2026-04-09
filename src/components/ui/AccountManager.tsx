@@ -99,7 +99,7 @@ export function AccountManager({ accounts, category, onAdd, onRemove, onToggleAc
                 placeholder="Account name"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                className="px-2 py-1.5 bg-background border border-border rounded text-xs text-text-primary"
+                className="px-2 py-1.5 bg-background border border-border rounded text-xs text-text-primary placeholder:text-text-muted/50 placeholder:italic"
               />
               <input
                 type="text"

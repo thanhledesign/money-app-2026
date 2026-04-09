@@ -53,7 +53,7 @@ function AppInner({ userId, isLocal, auth }: {
     data, isReadOnly, addSnapshot, deleteSnapshot, addGoal,
     addAccount, updateAccounts,
     updateComp, updateDeductions, updateAllocations, updateBudgetItems,
-    resetData, undo, redo, canUndo, canRedo,
+    resetData, undo, redo, canUndo, canRedo, showUndoBar,
   } = useAppData(userId, activeDashboard)
 
   const { prefs, update: updatePrefs, setAccountColor, setLabelColor, reset: resetPrefs } = useChartPrefs()
@@ -161,8 +161,8 @@ function AppInner({ userId, isLocal, auth }: {
         } />
       </Route>
     </Routes>
-    {/* Undo/Redo indicator */}
-    {(canUndo || canRedo) && (
+    {/* Undo/Redo indicator — only shows after edits, auto-hides */}
+    {showUndoBar && (canUndo || canRedo) && (
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface/90 backdrop-blur-xl border border-border/40 shadow-lg">
         <button
           onClick={undo}
