@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import type { AppData, Snapshot, Account, BudgetItem, Goal, Dashboard } from '@/data/types'
 import * as store from '@/lib/store'
 import { loadFromCloud } from '@/lib/sync'
+import { useUndoRedo } from './useUndoRedo'
 
 export function useAppData(userId?: string, dashboard?: Dashboard) {
   const dashboardId = dashboard?.id ?? 'default'
@@ -117,9 +118,12 @@ export function useAppData(userId?: string, dashboard?: Dashboard) {
     setData(store.resetData())
   }, [isReadOnly])
 
+  const { undo, redo, canUndo, canRedo } = useUndoRedo(data, setData)
+
   return {
     data, isReadOnly, refresh, addSnapshot, updateSnapshot, deleteSnapshot,
     addAccount, updateAccounts, updateBudgetItems, addGoal,
     updateComp, updateDeductions, updateAllocations, resetData,
+    undo, redo, canUndo, canRedo,
   }
 }

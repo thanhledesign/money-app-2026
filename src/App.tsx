@@ -52,7 +52,7 @@ function AppInner({ userId, isLocal, auth }: {
     data, isReadOnly, addSnapshot, deleteSnapshot, addGoal,
     addAccount, updateAccounts,
     updateComp, updateDeductions, updateAllocations, updateBudgetItems,
-    resetData,
+    resetData, undo, redo, canUndo, canRedo,
   } = useAppData(userId, activeDashboard)
 
   const { prefs, update: updatePrefs, setAccountColor, setLabelColor, reset: resetPrefs } = useChartPrefs()
@@ -160,6 +160,28 @@ function AppInner({ userId, isLocal, auth }: {
         } />
       </Route>
     </Routes>
+    {/* Undo/Redo indicator */}
+    {(canUndo || canRedo) && (
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface/90 backdrop-blur-xl border border-border/40 shadow-lg">
+        <button
+          onClick={undo}
+          disabled={!canUndo}
+          className="px-2 py-0.5 text-xs text-text-secondary hover:text-accent disabled:opacity-30 transition-colors"
+          title="Undo (Ctrl+Z)"
+        >
+          Undo
+        </button>
+        <span className="text-border">|</span>
+        <button
+          onClick={redo}
+          disabled={!canRedo}
+          className="px-2 py-0.5 text-xs text-text-secondary hover:text-accent disabled:opacity-30 transition-colors"
+          title="Redo (Ctrl+Shift+Z)"
+        >
+          Redo
+        </button>
+      </div>
+    )}
     </div>
     </>
   )
