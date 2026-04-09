@@ -469,6 +469,35 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
         </div>
       </Card>
 
+      {/* Subscription Tier (admin testing) */}
+      <Card className="mb-6">
+        <CardTitle>Subscription</CardTitle>
+        <p className="text-xs text-text-muted mt-1 mb-3">
+          Current tier: <span className="font-semibold text-accent">{(() => { const { getUserTier, TIER_CONFIGS } = require('@/lib/tiers'); const t = getUserTier(); return TIER_CONFIGS[t].name })()}</span>
+        </p>
+        <div className="flex gap-2">
+          {(['free', 'pro', 'premium'] as const).map(t => {
+            const { getUserTier, setUserTier, TIER_CONFIGS } = require('@/lib/tiers')
+            const current = getUserTier()
+            const config = TIER_CONFIGS[t]
+            return (
+              <button
+                key={t}
+                onClick={() => { setUserTier(t); window.location.reload() }}
+                className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+                  current === t
+                    ? 'border-accent bg-accent/10 text-accent font-medium'
+                    : 'border-border text-text-muted hover:text-text-secondary'
+                }`}
+              >
+                {config.name} ({config.price})
+              </button>
+            )
+          })}
+        </div>
+        <p className="text-[10px] text-text-muted mt-2">Switch tiers to test gated features. Reloads the page.</p>
+      </Card>
+
       {/* Preview & Testing */}
       <Card>
         <CardTitle>Preview & Testing</CardTitle>

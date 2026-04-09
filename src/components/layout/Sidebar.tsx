@@ -9,6 +9,8 @@ import type { Dashboard } from '@/data/types'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { DashboardSwitcher } from '@/components/dashboard/DashboardSwitcher'
 import { CreateDashboardModal } from '@/components/dashboard/CreateDashboardModal'
+import { FeatureBadge } from '@/components/ui/UpgradeGate'
+import { getUserTier } from '@/lib/tiers'
 
 const navItems = [
   { to: '/enter', icon: Camera, label: 'Add Snapshot' },
@@ -24,9 +26,9 @@ const navItems = [
 ]
 
 const proItems = [
-  { to: '/transactions', icon: Receipt, label: 'Transactions', pro: true },
-  { to: '/business', icon: Building2, label: 'Business', pro: true },
-  { to: '/properties', icon: HomeIcon, label: 'Properties', pro: true },
+  { to: '/transactions', icon: Receipt, label: 'Transactions', featureId: 'transactions' },
+  { to: '/business', icon: Building2, label: 'Business', featureId: 'business' },
+  { to: '/properties', icon: HomeIcon, label: 'Properties', featureId: 'properties' },
 ]
 
 interface Props {
@@ -162,23 +164,27 @@ export default function Sidebar({
             <span className="px-1.5 py-0.5 text-[8px] bg-amber/10 text-amber rounded-full border border-amber/20">Free Preview</span>
           </p>
         </div>
-        {proItems.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            onClick={closeMobile}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-                isActive
-                  ? 'text-amber bg-amber/10 border-r-2 border-amber'
-                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
-              }`
-            }
-          >
-            <Icon size={18} className="flex-shrink-0" />
-            <span className="truncate">{label}</span>
-          </NavLink>
-        ))}
+        {proItems.map(({ to, icon: Icon, label, featureId }) => {
+          const userTier = getUserTier()
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              onClick={closeMobile}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                  isActive
+                    ? 'text-amber bg-amber/10 border-r-2 border-amber'
+                    : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+                }`
+              }
+            >
+              <Icon size={18} className="flex-shrink-0" />
+              <span className="truncate">{label}</span>
+              <FeatureBadge featureId={featureId} userTier={userTier} />
+            </NavLink>
+          )
+        })}
       </nav>
 
       <div className="p-3 border-t border-border space-y-2 mt-auto shrink-0">

@@ -25,6 +25,8 @@ import { isAdmin } from '@/lib/roles'
 import ToolsPage from '@/components/tools/ToolsPage'
 import TransactionsPage from '@/components/pro/TransactionsPage'
 import { getStorageKey } from '@/lib/store'
+import { useTier } from '@/hooks/useTier'
+import { UpgradeGate } from '@/components/ui/UpgradeGate'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -44,6 +46,7 @@ function AppInner({ userId, isLocal, auth }: {
 
   const db = useDashboards(userId)
   const { activeDashboard } = db
+  const { tier } = useTier(userId)
 
   const {
     data, isReadOnly, addSnapshot, deleteSnapshot, addGoal,
@@ -138,9 +141,15 @@ function AppInner({ userId, isLocal, auth }: {
         } />
         <Route path="budget" element={<BudgetPage data={data} updateBudgetItems={updateBudgetItems} />} />
         <Route path="goals" element={<GoalsPage data={data} addGoal={addGoal} />} />
-        <Route path="transactions" element={<TransactionsPage />} />
-        <Route path="business" element={<BusinessPage />} />
-        <Route path="properties" element={<PropertiesPage />} />
+        <Route path="transactions" element={
+          <UpgradeGate featureId="transactions" userTier={tier}><TransactionsPage /></UpgradeGate>
+        } />
+        <Route path="business" element={
+          <UpgradeGate featureId="business" userTier={tier}><BusinessPage /></UpgradeGate>
+        } />
+        <Route path="properties" element={
+          <UpgradeGate featureId="properties" userTier={tier}><PropertiesPage /></UpgradeGate>
+        } />
         <Route path="tools" element={<ToolsPage />} />
         <Route path="settings" element={
           <SettingsPage data={data} prefs={prefs}

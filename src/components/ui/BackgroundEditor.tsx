@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react'
-import { Upload, X, RotateCcw, Image as ImageIcon } from 'lucide-react'
+import { Upload, X, RotateCcw, Image as ImageIcon, Lock } from 'lucide-react'
 import { Card, CardTitle } from './Card'
 import { useBackground, BACKGROUND_PRESETS, CSS_BACKGROUNDS, type BackgroundConfig } from '@/hooks/useBackground'
+import { getUserTier, canUseFeature } from '@/lib/tiers'
 
 const ASPECT_RATIOS: { value: BackgroundConfig['aspectRatio']; label: string }[] = [
   { value: 'fill', label: 'Fill' },
@@ -112,16 +113,18 @@ export function BackgroundEditor() {
       )}
 
       {/* Action buttons */}
+      {(() => { const isPro = canUseFeature(getUserTier(), 'photo-backgrounds'); return (
       <div className="flex flex-wrap gap-2 mb-4">
         <button
-          onClick={() => setShowPresets(!showPresets)}
+          onClick={() => isPro ? setShowPresets(!showPresets) : alert('Photo backgrounds require a Pro subscription.')}
           className="flex items-center gap-1.5 px-3 py-2 bg-accent/10 text-accent border border-accent/30 rounded-lg text-xs font-medium hover:bg-accent/20 transition-colors"
         >
           <ImageIcon size={13} />
-          {showPresets ? 'Hide Presets' : 'Browse Presets'}
+          {showPresets ? 'Hide Photos' : 'Photo Backgrounds'}
+          {!isPro && <Lock size={10} className="ml-1 opacity-60" />}
         </button>
         <button
-          onClick={() => fileRef.current?.click()}
+          onClick={() => isPro ? fileRef.current?.click() : alert('Custom uploads require a Pro subscription.')}
           className="flex items-center gap-1.5 px-3 py-2 border border-border text-text-secondary rounded-lg text-xs hover:text-text-primary hover:border-accent/40 transition-colors"
         >
           <Upload size={13} />
@@ -138,6 +141,7 @@ export function BackgroundEditor() {
         )}
         <input ref={fileRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
       </div>
+      ) })()}
 
       {/* URL paste */}
       <div className="flex gap-2 mb-4">
