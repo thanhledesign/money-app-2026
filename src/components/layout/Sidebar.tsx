@@ -246,7 +246,6 @@ export default function Sidebar({
         ref={sidebarRef}
         className="hidden lg:flex fixed left-0 top-0 sidebar-height border-r border-border/50 flex-col z-50 backdrop-blur-xl overflow-hidden"
         style={{ width, background: 'linear-gradient(180deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)' }}
-        style={{ width, background: 'linear-gradient(180deg, var(--color-surface) 0%, color-mix(in oklab, var(--color-surface) 90%, transparent) 100%)' }}
       >
         {sidebarContent}
         <div
