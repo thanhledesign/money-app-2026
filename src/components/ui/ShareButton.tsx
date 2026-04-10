@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Share2, Copy, Check, Link2, Loader2 } from 'lucide-react'
+import { Share2, Copy, Check, Link2, Loader2, AlertCircle } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import type { AppData } from '@/data/types'
 
@@ -14,43 +14,41 @@ export function ShareButton({ data, userId, dashboardName }: Props) {
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [open, setOpen] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   if (!isSupabaseConfigured() || !userId) return null
 
   async function handleShare() {
     if (!supabase || !userId) return
     setLoading(true)
+    setErrorMsg(null)
     try {
-      // Generate a share ID
-      const shareId = `share-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      // Compact, URL-safe share ID
+      const shareId = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`
 
-      // Upsert share data
       const { error } = await supabase
-        .from('shared_dashboards')
+        .from('shared_snapshots')
         .upsert({
           id: shareId,
           user_id: userId,
           name: dashboardName,
-          data: data,
+          data,
           created_at: new Date().toISOString(),
         })
 
       if (error) {
-        console.warn('[share] failed:', error.message)
-        // Fallback: use user_data table with a share key
-        const fallbackId = btoa(`${userId}:${Date.now()}`).replace(/[+/=]/g, '').slice(0, 16)
-        await supabase.from('user_data').upsert(
-          { user_id: userId, key: `share-${fallbackId}`, data: { name: dashboardName, dashboard: data }, updated_at: new Date().toISOString() },
-          { onConflict: 'user_id,key' }
-        )
-        const url = `${window.location.origin}/share/${userId}/${fallbackId}`
-        setShareUrl(url)
-      } else {
-        const url = `${window.location.origin}/share/${shareId}`
-        setShareUrl(url)
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          setErrorMsg('Share table missing. Run supabase-share-migration.sql in your Supabase SQL Editor first.')
+        } else {
+          setErrorMsg(error.message || 'Could not create share link.')
+        }
+        setLoading(false)
+        return
       }
-    } catch (e) {
-      console.warn('[share] error:', e)
+
+      setShareUrl(`${window.location.origin}/share/${shareId}`)
+    } catch (e: any) {
+      setErrorMsg(e?.message ?? 'Unknown error creating share link.')
     }
     setLoading(false)
   }
@@ -68,6 +66,7 @@ export function ShareButton({ data, userId, dashboardName }: Props) {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border border-border text-text-muted hover:text-text-secondary hover:border-accent/40 transition-colors"
         title="Share dashboard"
+        aria-label="Share dashboard"
       >
         <Share2 size={13} />
         Share
@@ -81,6 +80,13 @@ export function ShareButton({ data, userId, dashboardName }: Props) {
             <p className="text-xs text-text-muted mb-3">
               Generate a read-only link anyone can view without logging in.
             </p>
+
+            {errorMsg && (
+              <div className="flex items-start gap-2 mb-3 p-2 bg-red/10 border border-red/30 rounded-lg text-[11px] text-red">
+                <AlertCircle size={12} className="shrink-0 mt-0.5" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
 
             {!shareUrl ? (
               <button
@@ -99,17 +105,19 @@ export function ShareButton({ data, userId, dashboardName }: Props) {
                     value={shareUrl}
                     readOnly
                     className="flex-1 text-xs text-text-primary bg-transparent outline-none truncate"
+                    onFocus={(e) => e.currentTarget.select()}
                   />
                   <button
                     onClick={handleCopy}
                     className="p-1.5 rounded text-text-muted hover:text-accent transition-colors shrink-0"
                     title="Copy link"
+                    aria-label="Copy share link"
                   >
                     {copied ? <Check size={14} className="text-green" /> : <Copy size={14} />}
                   </button>
                 </div>
                 <p className="text-[10px] text-text-muted">
-                  Anyone with this link can view your dashboard. No login required.
+                  Anyone with this link can view a read-only snapshot of this dashboard. No login required.
                 </p>
               </div>
             )}

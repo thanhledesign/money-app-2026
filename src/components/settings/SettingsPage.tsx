@@ -210,7 +210,7 @@ export default function SettingsPage({ data, prefs, setAccountColor, setLabelCol
       </Card>
 
       {/* Background Image */}
-      <BackgroundEditor />
+      <BackgroundEditor userId={userId} />
 
       {/* Cloud Sync */}
       <CloudSyncPanel userId={userId} dashboardId={dashboardId ?? 'default'} dashboards={dashboards ?? []} data={data} onDataLoaded={onDataLoaded ?? (() => {})} />

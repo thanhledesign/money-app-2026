@@ -13,8 +13,12 @@ const ASPECT_RATIOS: { value: BackgroundConfig['aspectRatio']; label: string }[]
 
 const CATEGORIES = [...new Set(BACKGROUND_PRESETS.map(p => p.category))]
 
-export function BackgroundEditor() {
-  const { config, update, reset } = useBackground()
+interface BackgroundEditorProps {
+  userId?: string
+}
+
+export function BackgroundEditor({ userId }: BackgroundEditorProps = {}) {
+  const { config, update, reset } = useBackground(userId)
   const [showPresets, setShowPresets] = useState(false)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
