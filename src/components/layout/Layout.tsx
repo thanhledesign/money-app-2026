@@ -4,6 +4,7 @@ import { Camera } from 'lucide-react'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import type { Dashboard } from '@/data/types'
 import Sidebar from './Sidebar'
+import BottomNav from './BottomNav'
 
 const SIDEBAR_KEY = 'money-app-sidebar-width'
 const DEFAULT_WIDTH = 224
@@ -94,6 +95,7 @@ export default function Layout({
           </div>
         )}
         <ErrorBoundary><Outlet /></ErrorBoundary>
+        <BottomNav />
       </main>
       <SnapshotFab />
       <style>{`@media (min-width: 1024px) { main { margin-left: ${sidebarWidth}px !important; } }`}</style>

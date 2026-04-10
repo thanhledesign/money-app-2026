@@ -1,35 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import {
-  LayoutDashboard, Camera, Landmark, TrendingUp,
-  Skull, Diamond, Scale, Trophy, DollarSign, Settings,
-  Menu, X, Building2, Home as HomeIcon, Wrench, Receipt,
-} from 'lucide-react'
+import { Settings, Menu, X } from 'lucide-react'
 import type { Dashboard } from '@/data/types'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { DashboardSwitcher } from '@/components/dashboard/DashboardSwitcher'
 import { CreateDashboardModal } from '@/components/dashboard/CreateDashboardModal'
 import { FeatureBadge } from '@/components/ui/UpgradeGate'
 import { getUserTier, canUseFeature } from '@/lib/tiers'
-
-const navItems = [
-  { to: '/enter', icon: Camera, label: 'Add Snapshot' },
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/accounts', icon: Landmark, label: 'Cash Accounts' },
-  { to: '/investments', icon: TrendingUp, label: 'Investments' },
-  { to: '/debt', icon: Skull, label: 'Debt' },
-  { to: '/net-worth', icon: Diamond, label: 'Net Worth' },
-  { to: '/income', icon: DollarSign, label: 'Income' },
-  { to: '/budget', icon: Scale, label: 'Budget' },
-  { to: '/goals', icon: Trophy, label: 'Goals' },
-  { to: '/tools', icon: Wrench, label: 'Tools' },
-]
-
-const proItems = [
-  { to: '/transactions', icon: Receipt, label: 'Transactions', featureId: 'transactions' },
-  { to: '/business', icon: Building2, label: 'Business', featureId: 'business' },
-  { to: '/properties', icon: HomeIcon, label: 'Properties', featureId: 'properties' },
-]
+import { navItems, proItems } from '@/lib/navItems'
 
 interface Props {
   userEmail?: string
