@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronDown, Plus, Settings, Pencil, Trash2, Download, Upload, Copy } from 'lucide-react'
 import type { Dashboard } from '@/data/types'
 import { MAX_FREE_DASHBOARDS } from '@/data/types'
@@ -28,14 +29,39 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
   const [editEmoji, setEditEmoji] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [cogMenuId, setCogMenuId] = useState<string | null>(null)
-  const ref = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  // Portal position relative to viewport — recomputed when the dropdown opens
+  // and on window resize. Lets the dropdown escape sidebar's overflow:hidden.
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
 
   const active = dashboards.find(d => d.id === activeId) ?? dashboards[0]
 
+  // Compute portal position from the trigger button's bounding rect
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) return
+    const updatePosition = () => {
+      const rect = triggerRef.current?.getBoundingClientRect()
+      if (rect) setPosition({ top: rect.bottom + 4, left: rect.left })
+    }
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [open])
+
+  // Click-outside handler — must check BOTH the trigger and the portaled dropdown
+  // since they're no longer DOM-adjacent
   useEffect(() => {
     if (!open) return
     const handle = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      const target = e.target as Node
+      const insideTrigger = triggerRef.current?.contains(target)
+      const insideDropdown = dropdownRef.current?.contains(target)
+      if (!insideTrigger && !insideDropdown) {
         setOpen(false)
         setEditingId(null)
         setConfirmDeleteId(null)
@@ -107,8 +133,9 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
   }
 
   return (
-    <div ref={ref} className="relative px-3 py-2 border-b border-border">
+    <div className="px-3 py-2 border-b border-border">
       <button
+        ref={triggerRef}
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface-hover transition-colors text-left"
       >
@@ -117,8 +144,12 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
         <ChevronDown size={14} className={`text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {open && (
-        <div className="absolute left-0 top-full mt-1 bg-surface/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl z-50 py-1.5 max-h-96 overflow-y-auto min-w-[300px]" style={{ right: '-20px' }}>
+      {open && position && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed bg-surface/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl py-1.5 max-h-96 overflow-y-auto w-[320px]"
+          style={{ top: position.top, left: position.left, zIndex: 100 }}
+        >
           {dashboards.map(d => (
             <div key={d.id}>
               {editingId === d.id ? (
@@ -260,7 +291,8 @@ export function DashboardSwitcher({ dashboards, activeId, canCreate, onSwitch, o
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
