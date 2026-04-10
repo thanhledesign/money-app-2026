@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Routes, Route, useSearchParams, useLocation } from 'react-router-dom'
+import { Routes, Route, useSearchParams, useLocation, matchPath } from 'react-router-dom'
 import { useAppData } from '@/hooks/useAppData'
 import { useChartPrefs } from '@/hooks/useChartPrefs'
 import { useAuth } from '@/hooks/useAuth'
@@ -24,10 +24,12 @@ import { AdminDesigner } from '@/components/ui/AdminDesigner'
 import { isAdmin } from '@/lib/roles'
 import ToolsPage from '@/components/tools/ToolsPage'
 import TransactionsPage from '@/components/pro/TransactionsPage'
+import SharedDashboardPage from '@/components/share/SharedDashboardPage'
 import { getStorageKey, saveData as storeSaveData } from '@/lib/store'
 import { useTier } from '@/hooks/useTier'
 import { UpgradeGate } from '@/components/ui/UpgradeGate'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { applyStoredBackground, hydrateBackgroundFromCloud } from '@/hooks/useBackground'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -86,6 +88,22 @@ function AppInner({ userId, isLocal, auth }: {
       localStorage.removeItem('money-app-skipped-login')
     }
   }, [freshMode])
+
+  // Apply the saved background to the #app-background DOM nodes once they exist.
+  // Without this, the background only renders when the user opens the BackgroundEditor
+  // in Settings (where useBackground mounts).
+  useEffect(() => {
+    applyStoredBackground()
+  }, [wizardComplete])
+
+  // Once the user is signed in, pull the latest background config from cloud.
+  // This makes cross-device sync work: pick a bg on phone, open laptop, see it.
+  // Cloud is the source of truth on app load; subsequent local changes auto-upload
+  // (handled by useBackground when mounted with a userId in BackgroundEditor).
+  useEffect(() => {
+    if (!userId || !wizardComplete) return
+    hydrateBackgroundFromCloud(userId)
+  }, [userId, wizardComplete])
 
   if (!wizardComplete) {
     return (
@@ -189,6 +207,21 @@ function AppInner({ userId, isLocal, auth }: {
 }
 
 export default function App() {
+  const location = useLocation()
+
+  // Public read-only share view — bypasses auth, password gate, wizard, and the entire app shell
+  if (matchPath('/share/:shareId', location.pathname)) {
+    return (
+      <Routes>
+        <Route path="/share/:shareId" element={<SharedDashboardPage />} />
+      </Routes>
+    )
+  }
+
+  return <MainApp />
+}
+
+function MainApp() {
   const auth = useAuth()
   const [passwordOk, setPasswordOk] = useState(() => isPasswordValid())
   const [skippedLogin, setSkippedLogin] = useState(() => {
