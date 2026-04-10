@@ -14,32 +14,34 @@ export interface BackgroundConfig {
 }
 
 const STORAGE_KEY = 'money-app-background'
-const MIGRATION_KEY = 'money-app-bg-migrated-abstract-v1'
+// Migration key — bumped to v3 when default switched from Abstract Flow → Northern Lights.
+// Each bump runs a one-time check to upgrade users still on prior auto-defaults.
+const MIGRATION_KEY = 'money-app-bg-migrated-northern-v3'
 const CLOUD_KEY = 'settings/background'
 const CLOUD_SYNC_DEBOUNCE_MS = 1500
 
 let _cloudSyncTimer: ReturnType<typeof setTimeout> | null = null
 
-// Abstract Flow preset URL — kept in sync with BACKGROUND_PRESETS below
+// Preset URLs — kept in sync with BACKGROUND_PRESETS below
+const NORTHERN_LIGHTS_URL = 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1920&q=80'
 const ABSTRACT_FLOW_URL = 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1920&q=80'
 
-// New default — Abstract Flow preset (showcases the full image editor + scrim pipeline).
-// scrimOpacity is intentionally higher than the old CSS-default 0.65 because this is a
-// busy photographic background and content needs comfortable contrast out of the box.
+// Current default — Northern Lights preset (atmospheric aurora photo).
+// scrimOpacity 0.75 balances aurora color visibility with text contrast.
 const DEFAULT_CONFIG: BackgroundConfig = {
   type: 'preset',
-  url: ABSTRACT_FLOW_URL,
+  url: NORTHERN_LIGHTS_URL,
   cssGradient: 'corporate', // retained for quick toggle back to CSS mode
   focalX: 50,
   focalY: 50,
   zoom: 1,
   blur: 0,
-  scrimOpacity: 0.82,
+  scrimOpacity: 0.75,
   aspectRatio: 'fill',
 }
 
-// Old default — used for one-time migration of users who never customized
-const OLD_DEFAULT_CONFIG: BackgroundConfig = {
+// Original CSS default (pre-v1 migration) — Midnight Pro corporate gradient
+const OLD_CSS_DEFAULT_CONFIG: BackgroundConfig = {
   type: 'css',
   url: '',
   cssGradient: 'corporate',
@@ -51,15 +53,41 @@ const OLD_DEFAULT_CONFIG: BackgroundConfig = {
   aspectRatio: 'fill',
 }
 
-function isOldDefault(config: BackgroundConfig): boolean {
+// v1 default (Abstract Flow) — used to detect users auto-migrated to Abstract
+// Flow who never further customized, so they can be re-migrated to Northern Lights.
+const ABSTRACT_FLOW_DEFAULT_CONFIG: BackgroundConfig = {
+  type: 'preset',
+  url: ABSTRACT_FLOW_URL,
+  cssGradient: 'corporate',
+  focalX: 50,
+  focalY: 50,
+  zoom: 1,
+  blur: 0,
+  scrimOpacity: 0.82,
+  aspectRatio: 'fill',
+}
+
+function isOldCssDefault(config: BackgroundConfig): boolean {
   return (
-    config.type === OLD_DEFAULT_CONFIG.type &&
-    config.cssGradient === OLD_DEFAULT_CONFIG.cssGradient &&
-    config.focalX === OLD_DEFAULT_CONFIG.focalX &&
-    config.focalY === OLD_DEFAULT_CONFIG.focalY &&
-    config.zoom === OLD_DEFAULT_CONFIG.zoom &&
-    config.blur === OLD_DEFAULT_CONFIG.blur &&
+    config.type === OLD_CSS_DEFAULT_CONFIG.type &&
+    config.cssGradient === OLD_CSS_DEFAULT_CONFIG.cssGradient &&
+    config.focalX === OLD_CSS_DEFAULT_CONFIG.focalX &&
+    config.focalY === OLD_CSS_DEFAULT_CONFIG.focalY &&
+    config.zoom === OLD_CSS_DEFAULT_CONFIG.zoom &&
+    config.blur === OLD_CSS_DEFAULT_CONFIG.blur &&
     !config.url
+  )
+}
+
+function isAbstractFlowDefault(config: BackgroundConfig): boolean {
+  return (
+    config.type === ABSTRACT_FLOW_DEFAULT_CONFIG.type &&
+    config.url === ABSTRACT_FLOW_DEFAULT_CONFIG.url &&
+    config.focalX === ABSTRACT_FLOW_DEFAULT_CONFIG.focalX &&
+    config.focalY === ABSTRACT_FLOW_DEFAULT_CONFIG.focalY &&
+    config.zoom === ABSTRACT_FLOW_DEFAULT_CONFIG.zoom &&
+    config.blur === ABSTRACT_FLOW_DEFAULT_CONFIG.blur &&
+    config.scrimOpacity === ABSTRACT_FLOW_DEFAULT_CONFIG.scrimOpacity
   )
 }
 
@@ -202,12 +230,14 @@ function loadConfig(): BackgroundConfig {
     }
     const parsed: BackgroundConfig = { ...DEFAULT_CONFIG, ...JSON.parse(raw) }
 
-    // One-time migration: existing users still on the old CSS default get upgraded.
-    // Users who picked ANY other background (preset, custom, different CSS) keep their choice.
+    // One-time migration: upgrade users who are still on a prior auto-default
+    // (either the original CSS Midnight Pro, or the v1 Abstract Flow auto-default).
+    // Users who picked ANY OTHER background (preset, custom, different CSS, or
+    // even the same preset but with adjusted focal/scrim) keep their choice.
     const migrated = localStorage.getItem(MIGRATION_KEY) === 'true'
     if (!migrated) {
       localStorage.setItem(MIGRATION_KEY, 'true')
-      if (isOldDefault(parsed)) {
+      if (isOldCssDefault(parsed) || isAbstractFlowDefault(parsed)) {
         return DEFAULT_CONFIG
       }
     }
